@@ -1,0 +1,28 @@
+// Provides the message payloads for confirming message reception
+// or for message loss notification. 
+//
+// Rick Stovall, 2009-03-18
+//
+// This file released under the GPL 3.0 license.
+// 
+// Note: these are never sent bare.. they are always payloads 
+// 	in a channel wrapper message.
+
+// return on of these to ack the recept of each error free message.
+message message_ack {
+	required uint32 msg_uid = 1;
+}
+
+// return on of these for each message which has a failure.
+message message_nak {
+	enum nak_codes {
+		bad_msg_length = 1;     // Message length out of bounds.
+		bad_msg_parse = 2;      // GPB reported parse errors.
+		overflow = 3;           // Data lost in stream.
+		invalid_message = 4;    // Msg failed validation checks.
+		sequence_error = 5;     // Msg was invalid the current context.
+	}
+	required nak_codes reason = 1;
+    optional uint32 msg_uid = 2;
+	optional uint32 last_good_msg_UID = 3;
+} 

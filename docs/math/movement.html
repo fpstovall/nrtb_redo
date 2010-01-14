@@ -1,0 +1,120 @@
+<pre>
+Mathomatic version 14.2.1 (www.mathomatic.org)
+Copyright (C) 1987-2008 George Gesslein II.
+100 equation spaces available, 960K per equation space.
+HTML color mode enabled.
+<font color="green">1&mdash;&gt; <b>; Suffixes: a=average, i=initial, t=terminal (final)
+</b>1&mdash;&gt; <b>;
+</b>1&mdash;&gt; <b>; M=mass
+</b>1&mdash;&gt; <b>; A=acceleration
+</b>1&mdash;&gt; <b>; f=force
+</b>1&mdash;&gt; <b>; V=velocity
+</b>1&mdash;&gt; <b>; P=position
+</b>1&mdash;&gt; <b>; t=time
+</b>1&mdash;&gt; <b>;
+</b>1&mdash;&gt; <b>; Starting equations
+</b>1&mdash;&gt; <b>f = Ma A ; class force equation
+</b>
+#1: f = Ma&middot;A
+
+1&mdash;&gt; <b>Ma = (Mi + Mt) / 2 ; average mass 
+</b>
+         </font><font color="olive">(Mi + Mt)</font><font color="green">
+#2: Ma = &mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;
+             2
+
+2&mdash;&gt; <b>Va = (Vi + Vt) / 2 ; average velocity
+</b>
+         </font><font color="olive">(Vi + Vt)</font><font color="green">
+#3: Va = &mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;
+             2
+
+3&mdash;&gt; <b>Vt = Vi + A t ; final velocity
+</b>
+#4: Vt = Vi + </font><font color="olive">(A&middot;t)</font><font color="green">
+
+4&mdash;&gt; <b>Pt = Pi + Va t ; final position
+</b>
+#5: Pt = Pi + </font><font color="olive">(Va&middot;t)</font><font color="green">
+
+5&mdash;&gt; <b>;
+</b>5&mdash;&gt; <b>list all
+</b>#1: f = Ma*A
+
+#2: Ma = </font><font color="olive">(Mi + Mt)</font><font color="green">/2
+
+#3: Va = </font><font color="olive">(Vi + Vt)</font><font color="green">/2
+
+#4: Vt = Vi + </font><font color="olive">(A*t)</font><font color="green">
+
+#5: Pt = Pi + </font><font color="olive">(Va*t)</font><font color="green">
+
+5&mdash;&gt; <b>1 ; Integrate avg. mass to force equation.
+</b>
+#1: f = Ma&middot;A
+
+1&mdash;&gt; <b>eliminate Ma using 2
+</b>Solving equation #2 for (Ma) and substituting into the current equation...
+
+        </font><font color="olive">(Mi + Mt)</font><font color="green">&middot;A
+#1: f = &mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;
+             2
+
+1&mdash;&gt; <b>4 ; Integrate force equaation to final velocity.
+</b>
+#4: Vt = Vi + </font><font color="olive">(A&middot;t)</font><font color="green">
+
+4&mdash;&gt; <b>eliminate A using 1
+</b>Solving equation #1 for (A) and substituting into the current equation...
+
+</font><font color="olive">                2&middot;f&middot;t</font><font color="green">
+#4: Vt = Vi + </font><font color="olive">&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</font><font color="green">
+</font><font color="olive">              </font><font color="red">(Mi + Mt)</font><font color="green">
+
+4&mdash;&gt; <b>simplify
+</b>
+</font><font color="olive">                2&middot;f&middot;t</font><font color="green">
+#4: Vt = Vi + </font><font color="olive">&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</font><font color="green">
+</font><font color="olive">              </font><font color="red">(Mi + Mt)</font><font color="green">
+
+4&mdash;&gt; <b>5 ; Integrate avg. velocity to postion equation.
+</b>
+#5: Pt = Pi + </font><font color="olive">(Va&middot;t)</font><font color="green">
+
+5&mdash;&gt; <b>eliminate Va using 3
+</b>Solving equation #3 for (Va) and substituting into the current equation...
+
+</font><font color="olive">              </font><font color="red">(Vi + Vt)</font><font color="olive">&middot;t</font><font color="green">
+#5: Pt = Pi + </font><font color="olive">&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</font><font color="green">
+</font><font color="olive">                   2</font><font color="green">
+
+5&mdash;&gt; <b>simplify
+</b>
+</font><font color="olive">              t&middot;</font><font color="red">(Vi + Vt)</font><font color="green">
+#5: Pt = Pi + </font><font color="olive">&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</font><font color="green">
+</font><font color="olive">                   2</font><font color="green">
+
+5&mdash;&gt; <b>;
+</b>5&mdash;&gt; <b>; ================= final output: ================ 
+</b>5&mdash;&gt; <b>;
+</b>5&mdash;&gt; <b>4 ; Velocity equation
+</b>
+</font><font color="olive">                2&middot;f&middot;t</font><font color="green">
+#4: Vt = Vi + </font><font color="olive">&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</font><font color="green">
+</font><font color="olive">              </font><font color="red">(Mi + Mt)</font><font color="green">
+
+4&mdash;&gt; <b>code
+</b>Vt = (Vi + (2.0*f*t/(Mi + Mt)));
+4&mdash;&gt; <b>;
+</b>4&mdash;&gt; <b>5 ; Position equation 
+</b>
+</font><font color="olive">              t&middot;</font><font color="red">(Vi + Vt)</font><font color="green">
+#5: Pt = Pi + </font><font color="olive">&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</font><font color="green">
+</font><font color="olive">                   2</font><font color="green">
+
+5&mdash;&gt; <b>code
+</b>Pt = (Pi + (t*(Vi + Vt)/2.0));
+5&mdash;&gt; <b>;
+</b>5&mdash;&gt; <b>; ================================================
+</b>5&mdash;&gt; <b>exit
+</b></font></pre>

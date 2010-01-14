@@ -1,0 +1,83 @@
+SimEngine <===> BCP Communications
+
+SimEngine BCP_message class for messages to/from the BCP
+
+class BCP_message
+{
+    public:
+        BCP_message(const & std::string);
+        ~BCP_message();
+        
+        std::string as_string();
+
+        double age();
+        
+        std::vector<std::string> as_tokens();
+        
+    private
+        NRTB::hirez_timer elapsed;
+        std::string payload;
+        std::vector<std::string> tokens;
+}; 
+
+** the BCP_message flow goes something like this **
+
+1. A text string arrives at the port from the BCP, terminated by \n.
+2. A BCP_message (m) is instanciated from the string.
+3. m is placed in the queue for the bot_object associated with that 
+	connection.
+4. m is placed in the queue for logging to the data broker.
+5. the bot_object determines if it can resolve the message itself.
+6. If the bot_object can not resolve the message, an attempt is made to 
+	find a loaded plugin to handle it.
+7. If the bot_object has a suitable plugin loaded, m is passed to it.  
+	If not, an "invalid message" exception must be thrown.
+	
+
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=
+
+SimEngine/BCP conversation sequence diagram:
+
+
+SimEngine                               BCP   
+                                         <<<<< initiates connection
+    accept connection
+    instanciate bot_object
+    
+    { ** the following loops until timeout or ConfDone **
+	 
+    config challenge >>>>>
+                                         <<<<< config request or ConfDone
+    process config data
+    Ack/Nak >>>>>
+	 }
+    
+    ** game cycle may repeat multiple times **
+    
+    prep for game warning >>>>>
+    
+    Game start notice >>>>>
+    
+    { ** the following may occur at any time during the game **
+    
+                                            <<<<< bot control message
+    Ack >>>>>
+    }
+    
+    { ** the following will occur whenever there are status changes **
+    
+    status update >>>>>
+                                            <<<<< Ack (?)
+    }
+                                           
+    ** the following occurs at the end of the game **
+    
+    game end notice >>>>>
+                                            <<<<< Ack (?)
+    
+    ** End of game cycle (may repeat multiple times **
+    
+    terminate notification >>>>>
+    sim purge/close
+
+=-=-=-=-==-=-=--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=

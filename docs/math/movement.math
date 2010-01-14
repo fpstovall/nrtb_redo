@@ -1,0 +1,36 @@
+; Suffixes: a=average, i=initial, t=terminal (final)
+;
+; M=mass
+; A=acceleration
+; f=force
+; V=velocity
+; P=position
+; t=time
+;
+; Starting equations
+f = Ma A ; class force equation
+Ma = (Mi + Mt) / 2 ; average mass 
+Va = (Vi + Vt) / 2 ; average velocity
+Vt = Vi + A t ; final velocity
+Pt = Pi + Va t ; final position
+;
+list all
+1 ; Integrate avg. mass to force equation.
+eliminate Ma using 2
+4 ; Integrate force equaation to final velocity.
+eliminate A using 1
+simplify
+5 ; Integrate avg. velocity to postion equation.
+eliminate Va using 3
+simplify
+;
+; ================= final output: ================ 
+;
+4 ; Velocity equation
+code
+;
+5 ; Position equation 
+code
+;
+; ================================================
+exit

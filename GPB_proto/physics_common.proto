@@ -1,0 +1,30 @@
+// Common physics related message definitions used for NRTB
+//
+// Rick Stovall, 2009-03-17
+//
+// This file released under the GPL 3.0 license.
+// 
+// Note: these are never sent bare.. they are always payloads 
+// 	in a channel wrapper message.
+
+// The data in the triplet should always be in MKS units, specifically
+//  meters for distance, meters/sec for velocity, radians for attitude,
+//  and radians/sec for rotational velocity.
+
+message triplet {
+	required double x = 1;
+	required double y = 2;
+	required double z = 3;
+}
+
+message location_data {
+	required triplet position = 1;  // meters
+	required triplet attitude = 2;  // radians
+}
+
+message velocity_data {
+	required triplet speed = 1;     // meters/sec
+	required triplet rotation = 2;  // radians/sec
+}
+
+

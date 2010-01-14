@@ -1,0 +1,22 @@
+What the directories are for:
+
+|-- GPB_proto
+|-- bin : final executables and build products.
+|   `-- plugins 
+|-- common : C++ components shared between two or more modules.
+|   |-- include
+|   |-- obj
+|   `-- (...)
+|-- data_broker : Data broker code
+|-- docs 
+|   |-- ProgrammingReferences
+|   `-- UML
+|-- plugins : Source code for the various plugins
+|   |-- chassis
+|   |-- power
+|   |-- propulsion
+|   |-- sensor
+|   `-- weapon
+`-- sim_engine : Source code for the sim-engine.
+
+

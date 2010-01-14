@@ -1,0 +1,19 @@
+// Channel wrapper for sim engine to data broker messages.
+//
+// Rick Stovall, 2009-03-18
+//
+// This file released under the GPL 3.0 license.
+// 
+// Note: The message defined here is a "channel wrapper", a container for 
+//  all messages from the simulation engine to the data broker.
+
+import "ack_nak.proto";
+import "sim_obj_tq_update.proto";
+
+message sim_to_db {
+    required uint32 msg_uid = 1;    // the msg_uid must be unique for 
+                                    //  for each message on a channel.
+    repeated message_ack ack = 2;
+    repeated message_nak nak = 3;
+    repeated tq_data quanta_results = 4;
+}
