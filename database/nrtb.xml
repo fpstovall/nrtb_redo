@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Db flnm="nrtb" nm="nrtb" ver="1.3.4">
+  <VerLbl/>
+  <VerNotes/>
+  <DefTblOpts>Engine=InnoDB</DefTblOpts>
+  <DocFolder>/home/rstovall/development/NRTB_rstovall/database/docs</DocFolder>
+  <Sch Cm="" nm="schemaA">
+    <Tbl UsSo="1" nm="ObjectData">
+      <Cm>Core simulation object definitions.</Cm>
+      <TblOpts>Engine=InnoDB</TblOpts>
+      <Pk ClNs="uid" nm="pkObjectData"/>
+      <Cl au="1" df="" nm="uid" nu="0">
+        <DT ds="BigInt" en="" id="-5" ln="null" sc="null" sg="0"/>
+        <Cm>Object unique identifier</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="ObjectType_uid" nu="0">
+        <DT ds="BigInt" en="" id="-5" ln="null" sc="null" sg="0"/>
+        <Cm>key to the object type table</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="name " nu="0">
+        <DT ds="VarChar" en="" id="12" ln="25" sc="null" sg="1"/>
+        <Cm>Text name of object</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="creation_event" nu="0">
+        <DT ds="BigInt" en="" id="-5" ln="null" sc="null" sg="0"/>
+        <Cm>QuantaEvent which created this object</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="destruct_event" nu="0">
+        <DT ds="BigInt" en="" id="-5" ln="null" sc="null" sg="0"/>
+        <Cm>QuantaEvent of object termination.</Cm>
+      </Cl>
+      <Fk deAc="3" nm="fk_ObjectData_ObjectType" prLkCl="uid" upAc="3">
+        <PrTb mn="0" nm="ObjectType" oe="1" sch="schemaA" zr="0"/>
+        <CdTb mn="1" nm="ObjectData" oe="1" sch="schemaA" zr="1"/>
+        <ClPr cdCl="ObjectType_uid" prCl="uid"/>
+      </Fk>
+      <Fk deAc="3" nm="fk_ObjectData_QuantaEvents_creat" prLkCl="uid" upAc="3">
+        <PrTb mn="0" nm="QuantaEvents" oe="1" sch="schemaA" zr="0"/>
+        <CdTb mn="1" nm="ObjectData" oe="1" sch="schemaA" zr="1"/>
+        <ClPr cdCl="creation_event" prCl="uid"/>
+      </Fk>
+      <Fk deAc="3" nm="fk_ObjectData_QuantaEvents_dest" prLkCl="uid" upAc="3">
+        <PrTb mn="0" nm="QuantaEvents" oe="1" sch="schemaA" zr="0"/>
+        <CdTb mn="1" nm="ObjectData" oe="1" sch="schemaA" zr="1"/>
+        <ClPr cdCl="destruct_event" prCl="uid"/>
+      </Fk>
+      <Idx clu="0" nm="ObjectData_creation_event_Idx" unq="0">
+        <ClNs>creation_event</ClNs>
+      </Idx>
+      <Idx clu="0" nm="ObjectData_destruct_event_Idx" unq="0">
+        <ClNs>destruct_event</ClNs>
+      </Idx>
+      <Idx clu="0" nm="ObjectData_ObjectType_uid_Idx" unq="0">
+        <ClNs>ObjectType_uid</ClNs>
+      </Idx>
+      <SchTrHis/>
+    </Tbl>
+    <Tbl UsSo="1" nm="ObjectRelations">
+      <Cm>Stores relationships between objects</Cm>
+      <TblOpts>Engine=InnoDB</TblOpts>
+      <Cl au="0" df="" nm="parent" nu="0">
+        <DT ds="BigInt" en="" id="-5" ln="null" sc="null" sg="0"/>
+        <Cm>Parent of this relationship</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="child" nu="0">
+        <DT ds="BigInt" en="" id="-5" ln="null" sc="null" sg="0"/>
+        <Cm>child of this relationship</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="linkStart" nu="0">
+        <DT ds="BigInt" en="" id="-5" ln="null" sc="null" sg="0"/>
+        <Cm>QuantaEvent when link was created.</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="linkEnd" nu="0">
+        <DT ds="BigInt" en="" id="-5" ln="null" sc="null" sg="0"/>
+        <Cm>QuantaEvent when link was terminated</Cm>
+      </Cl>
+      <Fk deAc="3" nm="fk_ObjectRelations_ObjectData_child" prLkCl="uid" upAc="3">
+        <PrTb mn="0" nm="ObjectData" oe="1" sch="schemaA" zr="0"/>
+        <CdTb mn="1" nm="ObjectRelations" oe="1" sch="schemaA" zr="1"/>
+        <ClPr cdCl="child" prCl="uid"/>
+      </Fk>
+      <Fk deAc="3" nm="fk_ObjectRelations_ObjectData_parent" prLkCl="uid" upAc="3">
+        <PrTb mn="0" nm="ObjectData" oe="1" sch="schemaA" zr="0"/>
+        <CdTb mn="1" nm="ObjectRelations" oe="1" sch="schemaA" zr="1"/>
+        <ClPr cdCl="parent" prCl="uid"/>
+      </Fk>
+      <Fk deAc="3" nm="fk_ObjectRelations_QuantaEvents_end" prLkCl="uid" upAc="3">
+        <PrTb mn="0" nm="QuantaEvents" oe="1" sch="schemaA" zr="0"/>
+        <CdTb mn="1" nm="ObjectRelations" oe="1" sch="schemaA" zr="1"/>
+        <ClPr cdCl="linkEnd" prCl="uid"/>
+      </Fk>
+      <Fk deAc="3" nm="fk_ObjectRelations_QuantaEvents_start" prLkCl="uid" upAc="3">
+        <PrTb mn="0" nm="QuantaEvents" oe="1" sch="schemaA" zr="0"/>
+        <CdTb mn="1" nm="ObjectRelations" oe="1" sch="schemaA" zr="1"/>
+        <ClPr cdCl="linkStart" prCl="uid"/>
+      </Fk>
+      <Idx clu="0" nm="ObjectRelations_child_Idx" unq="0">
+        <ClNs>child</ClNs>
+      </Idx>
+      <Idx clu="0" nm="ObjectRelations_linkEnd_Idx" unq="0">
+        <ClNs>linkEnd</ClNs>
+      </Idx>
+      <Idx clu="0" nm="ObjectRelations_linkStart_Idx" unq="0">
+        <ClNs>linkStart</ClNs>
+      </Idx>
+      <Idx clu="0" nm="ObjectRelations_parent_Idx" unq="0">
+        <ClNs>parent</ClNs>
+      </Idx>
+      <SchTrHis/>
+    </Tbl>
+    <Tbl UsSo="1" nm="ObjectType">
+      <Cm>Object type definitions</Cm>
+      <TblOpts>Engine=InnoDB</TblOpts>
+      <Pk ClNs="uid" nm="pkObjectType"/>
+      <Cl au="1" df="" nm="uid" nu="0">
+        <DT ds="BigInt" en="" id="-5" ln="null" sc="null" sg="0"/>
+        <Cm>Object type unique ID</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="name" nu="0">
+        <DT ds="VarChar" en="" id="12" ln="20" sc="null" sg="1"/>
+        <Cm>text name of the type</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="plugin" nu="0">
+        <DT ds="VarChar" en="" id="12" ln="50" sc="null" sg="1"/>
+        <Cm>text plugin ID.</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="version" nu="0">
+        <DT ds="Float" en="" id="6" ln="null" sc="null" sg="0"/>
+        <Cm>Plugin version number</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="Description" nu="0">
+        <DT ds="Text" en="" id="703" ln="null" sc="null" sg="1"/>
+        <Cm>Text description of this object</Cm>
+      </Cl>
+      <SchTrHis/>
+    </Tbl>
+    <Tbl UsSo="1" nm="QuantaEvents">
+      <Cm>Core simulation events data</Cm>
+      <TblOpts/>
+      <Pk ClNs="uid" nm="pkQuantaEvents"/>
+      <Cl au="1" df="" nm="uid" nu="0">
+        <DT ds="BigInt" en="" id="-5" ln="null" sc="null" sg="0"/>
+        <Cm>Time quanta sequence number.</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="session_uid" nu="0">
+        <DT ds="BigInt" en="" id="-5" ln="null" sc="null" sg="0"/>
+        <Cm>The simulation owning this event.</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="timeQuanta" nu="0">
+        <DT ds="BigInt" en="" id="-5" ln="null" sc="null" sg="1"/>
+        <Cm>The simulation time quanta for this event.</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="event" nu="0">
+        <DT ds="VarChar" en="" id="12" ln="20" sc="null" sg="1"/>
+        <Cm>The type of this event.</Cm>
+      </Cl>
+      <Fk deAc="3" nm="fk_QuantaEvents_SessionData" prLkCl="uid" upAc="3">
+        <PrTb mn="0" nm="SessionData" oe="1" sch="schemaA" zr="0"/>
+        <CdTb mn="1" nm="QuantaEvents" oe="1" sch="schemaA" zr="1"/>
+        <ClPr cdCl="session_uid" prCl="uid"/>
+      </Fk>
+      <Idx clu="0" nm="fk_QuantaEvents_SessionData" unq="0">
+        <ClNs>session_uid</ClNs>
+      </Idx>
+      <Idx clu="0" nm="QuantaEvents_timeQuanta_Idx" unq="0">
+        <ClNs>timeQuanta</ClNs>
+      </Idx>
+      <SchTrHis/>
+    </Tbl>
+    <Tbl UsSo="1" nm="SessionData">
+      <Cm>Core data on sumulation runs</Cm>
+      <TblOpts/>
+      <Pk ClNs="uid" nm="pkSessionData"/>
+      <Cl au="1" df="" nm="uid" nu="0">
+        <DT ds="BigInt" en="" id="-5" ln="null" sc="null" sg="0"/>
+        <Cm>Unique session id.</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="startTime" nu="0">
+        <DT ds="DateTime" en="" id="700" ln="null" sc="null" sg="1"/>
+        <Cm>Time the simulation started.</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="endTime" nu="0">
+        <DT ds="DateTime" en="" id="700" ln="null" sc="null" sg="1"/>
+        <Cm>Time the simulation ended.</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="runStatus" nu="0">
+        <DT ds="Enum" en="'created','running','completed','abended'" id="706" ln="null" sc="null" sg="1"/>
+        <Cm>Current status of the simulatijon</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="timeQuanta" nu="0">
+        <DT ds="BigInt" en="" id="-5" ln="null" sc="null" sg="0"/>
+        <Cm>simulation time quanta in microseconds</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="description" nu="0">
+        <DT ds="Text" en="" id="703" ln="null" sc="null" sg="1"/>
+        <Cm>Text description of the simulation run.</Cm>
+      </Cl>
+      <SchTrHis/>
+    </Tbl>
+  </Sch>
+  <Dgm nm="diagramA">
+    <RnCf FtSz="9" lkStgy="OffsetDirect" zm="1.0">
+      <VbCfg>
+        <Fg ky="Auto Number" vl="0"/>
+        <Fg ky="Check" vl="0"/>
+        <Fg ky="Comment" vl="1"/>
+        <Fg ky="Data Type" vl="1"/>
+        <Fg ky="Default" vl="0"/>
+        <Fg ky="ENUM Values" vl="0"/>
+        <Fg ky="Length" vl="1"/>
+        <Fg ky="Name" vl="1"/>
+        <Fg ky="Nullable" vl="0"/>
+        <Fg ky="Schema Name" vl="0"/>
+        <Fg ky="Signed" vl="0"/>
+      </VbCfg>
+    </RnCf>
+    <DiaProps>
+      <Show AllCols="1" FkCols="1" PkCols="1"/>
+    </DiaProps>
+    <TbGl bkCl="ffffffe6" sch="schemaA" tbl="SessionData" x="31" y="18"/>
+    <TbGl bkCl="ffffffe6" sch="schemaA" tbl="QuantaEvents" x="32" y="119"/>
+    <TbGl bkCl="ffffffe6" sch="schemaA" tbl="ObjectData" x="498" y="116"/>
+    <TbGl bkCl="ffffffe6" sch="schemaA" tbl="ObjectType" x="505" y="15"/>
+    <TbGl bkCl="ffffffe6" sch="schemaA" tbl="ObjectRelations" x="499" y="213"/>
+    <FkGl bkCl="ff000000" nm="schemaA.ObjectData.fk_ObjectData_ObjectType"/>
+    <FkGl bkCl="ff000000" nm="schemaA.ObjectData.fk_ObjectData_QuantaEvents_creat"/>
+    <FkGl bkCl="ff000000" nm="schemaA.ObjectData.fk_ObjectData_QuantaEvents_dest"/>
+    <FkGl bkCl="ff000000" nm="schemaA.ObjectRelations.fk_ObjectRelations_ObjectData_child"/>
+    <FkGl bkCl="ff000000" nm="schemaA.ObjectRelations.fk_ObjectRelations_ObjectData_parent"/>
+    <FkGl bkCl="ff000000" nm="schemaA.ObjectRelations.fk_ObjectRelations_QuantaEvents_end"/>
+    <FkGl bkCl="ff000000" nm="schemaA.ObjectRelations.fk_ObjectRelations_QuantaEvents_start"/>
+    <FkGl bkCl="ff000000" nm="schemaA.QuantaEvents.fk_QuantaEvents_SessionData"/>
+  </Dgm>
+  <RnmMgr NxRnmId="1"/>
+  <DbDocOptionMgr>
+    <BasicOptionMgr>
+      <Name>db.doc.option.mgr</Name>
+      <BoolOpt lbl="Diagrams" nm="doc.diagrams" on="1" spl="0"/>
+      <BoolOpt lbl="Foreign Keys" nm="doc.fks" on="1" spl="0"/>
+      <BoolOpt lbl="Indexes" nm="doc.indexes" on="1" spl="0"/>
+      <BoolOpt lbl="Overwrite CSS File" nm="doc.overwrite.css" on="1" spl="0"/>
+      <BoolOpt lbl="Procedures" nm="doc.procs" on="0" spl="1"/>
+      <BoolOpt lbl="Schemas" nm="doc.schemas" on="1" spl="1"/>
+      <BoolOpt lbl="Sequences" nm="doc.sequences" on="0" spl="1"/>
+      <BoolOpt lbl="Tables" nm="doc.tables" on="1" spl="0"/>
+      <BoolOpt lbl="Triggers" nm="doc.triggers" on="0" spl="1"/>
+      <BoolOpt lbl="Views" nm="doc.views" on="1" spl="0"/>
+    </BasicOptionMgr>
+  </DbDocOptionMgr>
+</Db>
