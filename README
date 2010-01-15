@@ -8,6 +8,8 @@ What the directories are for:
 |   |-- obj
 |   `-- (...)
 |-- data_broker : Data broker code
+|-- database : Database scripts, queries
+|   '-- docs : Database schema documentation
 |-- docs 
 |   |-- ProgrammingReferences
 |   `-- UML
