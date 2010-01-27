@@ -1,11 +1,14 @@
-Visualization
+Visualization Arena
 =======================================
+
 Software Requirements:
 	Java SDK
 	Maven
+	Cygwin (or equivalent environment for window users/developers that allows unix style commands)
+
 
 Directory Structure:
-	Visualization -  Main directory for the visualization source and build components
+	visualization -  Main directory for the visualization source and build components
 		Arena - contains source and build components for the arena
 			src - contains the source (Java) for the visualization package
 			target - exists only after a build is performed and contains the executables
@@ -14,12 +17,12 @@ Directory Structure:
 			
 
 Build instructions:
-	Change directory to Visualization/Arena
+	Ensure you are in directory "visualization/Arena" off of the main branch
 	Execute "mvn package"
 
-	
+
 Execution instructions:
-	Ensure that file "arena_feed.txt" in Visualization/Arena directory contains the proper number of bots
-	Then from the Arena directory type
+	Ensure that file "arena_feed.txt" in the "visualization/Arena" directory contains the proper number of bots
+	Then from within the Arena directory type
 		"java -jar target/arena-alpha.jar"   (minus quotes)
 	
