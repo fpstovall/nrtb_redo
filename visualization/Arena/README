@@ -1,0 +1,25 @@
+Visualization
+=======================================
+Software Requirements:
+	Java SDK
+	Maven
+
+Directory Structure:
+	Visualization -  Main directory for the visualization source and build components
+		Arena - contains source and build components for the arena
+			src - contains the source (Java) for the visualization package
+			target - exists only after a build is performed and contains the executables
+			arena_feed.txt - file that contains number of bots to use
+			pom.xml - used by maven to build package
+			
+
+Build instructions:
+	Change directory to Visualization/Arena
+	Execute "mvn package"
+
+	
+Execution instructions:
+	Ensure that file "arena_feed.txt" in Visualization/Arena directory contains the proper number of bots
+	Then from the Arena directory type
+		"java -jar target/arena-alpha.jar"   (minus quotes)
+	
