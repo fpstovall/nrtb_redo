@@ -16,25 +16,15 @@
 #
 #***********************************************
 
-lib:
-	@echo "============= building common libs ==============="
-	@make action=lib doit
-	@echo "============= common libs complete ==============="
+lib:	common.o
+	@cp -v common.h ../include
+	@cp -v common.o ../obj
+	@echo build complete
 
-modules:
-	@echo "============= building common modules ==============="
-	@make doit
-	@echo "============= completed common modules =============="
+common.o:	common.h common.cpp Makefile
+	@rm -f common.o
+	g++ -c -O3 common.cpp
 
 clean:
-	@echo "============= cleaning common libs ==============="
-	@make action=clean doit
-	@rm -fv ./obj/*
-	@echo "========== common lib cleanup complete ==========="
-
-doit:
-	@cd common_rl; make ${action}
-	@cd point; make ${action}
-	@cd timer; make ${action}
-	@cd confreader; make ${action}
-#	@cd logger; make ${action}
+	@rm -rvf *.o  ../include/common.h ../obj/common.o
+	@echo all objects and executables have been erased.

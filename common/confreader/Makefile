@@ -16,25 +16,20 @@
 #
 #***********************************************
 
-lib:
-	@echo "============= building common libs ==============="
-	@make action=lib doit
-	@echo "============= common libs complete ==============="
+lib:	conftest
+	@cp -v confreader.h ../include
+	@cp -v confreader.o ../obj
+	@echo build complete
 
-modules:
-	@echo "============= building common modules ==============="
-	@make doit
-	@echo "============= completed common modules =============="
+confreader.o:	confreader.h confreader.cpp Makefile
+	@rm -f confreader.o
+	g++ -c confreader.cpp -I ../include
+
+conftest:	confreader.o conftest.cpp
+	@rm -f conftest
+	g++ -c conftest.cpp
+	g++ -o conftest conftest.o confreader.o ../obj/common.o -lPocoFoundation -lPocoUtil
 
 clean:
-	@echo "============= cleaning common libs ==============="
-	@make action=clean doit
-	@rm -fv ./obj/*
-	@echo "========== common lib cleanup complete ==========="
-
-doit:
-	@cd common_rl; make ${action}
-	@cd point; make ${action}
-	@cd timer; make ${action}
-	@cd confreader; make ${action}
-#	@cd logger; make ${action}
+	@rm -rvf *.o conftest ../include/confreader.h ../obj/confreader.o
+	@echo all objects and executables have been erased.

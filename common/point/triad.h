@@ -1,31 +1,40 @@
-/*************************************************************
-**** CODE REVIEW: triad.h, starting 2008-11-24 ***************
-* The triad template is fully implemented in this one file.
-* This class will be used for all vector and point operations
-* Please make any comments or suggestions directly in the file.
-*************************************************************/
-
-/**************************************************
-TODO: add methods for dot product, cross multiply, 
-	finding the surface normal, etc.
-/**************************************************
-
-#ifndef nrtb_triad_header
-#define nrtb_triad_header
+/***********************************************
+ This file is part of the NRTB project (https://*launchpad.net/nrtb).
+ 
+ NRTB is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ NRTB is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with NRTB.  If not, see <http://www.gnu.org/licenses/>.
+ 
+ **********************************************/
+ 
+#ifndef triad_header
+#define triad_header
 
 #include <iostream>
+#include <vector>
+#include <string>
 #include <sstream>
 #include <iomanip>
 #include <math.h>
+#include <common.h>
 
-namespace NRTB
+namespace nrtb
 {
 
 /** Template defining a point or vector in cartesian 3d space. Should work
  ** with all floating point types.
  ** 
  ** Implements the following operators: +,=,*,/,+=,-=,*=,/= for both
- ** triad<T> and <T> arguments; each returns a triad as the result.
+ ** triad<T> and <T> arguments; each returns an triad as the result.
  ** ==,!=,>>,<< are implemented for triad arguments. Additionally
  ** implements pow() with triad and T arguments. Finally implements range()
  ** which returns the distance between the triad and one supplied, and
@@ -76,7 +85,7 @@ struct triad
 	 ** is not modified.
 	 ** 
 	 ** Normalized triads are very useful when calcuating force or
-	 ** accelleration vectors and in many other cases.
+	 ** accelleration vectors, for example.
 	 **/
 	triad<T> normalize();
 	/// Returns the distance between *this and the supplied argument.
@@ -329,16 +338,11 @@ std::ostream & operator << (std::ostream &f, const triad<T> & a)
 	return f;
 };
 
- //?? Review question: should we have the read operator
- //   throw instead of defaulting to (0,0,0) on a bad read?
- // A: No, because this is the same behavior the read
- // 	operator exhibits with other numeric types.
- 
 /** Reads the triad<T> from an input stream.
  ** 
  ** The acceptable format is [(]x,y,z[)]. Any other format will result
  ** in the triad<T> being set to (0,0,0). Any numeric format acceptable
- ** to an iostream is valid for x, y and z. Any other represention of x,
+ ** to strtod() is valid for x, y and z. Any other represention of x,
  ** y or z will result in that particular value being set to 0.
  **/
 template <class T>
@@ -346,8 +350,7 @@ std::istream & operator >> (std::istream &f, triad<T> & a)
 {
 	std::string element;
 	f >> element;
-	//TODO: Need to replace split with boost equivelent
-	std::vector<std::string> t = split(element,',');
+	strlist t = split(element,',');
 	if (t.size() != 3)
 	{
 		a = 0;
@@ -363,6 +366,6 @@ std::istream & operator >> (std::istream &f, triad<T> & a)
 	return f;
 };
 
-} // namespace NRTB
+} // namespace nrtb
 
-#endif // nrtb_triad_header
+#endif // triad_header
