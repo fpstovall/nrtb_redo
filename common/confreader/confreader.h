@@ -16,13 +16,6 @@
  
  **********************************************/
 
-/* provides a class that can read configuration files and
- * simply make the values from that file available to the 
- * program
- * 
- * fps 2002-6-7
- */
-
 #ifndef ricklib_confreader_h
 #define ricklib_confreader_h
 
@@ -67,15 +60,9 @@ class conf_reader
 		/** No argument constructor; actually calls read() without a filename.
 		**/
 		conf_reader();
-		/** Instanciates the conf_reader and optionally loads a file.
-		 ** 
-		 ** This does not read and parse the command line. Use the
-		 ** read(argc,argv,filename) for that. If a config file name
-		 ** is specified it is read, along with any additional files
-		 ** that may be specified with an "*INCLUDE" directive in those
-		 ** files.
+		/** NOP virtual destructor to allow safe inheritance.
 		 **/
-		conf_reader(const std::string & _filename);
+		virtual ~conf_reader();
 		/** Static singletion access point. Unlike common practice, this 
 		 ** returns a reference to avoid anyone else taking control of a pointer.
 		 **/
@@ -84,9 +71,6 @@ class conf_reader
 			static Poco::SingletonHolder<conf_reader> sh;
 			return * sh.get();
 		}
-		/** NOP virtual destructor to allow safe inheritance.
-		 **/
-		virtual ~conf_reader();
 		/** Reads and parses a configuration file.
 		 ** 
 		 ** Returns the number of values stored.

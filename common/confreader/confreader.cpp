@@ -34,11 +34,6 @@ conf_reader::conf_reader()
 	read("");
 };
 
-conf_reader::conf_reader(const std::string & _filename)
-{
-	read(_filename);
-};
-
 conf_reader::~conf_reader() {};
 
 unsigned int conf_reader::read(const std::string & _filename, bool _clear)
