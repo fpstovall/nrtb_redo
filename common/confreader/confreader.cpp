@@ -99,7 +99,7 @@ unsigned int conf_reader::read(const std::string & _filename, bool _clear)
 		catch (...)
 		{
 			Poco::Logger& logger = Poco::Logger::get(logname);
-			logger.notice("Problems reading configuration file \""
+			logger.warning("Problems reading configuration file \""
 				+ filename + "\"; data may be incomplete.");
 		}
 	};
