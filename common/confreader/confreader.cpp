@@ -22,22 +22,29 @@
 #include <fstream>
 #include <iostream>
 #include <common.h>
+#include "Poco/Logger.h"
 
 using namespace std;
 using namespace nrtb;
+
+const std::string logname = "conf_reader";
+
 
 namespace nrtb
 {
 
 conf_reader::conf_reader()
 {
-	read("");
+	Poco::Logger& logger = Poco::Logger::get(logname);
+	logger.information("conf_reader instanciated.");
 };
 
 conf_reader::~conf_reader() {};
 
 unsigned int conf_reader::read(const std::string & _filename, bool _clear)
 {
+	Poco::Logger& logger = Poco::Logger::get(logname);
+	logger.information("Reading from \"" + _filename + "\".");
 	if (_filename != "") { filename = _filename; };
 	if (filename != "")
 	{
@@ -91,8 +98,9 @@ unsigned int conf_reader::read(const std::string & _filename, bool _clear)
 		}
 		catch (...)
 		{
-			cerr << "\nProblems reading configuration file \""
-				<< filename << "\";\n\tdata may be incomplete." << endl;
+			Poco::Logger& logger = Poco::Logger::get(logname);
+			logger.notice("Problems reading configuration file \""
+				+ filename + "\"; data may be incomplete.");
 		}
 	};
 	return values.size();
@@ -101,6 +109,8 @@ unsigned int conf_reader::read(const std::string & _filename, bool _clear)
 unsigned int conf_reader::read(int argc, char * argv[], 
 	const string & _filename)
 {
+	Poco::Logger& logger = Poco::Logger::get(logname);
+	logger.information("Reading from command line.");
 	clear();
 	filename = _filename;
 	value_list_type cvars;
@@ -158,6 +168,9 @@ unsigned int conf_reader::read(int argc, char * argv[],
 		};
 		c++;
 	};
+	std::stringstream message;
+	message << "Read " << values.size() << " parameters.";
+	logger.information(message.str());
 	return values.size();
 };
 

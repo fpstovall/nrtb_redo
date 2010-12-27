@@ -52,25 +52,6 @@ class conf_reader
 		value_list_type values;
 		std::string filename;
 	protected:
-	public:
-		/// conf_reader iterator, points to a conf_reader::pair
-		typedef value_list_type::iterator iterator;
-		/// conf_reader::pair is a std::pair<string,string>
-		typedef std::pair<std::string,std::string> pair;
-		/** No argument constructor; actually calls read() without a filename.
-		**/
-		conf_reader();
-		/** NOP virtual destructor to allow safe inheritance.
-		 **/
-		virtual ~conf_reader();
-		/** Static singletion access point. Unlike common practice, this 
-		 ** returns a reference to avoid anyone else taking control of a pointer.
-		 **/
-		static conf_reader & get_instance()
-		{
-			static Poco::SingletonHolder<conf_reader> sh;
-			return * sh.get();
-		}
 		/** Reads and parses a configuration file.
 		 ** 
 		 ** Returns the number of values stored.
@@ -107,6 +88,25 @@ class conf_reader
 		 **    the new file to be read.
 		 **/
 		unsigned int read(const std::string & _filename = "", bool _clear=true);
+	public:
+		/// conf_reader iterator, points to a conf_reader::pair
+		typedef value_list_type::iterator iterator;
+		/// conf_reader::pair is a std::pair<string,string>
+		typedef std::pair<std::string,std::string> pair;
+		/** No argument constructor; actually calls read() without a filename.
+		**/
+		conf_reader();
+		/** NOP virtual destructor to allow safe inheritance.
+		 **/
+		virtual ~conf_reader();
+		/** Static singletion access point. Unlike common practice, this 
+		 ** returns a reference to avoid anyone else taking control of a pointer.
+		 **/
+		static conf_reader & get_instance()
+		{
+			static Poco::SingletonHolder<conf_reader> sh;
+			return * sh.get();
+		}
 		/** Reads and parses the command line and the provided file.
 		 ** 
 		 ** Returns the number of values stored. argc and argv are, of 

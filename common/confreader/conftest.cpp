@@ -20,17 +20,25 @@
 
 #include "confreader.h"
 #include <iostream>
+#include "Poco/Logger.h"
+#include "Poco/SimpleFileChannel.h"
+#include "Poco/AutoPtr.h"
+
 
 using namespace nrtb;
 using namespace std;
 
 int main(int argc, char* argv[])
 {
-	cout << "Confreader Init" << endl;
+	Poco::Logger & log = Poco::Logger::root();
+	Poco::AutoPtr<Poco::SimpleFileChannel> pChannel(new Poco::SimpleFileChannel);
+	pChannel->setProperty("path", "conftest.log");
+	pChannel->setProperty("rotation", "2 K");
+	log.setChannel(pChannel);
+	log.information("=-=-=-=-=-= conftest Init =-=-=-=-=-=-=");
 	conf_reader & config = conf_reader::get_instance();
-	cout << "Starting read" << endl;
-	cout << "Read " << flush << config.read(argc,argv,"test.config")
-		<< " unique arguments from CL and file test.config" << endl;
+	log.information("Starting read");
+	config.read(argc,argv,"test.config");
 	conf_reader::iterator c = config.begin();
 	conf_reader::iterator e = config.end();
 	while (c != e)
@@ -66,5 +74,5 @@ int main(int argc, char* argv[])
 	{
 		cout << "\t" << i << ": " << strings[i] << endl;
 	};
-	cout << "\nRun Complete" << endl;
+	log.information("Run Complete");
 };
