@@ -34,9 +34,9 @@ void nrtb::setup_global_logging(const std::string & logfilename)
 {
   AutoPtr<SimpleFileChannel> pFile(new SimpleFileChannel);
   pFile->setProperty("path", logfilename);
-  pFile->setProperty("rotation", "2 K");
+  pFile->setProperty("rotation", "250 K");
   AutoPtr<PatternFormatter> pPF(new PatternFormatter);
-  pPF->setProperty("pattern", "%Y-%m-%d %H:%M:%S %s: %t");
+  pPF->setProperty("pattern", "%Y-%m-%d %H:%M:%S [%s:%p] %t");
   AutoPtr<FormattingChannel> pFC(new FormattingChannel(pPF, pFile));
   Logger::root().setChannel(pFC);
   Logger::root().notice("Logging system initialized");
