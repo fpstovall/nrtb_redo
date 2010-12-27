@@ -28,7 +28,7 @@ confreader.o:	confreader.h confreader.cpp Makefile
 conftest:	confreader.o conftest.cpp
 	@rm -f conftest
 	g++ -c conftest.cpp
-	g++ -o conftest conftest.o confreader.o ../obj/common.o -lPocoFoundation -lPocoUtil
+	g++ -o conftest conftest.o confreader.o ../obj/common.o ../obj/log_setup.o -lPocoFoundation -lPocoUtil
 
 clean:
 	@rm -rvf *.o conftest ../include/confreader.h ../obj/confreader.o
