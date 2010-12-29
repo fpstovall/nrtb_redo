@@ -21,7 +21,13 @@ lib:	conftest
 	@cp -v confreader.o ../obj
 	@echo build complete
 
-confreader.o:	confreader.h confreader.cpp Makefile
+../include/common.h: 
+	@cd ../common_rl; make lib
+
+../include/log_setup.h:
+	@cd ../logger; make lib
+
+confreader.o:	confreader.h confreader.cpp Makefile ../include/common.h  ../include/log_setup.h
 	@rm -f confreader.o
 	g++ -c confreader.cpp -I ../include
 
