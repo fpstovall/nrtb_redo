@@ -19,8 +19,11 @@
 lib:	common_test Makefile
 	@cp -v triad.h ../include
 	@echo build complete
-	
-common_test:	common_test.cpp triad.h Makefile
+
+../include/common.h:
+	@cd ../common_rl; make lib
+
+common_test:	common_test.cpp triad.h Makefile ../include/common.h
 	@rm -vf common_test
 	g++ -O3 common_test.cpp -I ../include ../obj/common.o -o common_test
 
