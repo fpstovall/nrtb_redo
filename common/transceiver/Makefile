@@ -16,23 +16,23 @@
 #
 #***********************************************
 
-lib:	transciever_test
-	@cp -v transciever.h ../include
-	@cp -v transciever.o ../obj
+lib:	transceiver_test
+	@cp -v transceiver.h ../include
+	@cp -v transceiver.o ../obj
 	@echo build complete
 
 ../include/confreader.h:
 	@cp ../confreader; make lib
 
-transciever.o:	transciever.h transciever.cpp Makefile ../include/confreader.h
-	@rm -f transciever.o
-	g++ -c transciever.cpp -I ../include
+transceiver.o:	transceiver.h transceiver.cpp Makefile ../include/confreader.h
+	@rm -f transceiver.o
+	g++ -c transceiver.cpp -I ../include
 
-transciever_test:	transciever.o transciever_test.cpp
-	@rm -f transciever_test
-	g++ -c transciever_test.cpp
-	g++ -o transciever_test transciever_test.o transciever.o ../obj/common.o ../obj/log_setup.o -lPocoFoundation -lPocoUtil
+transceiver_test:	transceiver.o transceiver_test.cpp
+	@rm -f transceiver_test
+	g++ -c transceiver_test.cpp
+	g++ -o transceiver_test transceiver_test.o transceiver.o ../obj/common.o ../obj/log_setup.o -lPocoFoundation -lPocoUtil
 
 clean:
-	@rm -rvf *.o transciever_test ../include/transciever.h ../obj/transciever.o
+	@rm -rvf *.o transceiver_test ../include/transceiver.h ../obj/transceiver.o
 	@echo all objects and executables have been erased.
