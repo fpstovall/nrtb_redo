@@ -21,7 +21,10 @@ lib:	transciever_test
 	@cp -v transciever.o ../obj
 	@echo build complete
 
-transciever.o:	transciever.h transciever.cpp Makefile
+../include/confreader.h:
+	@cp ../confreader; make lib
+
+transciever.o:	transciever.h transciever.cpp Makefile ../include/confreader.h
 	@rm -f transciever.o
 	g++ -c transciever.cpp -I ../include
 
