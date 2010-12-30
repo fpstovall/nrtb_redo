@@ -36,6 +36,14 @@ namespace nrtb
    * out_gpb is the channel wrapper for the outbound channel.
    * in_gpb is the channel wrapper for the inbound channel.
    * 
+   * The nrtb::confreader singleton will be queried for the 
+   * following parameters:
+   * 
+   * 	transciever.history_size			(int)
+   * 	transciever.send_timeout			(int)
+   * 	transciever.allow_recovery			(bool)
+   * 	transciever.max_consecutive_errors	(int)
+   * 
    * See https://blueprints.launchpad.net/nrtb/+spec/icp-spec for
    * specification this class implements.
    * ***************************************************************/
@@ -94,6 +102,10 @@ namespace nrtb
 	  // Thrown if the socket is closed due to too many errors in a row
 	  POCO_DECLARE_EXCEPTION(transciever, consecutive_error_overrun, general_exception)
 	protected:
+	  const std::string logname = "transciever:";
+	  unsigned int send_time_limit;
+	  bool attempt_recovery;
+	  unsigned int error_run_limit;
 	  // pointer to this class's logger instance
 	  Poco::Logger * log;
 	  // The socket used for communcation.
