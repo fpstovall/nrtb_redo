@@ -19,6 +19,7 @@
 #include "log_setup.h"
 
 #include <string>
+#include <iostream>
 #include <Poco/Logger.h>
 #include "Poco/LogStream.h"
 
@@ -26,10 +27,20 @@ using namespace std;
 
 int main()
 {
-  nrtb::setup_global_logging("test_ouput.log");
-  Poco::Logger & logger = Poco::Logger::get("log_test");
-  logger.notice("Logging should be set up now.");
-  Poco::LogStream log(logger);
-  log << "This message used the stream interface" << endl;
-  logger.fatal("Program run complete.");
+  bool set_if_failed = false;
+  try
+  {
+	nrtb::setup_global_logging("test_output.log");
+	Poco::Logger & logger = Poco::Logger::get("log_test");
+	logger.notice("Logging should be set up now.");
+	Poco::LogStream log(logger);
+	log << "This message used the stream interface" << endl;
+	logger.notice("Program run complete.");
+  }
+  catch (...)
+  {
+	set_if_failed = true;
+	cout << "** UNIT TEST FAILED **" << endl;
+  };
+  return set_if_failed;
 }

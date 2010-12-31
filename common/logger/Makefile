@@ -16,8 +16,14 @@
 #
 #***********************************************
 
-build:	log_test Makefile
-	@echo build complete
+lib:	log_test
+	@echo "Testing..."
+	@rm -f test_output.log
+	@./log_test
+	@grep "Program run complete." test_output.log
+	@cp -fv log_setup.h ../include
+	@cp -fv log_setup.o ../obj
+
 
 log_setup.o:	log_setup.h log_setup.cpp Makefile
 	@rm -f log_setup.o
@@ -32,8 +38,5 @@ log_test:	log_setup.o log_test.cpp Makefile
 clean:
 	@rm -vf *.o log_test ../include/log_setup.h ../obj/log_setup.o
 
-lib:	log_test
-	@cp -fv log_setup.h ../include
-	@cp -fv log_setup.o ../obj
 
 
