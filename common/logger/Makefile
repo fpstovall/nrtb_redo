@@ -36,7 +36,7 @@ log_test:	log_setup.o log_test.cpp Makefile
 #	g++ -g common_test.cpp  -idirafter . -o common_test
 
 clean:
-	@rm -vf *.o log_test ../include/log_setup.h ../obj/log_setup.o
+	@rm -vf *.o log_test ../include/log_setup.h ../obj/log_setup.o test_output.log
 
 
 

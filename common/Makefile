@@ -34,6 +34,7 @@ clean:
 
 doit:
 	@cd common_rl; make ${action}
+	@cd serializer; make ${action}
 	@cd point; make ${action}
 	@cd timer; make ${action}
 	@cd logger; make ${action}

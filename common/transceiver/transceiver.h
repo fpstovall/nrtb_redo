@@ -33,8 +33,8 @@ namespace nrtb
    * traffic between NRTB components. This is the only form of 
    * IPC used by NRTB.
    * 
-   * out_gpb is the channel wrapper for the outbound channel.
-   * in_gpb is the channel wrapper for the inbound channel.
+   * out is the channel wrapper for the outbound channel.
+   * in is the channel wrapper for the inbound channel.
    * 
    * The nrtb::confreader singleton will be queried for the 
    * following parameters:
@@ -47,14 +47,14 @@ namespace nrtb
    * See https://blueprints.launchpad.net/nrtb/+spec/icp-spec for
    * specification this class implements.
    * ***************************************************************/
-  template <class out_gpb, class in_gpb>
+  template <class out, class in>
   class transceiver
   {
 	public:
 	  /// outbound messages will be of this type
-	  typedef out_gpb outbound_type;
+	  typedef outbound_type out;
 	  /// inbound messages will be of this type.
-	  typedef in_gpb inbound_type;
+	  typedef inbound_type in;
 	  /**************************************************************
 	   * Creates the transceiver and associates it with a provided 
 	   * socket. Once created this class assumes it uniquely owns the 
@@ -70,12 +70,12 @@ namespace nrtb
 	   * gets the next message from the socket. If no messages are 
 	   * ready, blocks util one arrives. 
 	   * ***********************************************************/
-	  inbound_type & get();
+	  in & get();
 	  /**************************************************************
 	   * Sends a message over the socket and adds it to the 
 	   * sent_messages buffer in case it's needed for error recovery.
 	   * ***********************************************************/
-	  void send(outbound_type & sendme);
+	  void send(out & sendme);
 	  /**************************************************************
 	   * Called by the data consumer when an inbound message was 
 	   * not valid in the current application context. msg_number
@@ -102,6 +102,7 @@ namespace nrtb
 	  // Thrown if the socket is closed due to too many errors in a row
 	  POCO_DECLARE_EXCEPTION(transceiver, consecutive_error_overrun, general_exception)
 	protected:
+	  unsigned in uid;
 	  const std::string logname = "transceiver:";
 	  unsigned int send_time_limit;
 	  bool attempt_recovery;
@@ -114,7 +115,7 @@ namespace nrtb
 	  Poco::Net::SocketStream stream;
 	  // buffer to hold previously sent messages; required for 
 	  // error recovery.
-	  boost::circular_buffer<outbound_type> sent_messages;
+	  boost::circular_buffer<out> sent_messages;
 	  // fence post for recovery efforts, zero if none in play
 	  unsigned long long nak_fence_post;
 	  // These methods implment actual nak recovery.
@@ -124,4 +125,4 @@ namespace nrtb
 
 } // namespace nrtb
  
-#endif //nrtb_transceiver_h
+#endif //nrtb_transceiver_h//

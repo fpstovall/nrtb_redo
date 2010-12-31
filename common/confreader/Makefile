@@ -40,5 +40,5 @@ conftest:	confreader.o conftest.cpp
 	g++ -o conftest conftest.o confreader.o ../obj/common.o ../obj/log_setup.o -lPocoFoundation -lPocoUtil
 
 clean:
-	@rm -rvf *.o conftest ../include/confreader.h ../obj/confreader.o
+	@rm -rvf *.o conftest ../include/confreader.h ../obj/confreader.o conf_test.log
 	@echo all objects and executables have been erased.

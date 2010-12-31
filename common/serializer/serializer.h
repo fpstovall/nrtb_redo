@@ -1,5 +1,5 @@
 /***********************************************
- T his file is part of the NRTB project (https://*launchpad.net/nrtb).
+ This file is part of the NRTB project (https://*launchpad.net/nrtb).
  
  NRTB is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -18,19 +18,27 @@
 
 #ifndef nrtb_serializer_h
 #define nrtb_serializer_h
-#include <boost/concept_check.hpp>
-
 #include <Poco/Mutex.h>
 
 namespace nrtb 
 { 
-
+  /******************************************************************
+   * nrtb::serializer provides a simple, thread safe functor which
+   * returns a series of long long ints increasing by one each time
+   * it's called. By default it starts counting from zero, but may
+   * be started from any arbitrary integer in the range 
+   * 0 < x < max long long. 
+   * ***************************************************************/
   class serializer
   {
   public:
+	// default constructor; counter starts from zero.
 	serializer();
+	// constructor which sets the starting number.
 	serializer(unsigned long long start);
+	// NOP distructor for inheritance safety
 	~serializer();
+	// functor method, returns the next value in the sequence.
 	unsigned long long operator ()();
   private:
 	Poco::Mutex lock;
