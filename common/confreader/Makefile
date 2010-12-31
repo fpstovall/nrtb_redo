@@ -17,6 +17,9 @@
 #***********************************************
 
 lib:	conftest
+	@rm -f conf_test.log
+	@./conftest test=1 test2-2 test2=71.837486 test3="jack danials" --doit
+	@grep "Run Complete" conf_test.log
 	@cp -v confreader.h ../include
 	@cp -v confreader.o ../obj
 	@echo build complete
