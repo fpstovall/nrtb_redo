@@ -28,30 +28,45 @@ int main()
 {
 	hirez_timer overall;
 	hirez_timer interval;
-	overall.start();
-	interval.start();
-	cout << "sleep 1 second" << endl;
-	sleep(1);
-	cout << overall.interval() << " | " << interval.stop() << " (stop)" << endl;
-	cout << "sleep 3 seconds" << endl;
-	sleep(3);
-	cout << overall.interval() << " | " << interval.stop() << " (start)" << endl;	
-	interval.start();
-	cout << "sleep 2 seconds" << endl;
-	sleep(2);
-	cout << overall.interval() << " | " << interval.stop() << " (reset)" << endl;
-	interval.reset();
-	interval.start();
-	cout << "sleep 500000 useconds" << endl;
-	usleep(500000);
-	cout << overall.interval() << " | " << interval.stop() << endl;
-	// test the advanced formationg function
-	interval.start(109472.34);
-	interval.stop();
-	cout << "Extended interval_as_HMS() test: \""
-		<< interval.interval_as_HMS(true)
-		<< "\" or \"" << interval.interval_as_HMS() << "\"" << endl;
-	cout << "Total run time: " << overall.interval() << " seconds." << endl;
-	return 0;
+	int returnme = 0;
+	try
+	{
+	  overall.start();
+	  interval.start();
+	  cout << "sleep 1 second" << endl;
+	  sleep(1);
+	  cout << overall.interval() << " | " << interval.stop() << " (stop)" << endl;
+	  cout << "sleep 3 seconds" << endl;
+	  sleep(3);
+	  cout << overall.interval() << " | " << interval.stop() << " (start)" << endl;	
+	  interval.start();
+	  cout << "sleep 2 seconds" << endl;
+	  sleep(2);
+	  cout << overall.interval() << " | " << interval.stop() << " (reset)" << endl;
+	  interval.reset();
+	  interval.start();
+	  cout << "sleep 500000 useconds" << endl;
+	  usleep(500000);
+	  cout << overall.interval() << " | " << interval.stop() << endl;
+	  // test the advanced formationg function
+	  interval.start(109472.34);
+	  interval.stop();
+	  cout << "Extended interval_as_HMS() test: \""
+		  << interval.interval_as_HMS(true)
+		  << "\" or \"" << interval.interval_as_HMS() << "\"" << endl;
+	  cout << "Total run time: " << overall.stop() << " seconds." << endl;
+	  if ((overall.interval() < 6.5) or (overall.interval() > 6.503))
+	  {
+		cerr << "Measured runtime " 
+		  << overall.interval()
+		  << " is outside of expected limits, failed test" << endl;
+		returnme = 1;
+	  };
+	}
+	catch (...)
+	{
+	  returnme = 1;
+	};
+	return returnme;
 };
 

@@ -19,6 +19,7 @@
 lib:	timer_test
 	@cp -v hires_timer.h ../include
 	@cp -v hires_timer.o ../obj
+	@./timer_test
 	@echo build complete
 
 hires_timer.o:	hires_timer.h hires_timer.cpp Makefile
