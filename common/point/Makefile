@@ -17,8 +17,9 @@
 #***********************************************
 
 lib:	common_test Makefile
+	@echo "(2,3.5,7)" | ./common_test 
 	@cp -v triad.h ../include
-	@echo build complete
+	@echo nrtb::triad build complete
 
 ../include/common.h:
 	@cd ../common_rl; make lib
