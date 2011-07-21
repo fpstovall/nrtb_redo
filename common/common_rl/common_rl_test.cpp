@@ -52,6 +52,27 @@ int main()
 	  "nrtb::downcase()",
 	  nrtb::downcase(tstr) == "mixedcase");
   
+  returnme += report_test(
+	  "nrtb::gsub()",
+	  nrtb::gsub(tstr, "cAsE", " frogs") == "MiXeD frogs");
+
+  // split() testing
+  nrtb::strlist tokens = nrtb::split("this is a test",' ');
+  bool faults = tokens.size() == 4;
+  faults = faults or (tokens[0] == "this");
+  faults = faults or (tokens[0] == "is");
+  faults = faults or (tokens[0] == "a");
+  faults = faults or (tokens[0] == "test");  
+  returnme += report_test(
+	"nrtb::split()",
+	faults);
+  
+  string tchar = " "; tchar[0] = 0;
+  returnme += report_test(
+	  "nrtb::mconvert()",
+	  nrtb::mconvert("\\ \" '"+tchar) == "\\\\ \\\" \\\'\\0");
+
+
   cout << "=== nrtb::common_rl unit test complete ===" << endl;
   return returnme;
 };
