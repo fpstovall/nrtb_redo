@@ -72,7 +72,30 @@ int main()
 	  "nrtb::mconvert()",
 	  nrtb::mconvert("\\ \" '"+tchar) == "\\\\ \\\" \\\'\\0");
 
+  returnme += report_test(
+	  "nrtb::trim()",
+	  nrtb::trim("\t"+tstr+"   ") == tstr);
 
+  returnme += report_test(
+	  "nrtb::dateflip()",
+	  nrtb::dateflip("2011-07-21") == "07-21-2011");
+
+  returnme += report_test(
+	  "nrtb::http_hextochar()",
+	  nrtb::http_hextochar("20") == " ");
+  
+  returnme += report_test(
+	  "nrtb::http_chartohex()",
+	  nrtb::http_chartohex(tstr) == "4D6958654463417345");
+  
+  returnme += report_test(
+	  "nrtb::http_enhex()",
+	  nrtb::http_enhex(tstr) == "%4D%69%58%65%44%63%41%73%45");
+  
+  returnme += report_test(
+	  "nrtb::http_unhex()",
+	  nrtb::http_unhex("%4D%69%58%65%44%63%41%73%45") == tstr);
+  
   cout << "=== nrtb::common_rl unit test complete ===" << endl;
   return returnme;
 };
