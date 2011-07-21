@@ -36,16 +36,16 @@ int main()
 	  cout << "sleep 0.1 second" << endl;
 	  usleep(1e5);
 	  cout << overall.interval() << " | " << interval.stop() << " (stop)" << endl;
-	  cout << "sleep 3 seconds" << endl;
+	  cout << "sleep 0.3 seconds" << endl;
 	  usleep(3e5);
 	  cout << overall.interval() << " | " << interval.stop() << " (start)" << endl;	
 	  interval.start();
-	  cout << "sleep 2 seconds" << endl;
+	  cout << "sleep 0.2 seconds" << endl;
 	  usleep(2e5);
 	  cout << overall.interval() << " | " << interval.stop() << " (reset)" << endl;
 	  interval.reset();
 	  interval.start();
-	  cout << "sleep 500000 useconds" << endl;
+	  cout << "sleep 0.5 seconds" << endl;
 	  usleep(5e5);
 	  cout << overall.interval() << " | " << interval.stop() << endl;
 	  // test the advanced formationg function
