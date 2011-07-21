@@ -33,20 +33,20 @@ int main()
 	{
 	  overall.start();
 	  interval.start();
-	  cout << "sleep 1 second" << endl;
-	  sleep(1);
+	  cout << "sleep 0.1 second" << endl;
+	  usleep(1e5);
 	  cout << overall.interval() << " | " << interval.stop() << " (stop)" << endl;
 	  cout << "sleep 3 seconds" << endl;
-	  sleep(3);
+	  usleep(3e5);
 	  cout << overall.interval() << " | " << interval.stop() << " (start)" << endl;	
 	  interval.start();
 	  cout << "sleep 2 seconds" << endl;
-	  sleep(2);
+	  usleep(2e5);
 	  cout << overall.interval() << " | " << interval.stop() << " (reset)" << endl;
 	  interval.reset();
 	  interval.start();
 	  cout << "sleep 500000 useconds" << endl;
-	  usleep(500000);
+	  usleep(5e5);
 	  cout << overall.interval() << " | " << interval.stop() << endl;
 	  // test the advanced formationg function
 	  interval.start(109472.34);
@@ -55,7 +55,7 @@ int main()
 		  << interval.interval_as_HMS(true)
 		  << "\" or \"" << interval.interval_as_HMS() << "\"" << endl;
 	  cout << "Total run time: " << overall.stop() << " seconds." << endl;
-	  if ((overall.interval() < 6.5) or (overall.interval() > 6.503))
+	  if ((overall.interval() < 1.1) or (overall.interval() > 1.102))
 	  {
 		cerr << "Measured runtime " 
 		  << overall.interval()
