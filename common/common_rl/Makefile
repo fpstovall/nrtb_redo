@@ -16,7 +16,8 @@
 #
 #***********************************************
 
-lib:	common.o
+lib:	common_rl_test
+	@./common_rl_test
 	@cp -v common.h ../include
 	@cp -v common.o ../obj
 	@echo build complete
@@ -24,7 +25,12 @@ lib:	common.o
 common.o:	common.h common.cpp Makefile
 	@rm -f common.o
 	g++ -c -O3 common.cpp
+	
+common_rl_test:	common.o common_rl_test.cpp
+	@rm -f common_rl_test
+	g++ -c common_rl_test.cpp
+	g++ -o common_rl_test common_rl_test.o common.o
 
 clean:
-	@rm -rvf *.o  ../include/common.h ../obj/common.o
+	@rm -rvf *.o  ../include/common.h ../obj/common.o common_rl_test
 	@echo all objects and executables have been erased.
