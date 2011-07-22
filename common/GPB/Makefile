@@ -16,13 +16,19 @@
 #
 #***********************************************
 
-lib/nrtb_gpb.a:
-	@protoc -I=proto/ --cpp_out=cpp_src/ proto/*.proto
-	@cd obj; for file in ../cpp_src/*.cc; do g++ -c $$file; done
-	@cp -v cpp_src/*h include
-	@ar -r lib/nrtb_gpb.a obj/*.o
+proto=../../GPB_proto
+
+lib:	lib/nrtb_gpb.a
 	@echo "GPB lib build complete."
 
+lib/nrtb_gpb.a:
+	@protoc -I=${proto} --cpp_out=cpp_src/ ${proto}/*.proto
+	@cd obj; for file in ../cpp_src/*.cc; do g++ -c $$file; done
+	@cp -v cpp_src/*h ../include
+	@ar -r ../lib/nrtb_gpb.a obj/*.o
+
 clean:
-	@rm -vf lib/* obj/* cpp_src/* include/*
+	@cd cpp_src; for file in *h; do rm -vf ../../include/$$file; done
+	@rm -vf ../lib/nrtb_gpb.a
+	@rm -f obj/* cpp_src/*
 	@echo "GPB cleanup complete."

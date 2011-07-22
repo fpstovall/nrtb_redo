@@ -42,3 +42,4 @@ doit:
 	@cd timer; make ${action}
 	@cd logger; make ${action}
 	@cd confreader; make ${action}
+	@cd GPB; make ${action}
