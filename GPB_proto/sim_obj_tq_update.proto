@@ -8,6 +8,8 @@
 // Note: these are never sent bare.. they are always payloads 
 // 	in a channel wrapper message.
 
+package nrtb_msg;
+
 import "physics_common.proto";
 
 // This message contains all the information required to report the
