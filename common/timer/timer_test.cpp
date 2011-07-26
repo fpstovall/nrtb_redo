@@ -55,7 +55,7 @@ int main()
 		  << interval.interval_as_HMS(true)
 		  << "\" or \"" << interval.interval_as_HMS() << "\"" << endl;
 	  cout << "Total run time: " << overall.stop() << " seconds." << endl;
-	  if ((overall.interval() < 1.1) or (overall.interval() > 1.102))
+	  if ((overall.interval() < 1.1) or (overall.interval() > 1.104))
 	  {
 		cerr << "Measured runtime " 
 		  << overall.interval()
