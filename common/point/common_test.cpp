@@ -94,6 +94,10 @@ int main()
 	// normalization test
 	cout << "\ta.normalize() = " << a.normalize() << endl;
 	returnme = test_ld("a.normalize().magnatude()",a.normalize().magnatude(),1.0,returnme);
+	// dot and vector product tests.
+	returnme = test_ld("a.dot_product(b)",a.dot_product(b),10,returnme);
+	returnme = test_triad("a.vector_product(b)",a.vector_product(b),
+		ld_triad(-4,8,-4),returnme);
 	// string i/o tests, assumes "2,3.5,7) is input.
 	cout << "\tInput a new value for b \"(2,3.5,7)\": " << flush;
 	cin >> b; cout << endl;

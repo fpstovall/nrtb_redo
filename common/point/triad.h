@@ -92,6 +92,10 @@ struct triad
 	T range(const triad<T> & a);
 	/// Returns the magnatude of the vector.
 	T magnatude();
+	/// Returns the dot (scalar) product of two triads
+	T dot_product(const triad<T> & a);
+	/// Returns the vector product of two triads
+	triad<T> vector_product(const triad<T> & a);
 	bool operator == (const triad<T> & a);
 	bool operator != (const triad<T> & a);
 	/// Loads from a std::string.
@@ -298,6 +302,26 @@ template <class T>
 T triad<T>::magnatude()
 {
 	return sqrt((x*x) + (y*y) + (z*z));
+};
+
+template <class T>
+T triad<T>::dot_product(const triad<T> & a)
+{
+  T returnme;
+  returnme = x * a.x;
+  returnme += y * a.y;
+  returnme += z * a.z;
+  return returnme;
+};
+
+template <class T>
+triad<T> triad<T>::vector_product(const triad<T> & a)
+{
+  triad<T> rv;
+  rv.x = (y * a.z) - (z * a.y);
+  rv.y = (z * a.x) - (x * a.z);
+  rv.z = (x * a.y) - (y * a.x);
+  return rv;
 };
 
 template <class T>
