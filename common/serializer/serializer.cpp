@@ -17,7 +17,7 @@
  **********************************************/
  
 #include "serializer.h"
-#include <Poco/ScopedLock.h>
+#include <base_thread.h>
 
 using namespace nrtb;
 
@@ -38,6 +38,6 @@ serializer::~serializer()
 
 unsigned long long serializer::operator()()
 {
-  Poco::ScopedLock<Poco::Mutex> mylock(lock);
+  nrtb::scope_lock mylock(lock);
   return counter++;
 }

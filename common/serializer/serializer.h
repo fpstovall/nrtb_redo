@@ -18,7 +18,7 @@
 
 #ifndef nrtb_serializer_h
 #define nrtb_serializer_h
-#include <Poco/Mutex.h>
+#include <base_thread.h>
 
 namespace nrtb 
 { 
@@ -41,7 +41,7 @@ namespace nrtb
 	// functor method, returns the next value in the sequence.
 	unsigned long long operator ()();
   private:
-	Poco::Mutex lock;
+	nrtb::mutex lock;
 	unsigned long long int counter;
   };
 
