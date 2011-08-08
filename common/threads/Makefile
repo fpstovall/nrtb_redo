@@ -16,31 +16,21 @@
 #
 #***********************************************
 
-lib: ./lib/nrtb_common.a
+lib:	thread_test
+	@./thread_test
+	@cp -v base_thread.h ../include
+	@cp -v base_thread.o ../obj
+	@echo build complete
 
-./lib/nrtb_common.a:
-	@echo "============= building common libs ==============="
-	@make action=lib doit
-	@ar -r ./lib/nrtb_common.a ./obj/*.o
-	@echo "============= common libs complete ==============="
+base_thread.o:	base_thread.cpp base_thread.h Makefile
+	@rm -f base_thread.o
+	g++ -c -O3 base_thread.cpp -I ../include
 
-modules:
-	@echo "============= building common modules ==============="
-	@make doit
-	@echo "============= completed common modules =============="
+thread_test:	base_thread.o thread_test.cpp
+	@rm -f thread_test
+	g++ -c thread_test.cpp -I../include
+	g++ -o thread_test thread_test.o base_thread.o ../obj/hires_timer.o ../obj/common.o -lpthread
 
 clean:
-	@echo "============= cleaning common libs ==============="
-	@make action=clean doit
-	@rm -fv ./obj/* ./lib/*
-	@echo "========== common lib cleanup complete ==========="
-
-doit:
-	@cd common_rl; make ${action}
-	@cd point; make ${action}
-	@cd timer; make ${action}
-	@cd threads; make ${action}
-	@cd serializer; make ${action}
-	@cd logger; make ${action}
-	@cd confreader; make ${action}
-	@cd GPB; make ${action}
+	@rm -rvf *.o thread_test ../include/base_thread.h ../obj/base_thread.o
+	@echo all objects and executables have been erased.
