@@ -3,7 +3,7 @@ build:	base_socket.o Makefile
 	
 base_socket.o:	base_socket.cpp base_socket.h Makefile
 	@rm -f base_socket.o
-	gcc -c -O3 base_socket.cpp -idirafter ../ricks_handy -idirafter ../threads -idirafter ../timer -idirafter /usr/local/include/boost-1_31
+	gcc -c -O3 base_socket.cpp -I ../include
 #	gcc -c -g base_socket.cpp -idirafter ../ricks_handy -idirafter ../threads -idirafter ../timer -idirafter /usr/local/include/boost-1_31
 
 clean:
