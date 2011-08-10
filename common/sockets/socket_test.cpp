@@ -35,20 +35,24 @@ class myserver: public tcp_server_socket_factory
 		{
 			try
 			{
-				// we'll just return the current time in seconds 
-				string temp = ricklib::itos(time(NULL));
-				connect_sock->put(temp+"\n");
+				// just return what we've recieved.
+				string msg = connect_sock->getln()
+				connect_sock->put(msg);
 				// Close the socket.
 				connect_sock->close();
 				// delete the tcp_socket (it was new'd before we were called)
 				delete connect_sock;
-					// Update our hit count. 
+				// Update our hit count. 
 				scope_lock lock(data);
 				hits++;
 			}
+			catch (base_exception & e)
+			{
+			  cerr << "Caught " << e.what << endl;
+			}
 			catch (...)
 			{
-				std::cerr << "Unexpected error in on_accept()" << std::endl;
+				cerr << "Unexpected error in on_accept()" << std::endl;
 			};
 		};
 	public:
@@ -69,7 +73,11 @@ class myserver: public tcp_server_socket_factory
 };
 
 
-
+int main()
+{
+  myserver test_server("*:17000",5);
+  test_server.start_listen();
+};
 
 
 
