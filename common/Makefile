@@ -40,6 +40,7 @@ doit:
 	@cd point; make ${action}
 	@cd timer; make ${action}
 	@cd threads; make ${action}
+	@cd sockets; make ${action}
 	@cd serializer; make ${action}
 	@cd logger; make ${action}
 	@cd confreader; make ${action}
