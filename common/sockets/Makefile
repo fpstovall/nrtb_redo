@@ -16,20 +16,23 @@
 #
 #***********************************************
 
-build:	base_socket.o Makefile
+lib:	socket_test
+	@./socket_test
+	@cp -v base_socket.h ../include/
+	@cp -v base_socket.o ../obj/
 	@echo build complete
-	
+
+socket_test:	base_socket.o socket_test.cpp
+	@rm -f socket_test
+	gcc -c socket_test.cpp -I ../include
+	gcc -o socket_test socket_test.o base_socket.o ../obj/hires_timer.o ../obj/common.o ../obj/base_thread.o -lpthread -lm
+
+
 base_socket.o:	base_socket.cpp base_socket.h Makefile
 	@rm -f base_socket.o
 	gcc -c -O3 base_socket.cpp -I ../include
 
 clean:
-	@rm -vf *.o ../../include3/base_socket.h
+	@rm -vf *.o ../include/base_socket.h test-server
 	@echo all objects and executables have been erased.
 
-lib:	base_socket.o ../../include3/base_socket.h
-#	@ar -r ../../lib/libricklib3.a base_socket.
-	@echo the base_socket class has been added to the library
-
-../../include3/base_socket.h: base_socket.h
-	@cp -fv base_socket.h ../../include3

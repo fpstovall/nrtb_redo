@@ -18,8 +18,9 @@
 
 #include <iostream>
 #include <sstream>
+#include <string>
 #include "base_socket.h"
-#include "../../../dev/common/threads/base_thread.h"
+#include <base_thread.h>
 
 using namespace nrtb;
 using namespace std;
@@ -28,6 +29,7 @@ class myserver: public tcp_server_socket_factory
 {
 	private:
 		int hits;
+		int errors;
 		mutex data;
 	protected:
 		// on_accept() is called on each connection.
@@ -36,7 +38,7 @@ class myserver: public tcp_server_socket_factory
 			try
 			{
 				// just return what we've recieved.
-				string msg = connect_sock->getln()
+				string msg = connect_sock->getln();
 				connect_sock->put(msg);
 				// Close the socket.
 				connect_sock->close();
@@ -48,11 +50,13 @@ class myserver: public tcp_server_socket_factory
 			}
 			catch (base_exception & e)
 			{
-			  cerr << "Caught " << e.what << endl;
+			  errors++;
+			  cerr << "Caught " << e.what() << endl;
 			}
 			catch (...)
 			{
-				cerr << "Unexpected error in on_accept()" << std::endl;
+			  errors++;
+			  cerr << "Unexpected error in on_accept()" << std::endl;
 			};
 		};
 	public:
@@ -72,11 +76,87 @@ class myserver: public tcp_server_socket_factory
 		};
 };
 
+string transceiver(const string address, const string sendme)
+{
+  string returnme;
+  tcp_socket sender;
+  sender.connect(address);
+  sender.put(sendme);
+  returnme = sender.getln();
+  return returnme;
+};
+
+const string address = "localhost:17000";
 
 int main()
 {
-  myserver test_server("*:17000",5);
-  test_server.start_listen();
+  int er_count = 0;
+  myserver test_server(address,5);
+  
+  try
+  {
+	// start the receiver/server
+	test_server.start_listen();
+	
+	// Send test messages
+	for (int i = 0; i < 1000; i++)
+	{
+	  stringstream msg;
+	  msg << "test message " << i;
+	  string checkme = msg.str();
+	  msg << "\r";
+	  string returned = transceiver(address, msg.str());
+	  if (returned != checkme)
+	  {
+		er_count++;
+	  };
+	  cout << returned << ": " 
+		<< ((returned == checkme) ? "Passed" : "Failed")
+		<< endl;
+	};
+	test_server.stop_listen();
+	usleep(5000);
+	if (test_server.listening())
+	{  
+	  er_count++;
+	  cout << "Server failed to stop. " << endl;
+	};
+  }
+  catch (myserver::bind_failure_exception)
+  {
+	  cout << "Could not bind port" << endl;
+  }
+  catch (myserver::mem_exhasted_exception)
+  {
+	  cout << "myserver reports out of memory." << endl;
+  }
+  catch (myserver::listen_terminated_exception)
+  {
+	  cout << "Listener terminated unexpectedly." << endl;
+  }
+  catch (myserver::on_accept_bound_exception)
+  {
+	  cout << "myserver::on_accept() seems bound." << endl;
+  }
+  catch (tcp_socket::general_exception)
+  {
+	  cout << "A tcp_socket exception was caught." << endl;
+  }
+  catch (exception & e)
+  {
+	  cout << "A unexpected " << e.what() << " exception was caught." << endl;
+  };
+
+  // final check.
+  if (test_server.hit_count() != 1000)
+  {
+	er_count++;
+	cout << "Server does not report the proper number of hits."
+	  << endl;
+  };
+  cout << "=========== tcp_socket test complete =============" << endl;
+  
+  return er_count;
 };
 
 
