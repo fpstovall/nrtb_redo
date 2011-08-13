@@ -1,32 +1,37 @@
 // singleton template test program
 
 
-#include <http_page.h>
 #include "singleton.h"
+#include <serializer.h>
 #include <iostream>
 
-using namespace ricklib;
+using namespace nrtb;
 using namespace std;
+
+typedef singleton<serializer> sequence_type;
 
 int main()
 {
-	typedef singleton<http_page> p_type;
-	
-	{
-		p_type & getter = p_type::get_instance();
+  int er_count = 0;
+  
+  sequence_type & a = sequence_type::get_instance();
+  
+  for (int i=0; i<10; i++)
+  {
+	cout << a();
+  };
+  
+  sequence_type & b = sequence_type::get_instance();
+  
+  
+  if ( b() != 11)
+  {
+	er_count++;
+  };
+  
+  cout << "\nsingleton test " << (er_count ? "passed" : "failed")
+	<< "." << endl;
 
-		cout << "newly initialized code: " << getter.result_code() << endl;
-
-		getter.get("127.0.0.1:80","/");
-	};
-
-	cout << "first response code: " << p_type::get_instance().result_code()
-		<< endl;
-	
-	p_type::get_instance().get("127.0.0.1:80","/not_there.html");
-
-	cout << "second response code: " <<  p_type::get_instance().result_code()
-		 << endl;
-
-	p_type::get_instance().delete_me();
+  return er_count;
+  
 };
