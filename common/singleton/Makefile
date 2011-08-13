@@ -1,5 +1,5 @@
 #***********************************************
-#This file is part of the NRTB project (https://launchpad.net/nrtb).
+# This file is part of the NRTB project (https://launchpad.net/nrtb).
 #
 #    NRTB is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -16,23 +16,18 @@
 #
 #***********************************************
 
-lib:	conftest
-	@rm -f conf_test.log
-	@./conftest test=1 test2-2 test2=71.837486 test3="jack danials" --doit
-	@grep "Run Complete" conf_test.log
-	@cp -v confreader.h ../include
-	@cp -v confreader.o ../obj
+
+lib:	singleton_test
+	@./singleton_test
+	@cp -v singleton.h ../include
 	@echo build complete
 
-confreader.o:	confreader.h confreader.cpp Makefile 
-	@rm -f confreader.o
-	g++ -c confreader.cpp -I../include
-
-conftest:	confreader.o conftest.cpp
-	@rm -f conftest
-	g++ -c conftest.cpp -I../include
-	g++ -o conftest conftest.o confreader.o ../obj/common.o ../obj/log_setup.o ../obj/base_thread.o -lpthread -lPocoFoundation -lPocoUtil
+singleton_test:	singleton_test.cpp Makefile
+	@rm -f singleton_test
+	g++ -c singleton_test.cpp -I ../include 
+	g++ -o singleton_test singleton_test.o ../obj/base_thread.o ../obj/common.o ../obj/serializer.o -lpthread
 
 clean:
-	@rm -rvf *.o conftest ../include/confreader.h ../obj/confreader.o conf_test.log
+	@rm -rvf *.o singleton_test ../include/singleton.h
 	@echo all objects and executables have been erased.
+

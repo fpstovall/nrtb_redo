@@ -42,6 +42,7 @@ doit:
 	@cd threads; make ${action}
 	@cd sockets; make ${action}
 	@cd serializer; make ${action}
+	@cd singleton; make ${action}
 	@cd logger; make ${action}
 	@cd confreader; make ${action}
 	@cd GPB; make ${action}
