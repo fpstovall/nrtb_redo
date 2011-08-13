@@ -24,7 +24,6 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <boost/lexical_cast.hpp>
-#include "../../../dev/common/threads/base_thread.h"
 
 using boost::lexical_cast;
 using std::string;
