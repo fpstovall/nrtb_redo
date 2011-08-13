@@ -20,16 +20,10 @@
 
 #include "base_socket.h"
 #include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/time.h>
 #include <errno.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <boost/lexical_cast.hpp>
-#include <iostream>
-
-#include <hires_timer.h>
 
 using boost::lexical_cast;
 using std::string;

@@ -24,13 +24,13 @@ lib:	socket_test
 
 socket_test:	base_socket.o socket_test.cpp
 	@rm -f socket_test
-	gcc -c socket_test.cpp -I ../include
-	gcc -o socket_test socket_test.o base_socket.o ../obj/hires_timer.o ../obj/common.o ../obj/base_thread.o -lpthread -lm
+	g++ -c socket_test.cpp -I ../include
+	g++ -o socket_test socket_test.o base_socket.o ../obj/hires_timer.o ../obj/common.o ../obj/base_thread.o -lpthread 
 
 
 base_socket.o:	base_socket.cpp base_socket.h Makefile
 	@rm -f base_socket.o
-	gcc -c -O3 base_socket.cpp -I ../include
+	g++ -c -O3 base_socket.cpp -I ../include
 
 clean:
 	@rm -vf *.o ../include/base_socket.h test-server

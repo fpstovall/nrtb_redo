@@ -20,60 +20,55 @@
 #include <sstream>
 #include <string>
 #include "base_socket.h"
-#include <base_thread.h>
+#include <boost/shared_ptr.hpp>
 
 using namespace nrtb;
 using namespace std;
 
+typedef boost::shared_ptr<tcp_socket> sockp;
+
 class myserver: public tcp_server_socket_factory
 {
-	private:
-		int hits;
-		int errors;
-		mutex data;
-	protected:
-		// on_accept() is called on each connection.
-		void on_accept()
+public:
+	int hits;
+	int errors;
+
+	// constructor
+	myserver(const string & a, const unsigned short int & b) 
+		: tcp_server_socket_factory(a,b)
+	{
+		// Don't need to lock here because we know the 
+		// listener thread is not running.
+		hits = 0;
+		errors = 0;
+	};
+
+protected:
+	// on_accept() is called on each connection.
+	void on_accept()
+	{
+		try
 		{
-			try
-			{
-				// just return what we've recieved.
-				string msg = connect_sock->getln();
-				connect_sock->put(msg);
-				// Close the socket.
-				connect_sock->close();
-				// delete the tcp_socket (it was new'd before we were called)
-				delete connect_sock;
-				// Update our hit count. 
-				scope_lock lock(data);
-				hits++;
-			}
-			catch (base_exception & e)
-			{
-			  errors++;
-			  cerr << "Caught " << e.what() << endl;
-			}
-			catch (...)
-			{
-			  errors++;
-			  cerr << "Unexpected error in on_accept()" << std::endl;
-			};
-		};
-	public:
-		// constructor
-		myserver(const string & a, const unsigned short int & b) 
-			: tcp_server_socket_factory(a,b)
+			sockp c(connect_sock);
+			// just return what we've recieved.
+			string msg = c->getln();
+			c->put(msg);
+			// Close the socket.
+			c->close();
+			// Update our hit count. 
+			hits++;
+		}
+		catch (base_exception & e)
 		{
-			// Don't need to lock here because we know the 
-			// listener thread is not running.
-			hits = 0;
-		};
-		// hit count reporter.
-		int hit_count() 
+		  errors++;
+		  cerr << "Caught " << e.what() << endl;
+		}
+		catch (...)
 		{
-			scope_lock lock(data); 
-			return hits; 
+		  errors++;
+		  cerr << "Unexpected error in on_accept()" << endl;
 		};
+	};
 };
 
 string transceiver(const string address, const string sendme)
@@ -86,26 +81,26 @@ string transceiver(const string address, const string sendme)
   return returnme;
 };
 
-const string address = "localhost:17000";
+const string address = "127.0.0.1:17000";
 
 int main()
 {
   int er_count = 0;
   myserver test_server(address,5);
-  
+
   try
   {
 	// start the receiver/server
 	test_server.start_listen();
+	usleep(5e5);
 	
 	// Send test messages
 	for (int i = 0; i < 1000; i++)
 	{
 	  stringstream msg;
-	  msg << "test message " << i;
+	  msg << "test message " << i << "\r";
 	  string checkme = msg.str();
-	  msg << "\r";
-	  string returned = transceiver(address, msg.str());
+	  string returned = transceiver(address, checkme);
 	  if (returned != checkme)
 	  {
 		er_count++;
@@ -113,9 +108,9 @@ int main()
 	  cout << returned << ": " 
 		<< ((returned == checkme) ? "Passed" : "Failed")
 		<< endl;
+	  usleep(1000);
 	};
 	test_server.stop_listen();
-	usleep(5000);
 	if (test_server.listening())
 	{  
 	  er_count++;
@@ -138,9 +133,15 @@ int main()
   {
 	  cout << "myserver::on_accept() seems bound." << endl;
   }
-  catch (tcp_socket::general_exception)
+  catch (tcp_socket::bad_connect_exception & e)
   {
-	  cout << "A tcp_socket exception was caught." << endl;
+	  cout << "A bad_connect_exception was thrown.\n" 
+		<< e.comment() << endl;
+  }
+  catch (tcp_socket::general_exception & e)
+  {
+	  cout << "A tcp_socket exception was caught.\n" 
+		<< e.comment() << endl;
   }
   catch (exception & e)
   {
@@ -148,10 +149,11 @@ int main()
   };
 
   // final check.
-  if (test_server.hit_count() != 1000)
+  if (test_server.hits != 1000)
   {
 	er_count++;
-	cout << "Server does not report the proper number of hits."
+	cout << "Server does not report the proper number of hits.\n"
+	  << "\tExpected 1000, got " << test_server.hits 
 	  << endl;
   };
   cout << "=========== tcp_socket test complete =============" << endl;
