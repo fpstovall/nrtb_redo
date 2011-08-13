@@ -33,6 +33,6 @@ base_socket.o:	base_socket.cpp base_socket.h Makefile
 	g++ -c -O3 base_socket.cpp -I ../include
 
 clean:
-	@rm -vf *.o ../include/base_socket.h test-server
+	@rm -vf *.o ../include/base_socket.h socket_test
 	@echo all objects and executables have been erased.
 

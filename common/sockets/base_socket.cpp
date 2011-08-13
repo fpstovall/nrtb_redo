@@ -24,6 +24,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <boost/lexical_cast.hpp>
+#include "../../../dev/common/threads/base_thread.h"
 
 using boost::lexical_cast;
 using std::string;
@@ -612,11 +613,12 @@ void tcp_server_socket_factory::stop_listen()
 	// take action only if the listen thread is running.
 	if (is_running())
 	{
+		bool okay_to_kill = false;
 		// set the flag that indicates the thread should not process any more.
-		thread_data.lock();
-		okay_to_continue = false;
-		bool okay_to_kill = !in_on_accept;
-		thread_data.unlock();
+		{
+			scope_lock lock(thread_data);
+			bool okay_to_kill = !in_on_accept;
+		}
 		// close the listener socket.
 		close(listen_sock);
 		// is is okay to cancel the thread?
@@ -632,9 +634,10 @@ void tcp_server_socket_factory::stop_listen()
 				sleep(1);
 				// check boundaries.
 				// -- are we out of on_accept()?
-				thread_data.lock();
-				done = !in_on_accept;
-				thread_data.unlock();
+				{
+				  scope_lock lock(thread_data);
+				  done = !in_on_accept;
+				}
 				// -- are we out of time?
 				okay_to_kill = done;
 				if (time(NULL) > endtime) { done = true; };
@@ -707,10 +710,11 @@ void tcp_server_socket_factory::run()
 		while (go)
 		{
 			// are we okay to proceed?
-			thread_data.lock();
-			in_on_accept = false;
-			go = okay_to_continue;
-			thread_data.unlock();
+			{
+			  scope_lock lock(thread_data);
+			  in_on_accept = false;
+			  go = okay_to_continue;
+			}
 			if (!go)
 			{
 				close(listen_sock);
@@ -745,19 +749,20 @@ void tcp_server_socket_factory::run()
 						{	
 							// for any other error, we're going to shutdown the 
 							// this listener thread.
-							thread_data.lock();
-							// If the error was caused by an attempt to close the 
-							// socket and shutdown the thread, don't store an
-							// error flag.
-							if (okay_to_continue)
 							{
-								thread_return = errno;
-							}
-							else
-							{
-								thread_return = 0;
+							  scope_lock lock(thread_data);
+							  // If the error was caused by an attempt to close the 
+							  // socket and shutdown the thread, don't store an
+							  // error flag.
+							  if (okay_to_continue)
+							  {
+								  thread_return = errno;
+							  }
+							  else
+							  {
+								  thread_return = 0;
+							  };
 							};
-							thread_data.unlock();
 							exit(errno);
 							break;
 						};
@@ -766,13 +771,14 @@ void tcp_server_socket_factory::run()
 			// create connect_sock
 			connect_sock = new tcp_socket(new_conn);
 			// are we okay to proceed?
-			thread_data.lock();
-			go = okay_to_continue;
-			// if we are go, then we'll be going to on_accept next.
-			// Therefore, this equality makes sense if you hold your
-			// head just so. :-P
-			in_on_accept = go;
-			thread_data.unlock();
+			{
+			  scope_lock lock(thread_data);
+			  go = okay_to_continue;
+			  // if we are go, then we'll be going to on_accept next.
+			  // Therefore, this equality makes sense if you hold your
+			  // head just so. :-P
+			  in_on_accept = go;
+			}
 			if (!go)
 			{
 				delete connect_sock;
@@ -791,9 +797,10 @@ void tcp_server_socket_factory::run()
 			};
 		}; // while go;
 		// if we get here then things are not going well...
-		thread_data.lock();
-		thread_return = -2;
-		thread_data.unlock();
+		{
+		  scope_lock lock(thread_data);
+		  thread_return = -2;
+		}
 		close(listen_sock);
 		exit(-2);
 	}
