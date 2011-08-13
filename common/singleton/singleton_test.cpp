@@ -29,6 +29,9 @@ typedef singleton<serializer> sequence_type;
 
 int main()
 {
+  
+  cout << "============== singleton unit test ================" 
+	<< endl;
   int er_count = 0;
   
   sequence_type & a = sequence_type::get_instance();
@@ -40,15 +43,13 @@ int main()
   
   sequence_type & b = sequence_type::get_instance();
   
-  
-  if ( b() != 11)
+  if ( b() != 10)
   {
 	er_count++;
   };
   
-  cout << "\nsingleton test " << (er_count ? "passed" : "failed")
-	<< "." << endl;
+  cout << "\n=========== singleton test " << (er_count ? "failed" : "passed")
+	<< " =============" << endl;
 
   return er_count;
-  
 };
