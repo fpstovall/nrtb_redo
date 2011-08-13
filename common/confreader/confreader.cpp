@@ -29,7 +29,6 @@ using namespace nrtb;
 
 const std::string logname = "conf_reader";
 
-
 namespace nrtb
 {
 

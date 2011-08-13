@@ -24,20 +24,14 @@ lib:	conftest
 	@cp -v confreader.o ../obj
 	@echo build complete
 
-../include/common.h: 
-	@cd ../common_rl; make lib
-
-../include/log_setup.h:
-	@cd ../logger; make lib
-
-confreader.o:	confreader.h confreader.cpp Makefile ../include/common.h  ../include/log_setup.h
+confreader.o:	confreader.h confreader.cpp Makefile 
 	@rm -f confreader.o
-	g++ -c confreader.cpp -I ../include
+	g++ -c confreader.cpp -I../include
 
 conftest:	confreader.o conftest.cpp
 	@rm -f conftest
-	g++ -c conftest.cpp
-	g++ -o conftest conftest.o confreader.o ../obj/common.o ../obj/log_setup.o -lPocoFoundation -lPocoUtil
+	g++ -c conftest.cpp -I../include
+	g++ -o conftest conftest.o confreader.o ../obj/common.o ../obj/log_setup.o ../obj/base_thread.o -lpthread -lPocoFoundation -lPocoUtil
 
 clean:
 	@rm -rvf *.o conftest ../include/confreader.h ../obj/confreader.o conf_test.log

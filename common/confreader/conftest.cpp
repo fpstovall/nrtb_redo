@@ -19,11 +19,11 @@
 /* confreader test program */
 
 #include "confreader.h"
-#include "../include/log_setup.h"
+#include <log_setup.h>
 #include <iostream>
 #include "Poco/Logger.h"
 #include "Poco/SimpleFileChannel.h"
-#include "Poco/AutoPtr.h"
+//#include "Poco/AutoPtr.h"
 
 using namespace nrtb;
 using namespace std;
@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
   setup_global_logging("conf_test.log");
   Poco::Logger & log = Poco::Logger::get("conftest");
   log.information("=-=-=-=-=-= conftest Init =-=-=-=-=-=-=");
-  conf_reader & config = conf_reader::get_instance();
+  global_conf_reader & config = global_conf_reader::get_instance();
   try
   {
 	log.information("Starting read");

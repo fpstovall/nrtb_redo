@@ -22,10 +22,10 @@
 #include <string.h>
 #include <map>
 #include <vector>
+#include <string>
 #include <fstream>
 #include <boost/lexical_cast.hpp>
-#include <string.h>
-#include "Poco/SingletonHolder.h"
+#include <singleton.h>
 
 namespace nrtb
 {
@@ -99,14 +99,6 @@ class conf_reader
 		/** NOP virtual destructor to allow safe inheritance.
 		 **/
 		virtual ~conf_reader();
-		/** Static singletion access point. Unlike common practice, this 
-		 ** returns a reference to avoid anyone else taking control of a pointer.
-		 **/
-		static conf_reader & get_instance()
-		{
-			static Poco::SingletonHolder<conf_reader> sh;
-			return * sh.get();
-		}
 		/** Reads and parses the command line and the provided file.
 		 ** 
 		 ** Returns the number of values stored. argc and argv are, of 
@@ -227,6 +219,8 @@ class conf_reader
 		template <class T>
 			T get(const std::string & key, const T & def);
 };
+
+typedef singleton<conf_reader> global_conf_reader;
 
 template < class T >
 	typename std::vector<T> conf_reader::getall(const std::string & key)
