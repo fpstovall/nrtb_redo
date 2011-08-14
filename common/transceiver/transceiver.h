@@ -20,10 +20,9 @@
 #define nrtb_transceiver_h
 
 #include <string>
-#include <Poco/Net/StreamSocket.h>
-#include <Poco/Net/SocketStream.h>
+#include <base_socket.h>
 #include <Poco/Logger.h>
-#include <Poco/Exception.h>
+#include <boost/shared_ptr.hpp>
 #include <boost/circular_buffer.hpp>
 
 namespace nrtb
@@ -53,15 +52,22 @@ namespace nrtb
 	public:
 	  /// outbound messages will be of this type
 	  typedef outbound_type out;
+	  /// shared pointer for outbound messages
+	  typedef boost::shared_ptr<out> outp;
 	  /// inbound messages will be of this type.
 	  typedef inbound_type in;
-	  /**************************************************************
+	  /// shared pointer for inbound messages.
+	  typedef boost::shared_ptr<in> inp;
+	  /// shared pointer type to be for sockets passed in.
+	  typedef boost::shared_ptr<nrtb::tcp_socket> sockp;
+	  
+	  /*************************************************************
 	   * Creates the transceiver and associates it with a provided 
 	   * socket. Once created this class assumes it uniquely owns the 
 	   * socket and will close it upon distruction.
 	   * ***********************************************************/
-	  transceiver(Poco::Net::StreamSocket socket);
-	  /**************************************************************
+	  transceiver(sockp socket);
+	  /*************************************************************
 	   * Closes the socket and releases all mmemory associated with
 	   * this class.
 	   * ***********************************************************/
@@ -70,12 +76,12 @@ namespace nrtb
 	   * gets the next message from the socket. If no messages are 
 	   * ready, blocks util one arrives. 
 	   * ***********************************************************/
-	  in & get();
+	  inp get();
 	  /**************************************************************
 	   * Sends a message over the socket and adds it to the 
 	   * sent_messages buffer in case it's needed for error recovery.
 	   * ***********************************************************/
-	  void send(out & sendme);
+	  void send(outp sendme);
 	  /**************************************************************
 	   * Called by the data consumer when an inbound message was 
 	   * not valid in the current application context. msg_number
@@ -91,34 +97,34 @@ namespace nrtb
 	  /**************************************************************
 	   * Exceptions which may be thrown for external resulution.
 	   * ***********************************************************/
-	  // parent of all transceiver exceptions
-	  POCO_DECLARE_EXCEPTION(transceiver, general_exception, Poco::Exception)
-	  // thrown if send fails due to timeout.
-	  POCO_DECLARE_EXCEPTION(transceiver, send_timeout, general_exception)
-	  // thrown in the case of a fault while in get()
-	  POCO_DECLARE_EXCEPTION(transceiver, get_fault, general_exception)
-	  // Thrown if the socket is closed due to an unrecoverable date error.
-	  POCO_DECLARE_EXCEPTION(transceiver, unrecoverable_data_error, general_exception)
-	  // Thrown if the socket is closed due to too many errors in a row
-	  POCO_DECLARE_EXCEPTION(transceiver, consecutive_error_overrun, general_exception)
-	protected:
-	  unsigned in uid;
+	  /// parent of all transceiver exceptions
+	  class general_exception : public nrtb::base_exception {};
+	  /// thrown if the a unexpected msg_uid is received
+	  class inbound_seq_error : public general_exception {};
+	  /// thrown the connection is unexpectedly lost
+	  class connection_lost: public general_exception {};
+	  /// thrown if too many sequencial errors occur.
+	  class too_many_errors: public general_exception {};
+	  
+  protected:
 	  const std::string logname = "transceiver:";
 	  unsigned int send_time_limit;
 	  bool attempt_recovery;
 	  unsigned int error_run_limit;
-	  // pointer to this class's logger instance
+	  /// pointer to this class's logger instance
 	  Poco::Logger * log;
-	  // The socket used for communcation.
-	  Poco::Net::StreamSocket sock;
-	  // the associated iostream (Do we need this?)
-	  Poco::Net::SocketStream stream;
-	  // buffer to hold previously sent messages; required for 
-	  // error recovery.
-	  boost::circular_buffer<out> sent_messages;
-	  // fence post for recovery efforts, zero if none in play
+	  /// The socket used for communcation.
+	  sockp sock;
+	  /// serializer used for message numbers
+	  serializer out_msg_num;
+	  /// last received message number 
+	  unsigned long long  last_inbound;
+	  /// buffer to hold previously sent messages; required for 
+	  /// error recovery.
+	  boost::circular_buffer<outp> sent_messages;
+	  /// fence post for recovery efforts, zero if none in play
 	  unsigned long long nak_fence_post;
-	  // These methods implment actual nak recovery.
+	  /// These methods implment actual nak recovery.
 	  void handle_inbound_nak();
 	  void handle_outbound_nak();
   };
