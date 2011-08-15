@@ -20,6 +20,7 @@
 #define base_socket_header
 
 #include <base_thread.h>
+#include <boost/shared_ptr.hpp>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
@@ -370,6 +371,9 @@ class tcp_socket
 		 **/
 		std::string get_remote_address();
 };
+
+/// smart pointer for use with tcp_sockets
+typedef boost::shared_ptr<nrtb::tcp_socket> tcp_socketp;
 
 /** Abstract "listener" TCP/IP socket for servers. 
  ** 
