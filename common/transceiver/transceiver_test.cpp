@@ -15,3 +15,19 @@
  along with NRTB.  If not, see <http://www.gnu.org/licenses/>.
  
  **********************************************/
+ 
+#include "transceiver.h"
+#include <log_setup.h>
+#include <sim_to_db_wrapper.pb.h>
+
+using namespace nrtb;
+
+int main()
+{
+  int er_count = 0;
+  setup_global_logging("transceiver.log");
+  
+  
+  
+  return er_count;
+};

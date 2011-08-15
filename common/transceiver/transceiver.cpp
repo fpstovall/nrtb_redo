@@ -23,11 +23,12 @@
 #include <sstream>
 
 using namespace nrtb;
+using namespace std;
 
-serializer tscvr_sequence;
+serializer tscvr_sequence(0);
 
-template <class out, class in>
-transceiver::transceiver(transceiver<out,in>::sockp socket)
+template <class out, class in, class outp, class inp>
+transceiver<out,in,outp,inp>::transceiver(tcp_socketp socket)
 {
   // get the configuration parameters.
   global_conf_reader & config = global_conf_reader::get_instance();
@@ -38,7 +39,7 @@ transceiver::transceiver(transceiver<out,in>::sockp socket)
   sent_messages.resize(config.get<int>("transceiver.history_size",50));
   // set up logging
   std::stringstream s;
-  s << logname << "_" << tscvr_sequence();
+  s << "transceiver:_" << tscvr_sequence();
   log = Poco::Logger::get(s.str());
   // set up the socket.
   sock(socket);
@@ -54,8 +55,8 @@ transceiver::transceiver(transceiver<out,in>::sockp socket)
   log->trace(s.str());
 };
 
-template <class out, class in>
-transceiver::~transceiver()
+template <class out, class in, class outp, class inp>
+transceiver<out,in,outp,inp>::~transceiver()
 {
 	log->trace("In ~transciever");
 	// shutdown the socket.
@@ -65,13 +66,14 @@ transceiver::~transceiver()
 	log->trace("shutdown complete.");
 };
 
-template <class out, class in>
-inp transceiver::get()
+template <class out, class in, class outp, class inp>
+inp transceiver<out,in,outp,inp>::get()
 {
   inp returnme(new in);
   string input = sock->getln();
   returnme->ParseFromString(input);
-  /// message sequence checks go here
+  // for the first messsge any number is
+  // accepted.
   if (last_inbound == 0)
   {
 	last_inbound = returnme->msg_uid();
@@ -93,45 +95,45 @@ inp transceiver::get()
   return returnme;
 };
 
-template <class out, class in>
-void transceiver::send(outp sendme)
+template <class out, class in, class outp, class inp>
+void transceiver<out,in,outp,inp>::send(outp sendme)
 {
   sendme->set_msg_uid(out_msg_num());
-  stringstream output;
-  output << sendme->SerializeAsString() << "\r";
-  sock->put(output.str());
-  sent_messages.push_back(out);
+  string output;
+  output = sendme->SerializeAsString() + "\r";
+  sock->put(output);
+  sent_messages.push_back(sendme);
 };
 
-template <class out, class in>
-void transceiver::nak_invalid_context(const unsigned long int msg_number)
+template <class out, class in, class outp, class inp>
+void transceiver<out,in,outp,inp>::nak_invalid_context(const unsigned long int msg_number)
 {
   general_exception e;
-  e.store("transceiver::nak_invalid_context not implemented.");
+  e.store("transceiver<outp,inp>::nak_invalid_context not implemented.");
   throw e;
 };
 
-template <class out, class in>
-void transceiver::nak_validation_error(const unsigned long int msg_number)
+template <class out, class in, class outp, class inp>
+void transceiver<out,in,outp,inp>::nak_validation_error(const unsigned long int msg_number)
 {
   general_exception e;
-  e.store("transceiver::nak_validation_error not implemented.");
+  e.store("transceiver<outp,inp>::nak_validation_error not implemented.");
   throw e;
 };
 
-template <class out, class in>
-void transceiver::handle_inbound_nak()
+template <class out, class in, class outp, class inp>
+void transceiver<out,in,outp,inp>::handle_inbound_nak()
 {
   general_exception e;
-  e.store("transceiver::handle_inbound_nak not implemented.");
+  e.store("transceiver<outp,inp>::handle_inbound_nak not implemented.");
   throw e;  
 };
 
-template <class out, class in>
-void transceiver::handle_outbound_nak()
+template <class out, class in, class outp, class inp>
+void transceiver<out,in,outp,inp>::handle_outbound_nak()
 {
   general_exception e;
-  e.store("transceiver::handle_outbound_nak not implemented.");
+  e.store("transceiver<outp,inp>::handle_outbound_nak not implemented.");
   throw e;    
 };
 

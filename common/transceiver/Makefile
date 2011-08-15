@@ -21,17 +21,14 @@ lib:	transceiver_test
 	@cp -v transceiver.o ../obj
 	@echo build complete
 
-../include/confreader.h:
-	@cp ../confreader; make lib
-
-transceiver.o:	transceiver.h transceiver.cpp Makefile ../include/confreader.h
+transceiver.o:	transceiver.h transceiver.cpp Makefile
 	@rm -f transceiver.o
 	g++ -c transceiver.cpp -I ../include
 
 transceiver_test:	transceiver.o transceiver_test.cpp
 	@rm -f transceiver_test
-	g++ -c transceiver_test.cpp
-	g++ -o transceiver_test transceiver_test.o transceiver.o ../obj/common.o ../obj/log_setup.o -lPocoFoundation -lPocoUtil
+	g++ -c transceiver_test.cpp -I../include
+	g++ -o transceiver_test transceiver_test.o transceiver.o ../obj/common.o ../obj/log_setup.o ../obj/serializer.o ../obj/base_thread.o -lPocoFoundation -lpthread
 
 clean:
 	@rm -rvf *.o transceiver_test ../include/transceiver.h ../obj/transceiver.o
