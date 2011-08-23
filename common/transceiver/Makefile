@@ -17,18 +17,14 @@
 #***********************************************
 
 lib:	transceiver_test
+	@./transceiver_test
 	@cp -v transceiver.h ../include
-	@cp -v transceiver.o ../obj
 	@echo build complete
 
-transceiver.o:	transceiver.h transceiver.cpp Makefile
-	@rm -f transceiver.o
-	g++ -c transceiver.cpp -I ../include
-
-transceiver_test:	transceiver.o transceiver_test.cpp
+transceiver_test:	transceiver.h transceiver_test.cpp
 	@rm -f transceiver_test
 	g++ -c transceiver_test.cpp -I../include
-	g++ -o transceiver_test transceiver_test.o transceiver.o ../obj/common.o ../obj/log_setup.o ../obj/serializer.o ../obj/base_thread.o -lPocoFoundation -lpthread
+	g++ -o transceiver_test transceiver_test.o ../obj/common.o ../obj/log_setup.o ../obj/serializer.o ../obj/base_thread.o ../obj/base_socket.o ../obj/confreader.o -lpthread -lprotobuf  ../lib/nrtb_gpb.a -lPocoFoundation
 
 clean:
 	@rm -rvf *.o transceiver_test ../include/transceiver.h ../obj/transceiver.o
