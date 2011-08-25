@@ -46,3 +46,4 @@ doit:
 	@cd logger; make ${action}
 	@cd confreader; make ${action}
 	@cd GPB; make ${action}
+	@cd transceiver; make ${action}
