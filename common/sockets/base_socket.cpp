@@ -587,11 +587,13 @@ tcp_server_socket_factory::~tcp_server_socket_factory()
 	{
 		// yes, this is -rude- shutdown of the listening thread.
 		// Get over it.
-		thread_data.lock();
-		okay_to_continue = false;
-		thread_data.unlock();
-		close(listen_sock);
 		stop();
+		try
+		{ 
+		  if (listen_sock)
+			close(listen_sock);
+		}
+		catch (...) {};
 	};
 };
 
