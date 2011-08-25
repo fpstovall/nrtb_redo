@@ -27,5 +27,5 @@ transceiver_test:	transceiver.h transceiver_test.cpp
 	g++ -o transceiver_test transceiver_test.o ../obj/common.o ../obj/log_setup.o ../obj/serializer.o ../obj/base_thread.o ../obj/base_socket.o ../obj/confreader.o -lpthread -lprotobuf  ../lib/nrtb_gpb.a -lPocoFoundation
 
 clean:
-	@rm -rvf *.o transceiver_test ../include/transceiver.h ../obj/transceiver.o
+	@rm -rvf *.o transceiver_test ../include/transceiver.h *.log ../obj/transceiver.o
 	@echo all objects and executables have been erased.

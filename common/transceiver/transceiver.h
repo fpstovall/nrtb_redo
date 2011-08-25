@@ -21,6 +21,7 @@
 
 #include <string>
 #include <sstream>
+#include <common.h>
 #include <base_socket.h>
 #include <serializer.h>
 #include <confreader.h>
@@ -57,6 +58,12 @@ namespace nrtb
 	public:
 	  typedef inp in_ptr;
 	  typedef outp out_ptr;
+	  
+	  union msg_num_t
+	  {
+		uint32_t number;
+		unsigned char bytes[4];
+	  };
 	  
 	  /*************************************************************
 	   * Creates the transceiver and associates it with a provided 
@@ -173,8 +180,19 @@ transceiver<out,in,outp,inp>::~transceiver()
 template <class out, class in, class outp, class inp>
 inp transceiver<out,in,outp,inp>::get()
 {
+  // get the message length first.
+  std::string len_field = sock->get(4,10);
+//std::cout << "len_field=" << http_chartohex(len_field) << std::endl;  
+  msg_num_t msg_len;
+  for (int i=0; i<4; i++)
+  {
+	msg_len.bytes[i] = len_field[i];
+  };
+//std::cout << ":len=" << msg_len.number << std::endl;
+  // get the rest of the message.
   inp returnme(new in);
-  std::string input = sock->getln();
+  std::string input = sock->get(msg_len.number);
+//std::cout << ":received=" << http_chartohex(input) << std::endl;
   returnme->ParseFromString(input);
   // for the first messsge any number is
   // accepted.
@@ -204,7 +222,19 @@ void transceiver<out,in,outp,inp>::send(outp sendme)
 {
   sendme->set_msg_uid(out_msg_num());
   std::string output;
-  output = sendme->SerializeAsString() + "\r";
+  output = sendme->SerializeAsString();
+  msg_num_t msg_len;
+  msg_len.number = output.size();
+//std::cout << "num:len" << msg_len.number << ":" << output.length() << //std::endl;
+  std::string num_field = "    ";
+  for (int i=0; i<4; i++)
+  {
+	num_field[i] = msg_len.bytes[i];
+//std::cout << int(num_field[i]) << "," ;
+  };
+//std::cout << " = " << msg_len.number << std::endl;  
+  output = num_field + output;
+//std::cout << "out msg=" << http_chartohex(output) << std::endl;  
   sock->put(output);
   sent_messages.push_back(sendme);
 };

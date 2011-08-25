@@ -43,16 +43,17 @@ public:
   
   void run()
   {
+	set_cancel_anytime();
 	linkt link(sock);
 	while (sock->status() == tcp_socket::sock_connect)
 	{
 	  try 
 	  {
-		cout << "'\tserver waiting" << endl;
 		linkt::out_ptr inbound = link.get();
-		cout << "\tserver got message" << endl;
 		last_inbound = inbound->msg_uid();
 		cout << "\tReceived #" << last_inbound << endl;
+		if (last_inbound == 99)
+		  exit(0);
 	  }
 	  catch (linkt::general_exception & e)
 	  {
@@ -138,8 +139,7 @@ int main()
 	cout << "Sent " << msg->msg_uid() << endl;
 	usleep(1e4);
   };
-    
-  //er_count = 113 - task.last_inbound;
-  //cout << task.last_inbound;
+  
+  usleep(5e5);
   return er_count;
 };
