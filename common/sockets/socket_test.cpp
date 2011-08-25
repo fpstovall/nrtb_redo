@@ -19,6 +19,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <boost/random.hpp>
 #include "base_socket.h"
 #include <boost/shared_ptr.hpp>
 
@@ -81,11 +82,21 @@ string transceiver(const string address, const string sendme)
   return returnme;
 };
 
-const string address = "127.0.0.1:17000";
+string address = "127.0.0.1:";
+int port_base = 17000;
 
 int main()
 {
   int er_count = 0;
+  //set up our port and address
+  boost::mt19937 rng;
+  rng.seed(time(0));
+  boost::uniform_int<> r(0,1000);
+  stringstream s;
+  s << address << port_base + r(rng);
+  address = s.str();
+  cout << "Using " << address << endl;
+  
   myserver test_server(address,5);
 
   try
@@ -105,7 +116,7 @@ int main()
 	  {
 		er_count++;
 	  };
-	  cout << returned << ": " 
+	  cout << returned.substr(0,returned.size()-1) << ": " 
 		<< ((returned == checkme) ? "Passed" : "Failed")
 		<< endl;
 	  usleep(1000);

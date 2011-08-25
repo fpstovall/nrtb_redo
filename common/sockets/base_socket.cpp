@@ -65,8 +65,11 @@ int tcp_socket::receive(std::string & data, int limit)
 	if (returnme > 0)
 	{
 		// yes.. store for the caller.
-		inbuff[returnme] = 0;
-		data.assign((const char *) &(inbuff[0]));
+		data.resize(returnme,0);
+		for (int i=0; i<returnme; i++)
+		{
+		  data[i] = inbuff[i];
+		};
 	}
 	// ... or was there an error?
 	else if (errno) 
