@@ -16,21 +16,23 @@
 #
 #***********************************************
 
-lib:	timer_test
-	@./timer_test
-	@cp -v hires_timer.h ../include
-	@cp -v hires_timer.o ../obj
+lib:	conftest
+	@rm -f conf_test.log
+	@./conftest test=1 test2-2 test2=71.837486 test3="jack danials" --doit
+	@grep "Run Complete" conf_test.log
+	@cp -v confreader.h ../include
+	@cp -v confreader.o ../obj
 	@echo build complete
 
-hires_timer.o:	hires_timer.h hires_timer.cpp Makefile
-	@rm -f hires_timer.o
-	g++ -c -O3 hires_timer.cpp
+confreader.o:	confreader.h confreader.cpp Makefile 
+	@rm -f confreader.o
+	g++ -c confreader.cpp -I../include
 
-timer_test:	hires_timer.o timer_test.cpp
-	@rm -f timer_test
-	g++ -c timer_test.cpp
-	g++ -o timer_test timer_test.o hires_timer.o
+conftest:	confreader.o conftest.cpp
+	@rm -f conftest
+	g++ -c conftest.cpp -I../include
+	g++ -o conftest conftest.o confreader.o ../obj/common.o ../obj/log_setup.o ../obj/base_thread.o -lpthread -lPocoFoundation -lPocoUtil
 
 clean:
-	@rm -rvf *.o timer_test ../include/hires_timer.h ../obj/hires_timer.o
+	@rm -rvf *.o conftest ../include/confreader.h ../obj/confreader.o conf_test.log
 	@echo all objects and executables have been erased.

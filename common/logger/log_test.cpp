@@ -15,41 +15,32 @@
  along with NRTB.  If not, see <http://www.gnu.org/licenses/>.
  
  **********************************************/
+ 
+#include "log_setup.h"
 
-// singleton template test program
-
-#include "singleton.h"
-#include <serializer.h>
+#include <string>
 #include <iostream>
+#include <Poco/Logger.h>
+#include "Poco/LogStream.h"
 
-using namespace nrtb;
 using namespace std;
-
-typedef singleton<serializer> sequence_type;
 
 int main()
 {
-  
-  cout << "============== singleton unit test ================" 
-	<< endl;
-  int er_count = 0;
-  
-  sequence_type & a = sequence_type::get_instance();
-  
-  for (int i=0; i<10; i++)
+  bool set_if_failed = false;
+  try
   {
-	cout << a();
-  };
-  
-  sequence_type & b = sequence_type::get_instance();
-  
-  if ( b() != 10)
+	nrtb::setup_global_logging("test_output.log");
+	Poco::Logger & logger = Poco::Logger::get("log_test");
+	logger.notice("Logging should be set up now.");
+	Poco::LogStream log(logger);
+	log << "This message used the stream interface" << endl;
+	logger.notice("Program run complete.");
+  }
+  catch (...)
   {
-	er_count++;
+	set_if_failed = true;
+	cout << "** UNIT TEST FAILED **" << endl;
   };
-  
-  cout << "\n=========== singleton test " << (er_count ? "failed" : "passed")
-	<< " =============" << endl;
-
-  return er_count;
-};
+  return set_if_failed;
+}

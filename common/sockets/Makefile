@@ -1,5 +1,5 @@
 #***********************************************
-#This file is part of the NRTB project (https://launchpad.net/nrtb).
+# This file is part of the NRTB project (https://launchpad.net/nrtb).
 #
 #    NRTB is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -16,21 +16,23 @@
 #
 #***********************************************
 
-lib:	timer_test
-	@./timer_test
-	@cp -v hires_timer.h ../include
-	@cp -v hires_timer.o ../obj
+lib:	socket_test
+	@./socket_test
+	@cp -v base_socket.h ../include/
+	@cp -v base_socket.o ../obj/
 	@echo build complete
 
-hires_timer.o:	hires_timer.h hires_timer.cpp Makefile
-	@rm -f hires_timer.o
-	g++ -c -O3 hires_timer.cpp
+socket_test:	base_socket.o socket_test.cpp
+	@rm -f socket_test
+	g++ -c socket_test.cpp -I ../include
+	g++ -o socket_test socket_test.o base_socket.o ../obj/hires_timer.o ../obj/common.o ../obj/base_thread.o -lpthread 
 
-timer_test:	hires_timer.o timer_test.cpp
-	@rm -f timer_test
-	g++ -c timer_test.cpp
-	g++ -o timer_test timer_test.o hires_timer.o
+
+base_socket.o:	base_socket.cpp base_socket.h Makefile
+	@rm -f base_socket.o
+	g++ -c -O3 base_socket.cpp -I ../include
 
 clean:
-	@rm -rvf *.o timer_test ../include/hires_timer.h ../obj/hires_timer.o
+	@rm -vf *.o ../include/base_socket.h socket_test
 	@echo all objects and executables have been erased.
+

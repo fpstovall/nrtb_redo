@@ -16,21 +16,21 @@
 #
 #***********************************************
 
-lib:	timer_test
-	@./timer_test
-	@cp -v hires_timer.h ../include
-	@cp -v hires_timer.o ../obj
+lib:	serializer_test
+	@./serializer_test
+	@cp -v serializer.h ../include
+	@cp -v serializer.o ../obj
 	@echo build complete
 
-hires_timer.o:	hires_timer.h hires_timer.cpp Makefile
-	@rm -f hires_timer.o
-	g++ -c -O3 hires_timer.cpp
+serializer.o:	serializer.h serializer.cpp Makefile
+	@rm -f serializer.o
+	g++ -c serializer.cpp -I ../include
 
-timer_test:	hires_timer.o timer_test.cpp
-	@rm -f timer_test
-	g++ -c timer_test.cpp
-	g++ -o timer_test timer_test.o hires_timer.o
+serializer_test:	serializer.o serializer_test.cpp
+	@rm -f serializer_test
+	g++ -c serializer_test.cpp -I../include
+	g++ -o serializer_test serializer_test.o serializer.o ../obj/base_thread.o -lpthread ../obj/common.o
 
 clean:
-	@rm -rvf *.o timer_test ../include/hires_timer.h ../obj/hires_timer.o
+	@rm -rvf *.o serializer_test ../include/serializer.h ../obj/serializer.o
 	@echo all objects and executables have been erased.

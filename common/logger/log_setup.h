@@ -15,41 +15,16 @@
  along with NRTB.  If not, see <http://www.gnu.org/licenses/>.
  
  **********************************************/
+ 
+#ifndef logger_setup_h
+#define logger_setup_h
 
-// singleton template test program
+#include <string>
 
-#include "singleton.h"
-#include <serializer.h>
-#include <iostream>
-
-using namespace nrtb;
-using namespace std;
-
-typedef singleton<serializer> sequence_type;
-
-int main()
+namespace nrtb
 {
-  
-  cout << "============== singleton unit test ================" 
-	<< endl;
-  int er_count = 0;
-  
-  sequence_type & a = sequence_type::get_instance();
-  
-  for (int i=0; i<10; i++)
-  {
-	cout << a();
-  };
-  
-  sequence_type & b = sequence_type::get_instance();
-  
-  if ( b() != 10)
-  {
-	er_count++;
-  };
-  
-  cout << "\n=========== singleton test " << (er_count ? "failed" : "passed")
-	<< " =============" << endl;
 
-  return er_count;
-};
+  void setup_global_logging(const std::string & logfilename);
+}
+
+#endif //logger_setup_h

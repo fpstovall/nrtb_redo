@@ -16,21 +16,21 @@
 #
 #***********************************************
 
-lib:	timer_test
-	@./timer_test
-	@cp -v hires_timer.h ../include
-	@cp -v hires_timer.o ../obj
+lib:	common_rl_test
+	@./common_rl_test
+	@cp -v common.h ../include
+	@cp -v common.o ../obj
 	@echo build complete
 
-hires_timer.o:	hires_timer.h hires_timer.cpp Makefile
-	@rm -f hires_timer.o
-	g++ -c -O3 hires_timer.cpp
-
-timer_test:	hires_timer.o timer_test.cpp
-	@rm -f timer_test
-	g++ -c timer_test.cpp
-	g++ -o timer_test timer_test.o hires_timer.o
+common.o:	common.h common.cpp Makefile
+	@rm -f common.o
+	g++ -c -O3 common.cpp
+	
+common_rl_test:	common.o common_rl_test.cpp
+	@rm -f common_rl_test
+	g++ -c common_rl_test.cpp
+	g++ -o common_rl_test common_rl_test.o common.o
 
 clean:
-	@rm -rvf *.o timer_test ../include/hires_timer.h ../obj/hires_timer.o
+	@rm -rvf *.o  ../include/common.h ../obj/common.o common_rl_test
 	@echo all objects and executables have been erased.

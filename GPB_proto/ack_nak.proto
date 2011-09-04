@@ -9,6 +9,9 @@
 // 	in a channel wrapper message.
 
 // return on of these to ack the recept of each error free message.
+
+package nrtb_msg;
+
 message message_ack {
 	required uint32 msg_uid = 1;
 }

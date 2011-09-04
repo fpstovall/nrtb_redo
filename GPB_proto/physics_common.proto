@@ -11,6 +11,8 @@
 //  meters for distance, meters/sec for velocity, radians for attitude,
 //  and radians/sec for rotational velocity.
 
+package nrtb_msg;
+
 message triplet {
 	required double x = 1;
 	required double y = 2;

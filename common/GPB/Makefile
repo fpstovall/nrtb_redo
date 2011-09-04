@@ -16,21 +16,19 @@
 #
 #***********************************************
 
-lib:	timer_test
-	@./timer_test
-	@cp -v hires_timer.h ../include
-	@cp -v hires_timer.o ../obj
-	@echo build complete
+proto=../../GPB_proto
 
-hires_timer.o:	hires_timer.h hires_timer.cpp Makefile
-	@rm -f hires_timer.o
-	g++ -c -O3 hires_timer.cpp
+lib:	lib/nrtb_gpb.a
+	@echo "GPB lib build complete."
 
-timer_test:	hires_timer.o timer_test.cpp
-	@rm -f timer_test
-	g++ -c timer_test.cpp
-	g++ -o timer_test timer_test.o hires_timer.o
+lib/nrtb_gpb.a:
+	@protoc -I=${proto} --cpp_out=cpp_src/ ${proto}/*.proto
+	@cd obj; for file in ../cpp_src/*.cc; do g++ -c $$file; done
+	@cp -v cpp_src/*h ../include
+	@ar -r ../lib/nrtb_gpb.a obj/*.o
 
 clean:
-	@rm -rvf *.o timer_test ../include/hires_timer.h ../obj/hires_timer.o
-	@echo all objects and executables have been erased.
+	@cd cpp_src; for file in *h; do rm -vf ../../include/$$file; done
+	@rm -vf ../lib/nrtb_gpb.a
+	@rm -f obj/* cpp_src/*
+	@echo "GPB cleanup complete."

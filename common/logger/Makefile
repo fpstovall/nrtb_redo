@@ -16,21 +16,27 @@
 #
 #***********************************************
 
-lib:	timer_test
-	@./timer_test
-	@cp -v hires_timer.h ../include
-	@cp -v hires_timer.o ../obj
-	@echo build complete
+lib:	log_test
+	@echo "Testing..."
+	@rm -f test_output.log
+	@./log_test
+	@grep "Program run complete." test_output.log
+	@cp -fv log_setup.h ../include
+	@cp -fv log_setup.o ../obj
 
-hires_timer.o:	hires_timer.h hires_timer.cpp Makefile
-	@rm -f hires_timer.o
-	g++ -c -O3 hires_timer.cpp
 
-timer_test:	hires_timer.o timer_test.cpp
-	@rm -f timer_test
-	g++ -c timer_test.cpp
-	g++ -o timer_test timer_test.o hires_timer.o
+log_setup.o:	log_setup.h log_setup.cpp Makefile
+	@rm -f log_setup.o
+	g++ -c log_setup.cpp -I ../include
+
+log_test:	log_setup.o log_test.cpp Makefile
+	@rm -vf log_test
+	g++ -c log_test.cpp -I../include 
+	g++ -o log_test log_setup.o log_test.o -lPocoFoundation
+#	g++ -g common_test.cpp  -idirafter . -o common_test
 
 clean:
-	@rm -rvf *.o timer_test ../include/hires_timer.h ../obj/hires_timer.o
-	@echo all objects and executables have been erased.
+	@rm -vf *.o log_test ../include/log_setup.h ../obj/log_setup.o test_output.log
+
+
+

@@ -1,20 +1,33 @@
+/***********************************************
+ This file is part of the NRTB project (https://*launchpad.net/nrtb).
+ 
+ NRTB is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ NRTB is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with NRTB.  If not, see <http://www.gnu.org/licenses/>.
+ 
+ **********************************************/
+
 /* implements a template that takes any class provided and 
  * creates a singleton for it.
  * 
  * fps 2002-5-29
  */
 
-/*
-	TODO: Alter to use boost::threads mutexes. 
-*/
+#ifndef nrtb_singleton_h
+#define nrtb_singleton_h
 
+#include <base_thread.h>
 
-#ifndef NRTB_singleton_h
-#define NRTB_singleton_h
-
-#include <boost/thread>
-
-namespace NRTB
+namespace nrtb
 {
 
 /** Wrapper template to create singleton classes.
@@ -105,6 +118,6 @@ class singleton: public T
 template <class T, int mytag> mutex singleton<T,mytag>::__mylock;
 template <class T, int mytag> singleton<T,mytag> * singleton<T,mytag>::__me = 0; 
 
-} // namespace NRTB;
+} // namespace nrtb;
 
-#endif // NRTB_singleton_h
+#endif // nrtb_singleton_h

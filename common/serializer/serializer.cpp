@@ -1,5 +1,5 @@
 /***********************************************
- This file is part of the NRTB project (https://*launchpad.net/nrtb).
+ T his file is part of the NRTB project (https://*launchpad.net/nrtb).
  
  NRTB is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -15,41 +15,29 @@
  along with NRTB.  If not, see <http://www.gnu.org/licenses/>.
  
  **********************************************/
-
-// singleton template test program
-
-#include "singleton.h"
-#include <serializer.h>
-#include <iostream>
+ 
+#include "serializer.h"
+#include <base_thread.h>
 
 using namespace nrtb;
-using namespace std;
 
-typedef singleton<serializer> sequence_type;
-
-int main()
+nrtb::serializer::serializer()
 {
-  
-  cout << "============== singleton unit test ================" 
-	<< endl;
-  int er_count = 0;
-  
-  sequence_type & a = sequence_type::get_instance();
-  
-  for (int i=0; i<10; i++)
-  {
-	cout << a();
-  };
-  
-  sequence_type & b = sequence_type::get_instance();
-  
-  if ( b() != 10)
-  {
-	er_count++;
-  };
-  
-  cout << "\n=========== singleton test " << (er_count ? "failed" : "passed")
-	<< " =============" << endl;
-
-  return er_count;
+  counter = 0;
 };
+
+nrtb::serializer::serializer(unsigned long long start)
+{
+  counter = start;
+};
+
+serializer::~serializer()
+{
+  // nop destructor 
+};
+
+unsigned long long serializer::operator()()
+{
+  nrtb::scope_lock mylock(lock);
+  return counter++;
+}
