@@ -29,7 +29,6 @@ using namespace nrtb;
 using namespace std;
 
 typedef nrtb_msg::sim_to_db my_msg;
-typedef boost::shared_ptr<my_msg> my_msgp;
 typedef transceiver<my_msg,my_msg> linkt;
 
 int er_count = 0;
@@ -38,7 +37,7 @@ class server_work_thread: public runnable
 {
 public:
   
-  tcp_socketp sock;
+  tcp_socket_p sock;
   unsigned long long last_inbound;
   
   void run()
@@ -53,7 +52,10 @@ public:
 		last_inbound = inbound->msg_uid();
 		cout << "\tReceived #" << last_inbound << endl;
 		if (last_inbound == 99)
+		{
+		  cout << "Receiver thread closing." << endl;
 		  exit(0);
+		};
 	  }
 	  catch (linkt::general_exception & e)
 	  {
@@ -91,14 +93,13 @@ public:
 	if (!process.is_running())
 	{
 	  task.last_inbound = 0;
-	  task.sock.reset(connect_sock);
+	  task.sock = connect_sock;
 	  process.start(task);
 	  cout << "server thread running." << endl;
 	}
 	else
 	{
-	  tcp_socketp s(connect_sock);
-	  s->close();
+	  connect_sock->close();
 	  cerr << "Multiple attempts to connect to server" 
 		<< endl;
 	};
@@ -124,22 +125,24 @@ int main()
   // kick off the listener thread.
   listener server(address,5);
   server.start_listen();
-  usleep(5e5);
+  usleep(1e4);
 
   // set up our sender
-  tcp_socketp sock(new tcp_socket);
+  tcp_socket_p sock(new tcp_socket);
   sock->connect(address);
   linkt sender(sock);
 
   // Let's send a few things.
   for (int i=0; i<100; i++)
   {
-	my_msgp msg(new my_msg);
+	linkt::out_ptr msg(new my_msg);
 	sender.send(msg);
 	cout << "Sent " << msg->msg_uid() << endl;
 	usleep(1e4);
   };
   
+  server.stop_listen();
+  cout << "Listener shutdown complete." << endl;
   usleep(5e5);
   return er_count;
 };

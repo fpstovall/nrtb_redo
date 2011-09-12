@@ -70,7 +70,7 @@ namespace nrtb
 	   * socket. Once created this class assumes it uniquely owns the 
 	   * socket and will close it upon distruction.
 	   * ***********************************************************/
-	  transceiver(tcp_socketp socket);
+	  transceiver(tcp_socket_p socket);
 	  /*************************************************************
 	   * Closes the socket and releases all mmemory associated with
 	   * this class.
@@ -117,7 +117,7 @@ namespace nrtb
 	  /// the name used for logging
 	  std::string logname;
 	  /// The socket used for communcation.
-	  tcp_socketp sock;
+	  tcp_socket_p sock;
 	  /// serializer used for message numbers
 	  serializer out_msg_num;
 	  /// last received message number 
@@ -136,7 +136,7 @@ namespace nrtb
 serializer tscvr_sequence(0);
 
 template <class out, class in, class outp, class inp>
-transceiver<out,in,outp,inp>::transceiver(tcp_socketp socket)
+transceiver<out,in,outp,inp>::transceiver(tcp_socket_p socket)
 {
   // get the configuration parameters.
   global_conf_reader & config = global_conf_reader::get_instance();
@@ -171,7 +171,8 @@ transceiver<out,in,outp,inp>::~transceiver()
 	Poco::Logger & log = Poco::Logger::get(logname);
 	log.trace("In ~transciever");
 	// shutdown the socket.
-	sock->close();
+	if (sock)
+	  try {sock->close();} catch (...) {};
 	// discard the sent messages list.
 	sent_messages.clear();
 	log.trace("shutdown complete.");
