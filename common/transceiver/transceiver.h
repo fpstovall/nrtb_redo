@@ -154,7 +154,7 @@ transceiver<out,in,outp,inp>::transceiver(tcp_socket_p socket)
   // set up the socket.
   sock = socket;
   // annouce ourselves...
-  log.trace("Instanciated."); 
+  log.information("Instanciated."); 
   s.str("");
   s << "history_size=" << sent_messages.size()
     << ", send_timeout=" << send_time_limit
@@ -162,20 +162,19 @@ transceiver<out,in,outp,inp>::transceiver(tcp_socket_p socket)
     << ", error_run_limit=" << error_run_limit
     << ", remote_address=" << sock->get_remote_address()
     << ", local_address=" << sock->get_local_address();
-  log.trace(s.str());
+  log.information(s.str());
 };
 
 template <class out, class in, class outp, class inp>
 transceiver<out,in,outp,inp>::~transceiver()
 {
-	Poco::Logger & log = Poco::Logger::get(logname);
-	log.trace("In ~transciever");
-	// shutdown the socket.
-	if (sock)
-	  try {sock->close();} catch (...) {};
-	// discard the sent messages list.
-	sent_messages.clear();
-	log.trace("shutdown complete.");
+  Poco::Logger & log = Poco::Logger::get(logname);
+  log.information("In ~transciever");
+  // shutdown and release  the socket.
+  try {sock->close();} catch (...) {};
+  // discard the sent messages list.
+  sent_messages.clear();
+  log.information("shutdown complete.");
 };
 
 template <class out, class in, class outp, class inp>

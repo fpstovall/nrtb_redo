@@ -31,7 +31,27 @@ using namespace std;
 typedef nrtb_msg::sim_to_db my_msg;
 typedef transceiver<my_msg,my_msg> linkt;
 
-int er_count = 0;
+class safe_counter
+{
+private:
+  mutex data_lock;
+  int er_count;
+public:
+  safe_counter() { er_count = 0; };
+  ~safe_counter() {};
+  void inc()
+  {
+	scope_lock lock(data_lock);
+	er_count++;
+  };
+  int operator ()()
+  {
+	scope_lock lock(data_lock);
+	return er_count;
+  };
+};
+
+safe_counter er_count;
 
 class server_work_thread: public runnable
 {
@@ -61,40 +81,43 @@ public:
 	  {
 		cerr << "Server work thread caught " << e.what()
 		  << "\n\tComment: " << e.comment() << endl;
-		er_count++;
+		er_count.inc();;
 	  }
 	  catch (tcp_socket::general_exception & e)
 	  {
 		cerr << "Server work thread caught " << e.what()
 		  << "\n\tComment: " << e.comment() << endl;
-		er_count++;
+		er_count.inc();;
 	  }
 	  catch (std::exception & e)
 	  {
 		cerr << "Server work thread caught " << e.what() 
 		  << endl;
-		er_count++;
+		er_count.inc();;
 	  };
 	};
   };
 };
 
-thread process;
-server_work_thread task;
-  
 class listener: public tcp_server_socket_factory
 {
+protected:
+  boost::shared_ptr<nrtb::thread> process;
+  boost::shared_ptr<server_work_thread> task;
+
 public:
   listener(const string & add, const int & back)
    : tcp_server_socket_factory(add, back) {};
   
   void on_accept()
   {
-	if (!process.is_running())
+	if (!process)
 	{
-	  task.last_inbound = 0;
-	  task.sock = connect_sock;
-	  process.start(task);
+	  task.reset(new server_work_thread);
+	  task->last_inbound = 0;
+	  task->sock = connect_sock;
+	  process.reset(new nrtb::thread);
+	  process->start(*(task.get()));
 	  cout << "server thread running." << endl;
 	}
 	else
@@ -112,37 +135,52 @@ int port_base = 12334;
 int main()
 {
   setup_global_logging("transceiver.log");
-  
-  //set up our port and address
-  boost::mt19937 rng;
-  rng.seed(time(0));
-  boost::uniform_int<> r(0,1000);
-  stringstream s;
-  s << address << port_base + r(rng);
-  address = s.str();
-  cout << "Using " << address << endl;
 
-  // kick off the listener thread.
-  listener server(address,5);
-  server.start_listen();
-  usleep(1e4);
-
-  // set up our sender
-  tcp_socket_p sock(new tcp_socket);
-  sock->connect(address);
-  linkt sender(sock);
-
-  // Let's send a few things.
-  for (int i=0; i<100; i++)
+  try
   {
-	linkt::out_ptr msg(new my_msg);
-	sender.send(msg);
-	cout << "Sent " << msg->msg_uid() << endl;
+	//set up our port and address
+	boost::mt19937 rng;
+	rng.seed(time(0));
+	boost::uniform_int<> r(0,1000);
+	stringstream s;
+	s << address << port_base + r(rng);
+	address = s.str();
+	cout << "Using " << address << endl;
+
+	// kick off the listener thread.
+	listener server(address,5);
+	server.start_listen();
 	usleep(1e4);
+
+	// set up our sender
+	tcp_socket_p sock(new tcp_socket);
+	sock->connect(address);
+	linkt sender(sock);
+
+	// Let's send a few things.
+	for (int i=0; i<100; i++)
+	{
+	  linkt::out_ptr msg(new my_msg);
+	  sender.send(msg);
+	  cout << "Sent " << msg->msg_uid() << endl;
+	  usleep(1e4);
+	};
+  }
+  catch (...)
+  {
+	cout << "exception caught during test." << endl;
+	er_count.inc();
   };
-  
-  server.stop_listen();
-  cout << "Listener shutdown complete." << endl;
-  usleep(5e5);
-  return er_count;
+
+  int faults = er_count(); 
+  if (faults)
+  {
+	cout << "========== ** There were " << faults 
+	  << "errors logged. =========" << endl; 
+  }
+  else
+	cout << "========= nrtb::transceiver test complete.=========" 
+	  << endl;
+
+  return faults;
 };

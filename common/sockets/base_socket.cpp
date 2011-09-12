@@ -606,7 +606,7 @@ void tcp_server_socket_factory::stop_listen()
   if (listening())
   {
 	// stop the listener thread
-	stop();
+	if (is_running()) stop();
 	// wait here until the thread stops.
 	if (is_running()) join();
 	try
@@ -620,7 +620,7 @@ void tcp_server_socket_factory::stop_listen()
 bool tcp_server_socket_factory::listening()
 {
 	bool running = is_running();
-	if (!running)
+/*	if (!running)
 	{
 		// check to be sure the thread did not die due to an error.
 		if (_last_thread_fault != 0)
@@ -630,7 +630,7 @@ bool tcp_server_socket_factory::listening()
 		  throw listen_terminated_exception();
 		};
 	};
-	return running;
+*/	return running;
 };
 
 unsigned short int tcp_server_socket_factory::backlog()
