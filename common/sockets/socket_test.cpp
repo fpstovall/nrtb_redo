@@ -26,8 +26,6 @@
 using namespace nrtb;
 using namespace std;
 
-typedef boost::shared_ptr<tcp_socket> sockp;
-
 class myserver: public tcp_server_socket_factory
 {
 public:
@@ -50,19 +48,18 @@ protected:
 	{
 		try
 		{
-			sockp c(connect_sock);
 			// just return what we've recieved.
-			string msg = c->getln();
-			c->put(msg);
+			string msg = connect_sock->getln();
+			connect_sock->put(msg);
 			// Close the socket.
-			c->close();
+			connect_sock->close();
 			// Update our hit count. 
 			hits++;
 		}
 		catch (base_exception & e)
 		{
 		  errors++;
-		  cerr << "Caught " << e.what() << endl;
+		  cerr << "server Caught " << e.what() << endl;
 		}
 		catch (...)
 		{
@@ -77,7 +74,7 @@ string transceiver(const string address, const string sendme)
   string returnme;
   tcp_socket sender;
   sender.connect(address);
-  sender.put(sendme);
+  sender.put(sendme);//cerr << "tc::msg sent" << endl;
   returnme = sender.getln();
   return returnme;
 };
@@ -121,7 +118,9 @@ int main()
 		<< endl;
 	  usleep(1000);
 	};
+cerr << "All messages sent\n" << endl;
 	test_server.stop_listen();
+cerr << "Server stopped" << endl;
 	if (test_server.listening())
 	{  
 	  er_count++;
@@ -152,6 +151,7 @@ int main()
   catch (tcp_socket::general_exception & e)
   {
 	  cout << "A tcp_socket exception was caught.\n" 
+		<< e.what() << endl 
 		<< e.comment() << endl;
   }
   catch (exception & e)
