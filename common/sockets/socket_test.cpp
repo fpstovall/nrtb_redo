@@ -51,8 +51,6 @@ protected:
 			// just return what we've recieved.
 			string msg = connect_sock->getln();
 			connect_sock->put(msg);
-			// Close the socket.
-			connect_sock->close();
 			// Update our hit count. 
 			hits++;
 		}
@@ -74,8 +72,9 @@ string transceiver(const string address, const string sendme)
   string returnme;
   tcp_socket sender;
   sender.connect(address);
-  sender.put(sendme);//cerr << "tc::msg sent" << endl;
+  sender.put(sendme);
   returnme = sender.getln();
+  sender.close();//cerr << "tc>> sock closed" << endl;
   return returnme;
 };
 
@@ -116,11 +115,9 @@ int main()
 	  cout << returned.substr(0,returned.size()-1) << ": " 
 		<< ((returned == checkme) ? "Passed" : "Failed")
 		<< endl;
-	  usleep(1000);
+//	  usleep(1000);
 	};
-cerr << "All messages sent\n" << endl;
 	test_server.stop_listen();
-cerr << "Server stopped" << endl;
 	if (test_server.listening())
 	{  
 	  er_count++;
@@ -148,10 +145,29 @@ cerr << "Server stopped" << endl;
 	  cout << "A bad_connect_exception was thrown.\n" 
 		<< e.comment() << endl;
   }
+  catch (tcp_socket::not_open_exception & e)
+  {
+	  cout << "A tcp not open exception was caught.\n" 
+		<< e.comment() << endl;
+  }
+  catch (tcp_socket::close_exception & e)
+  {
+	  cout << "A close_exception was caught.\n" 
+		<< e.comment() << endl;
+  }
+  catch (tcp_socket::overrun_exception & e)
+  {
+	  cout << "An overrun_exception was caught.\n" 
+		<< e.comment() << endl;
+  }
+  catch (tcp_socket::buffer_full_exception & e)
+  {
+	  cout << "A buffer_full_exception was caught.\n" 
+		<< e.comment() << endl;
+  }
   catch (tcp_socket::general_exception & e)
   {
 	  cout << "A tcp_socket exception was caught.\n" 
-		<< e.what() << endl 
 		<< e.comment() << endl;
   }
   catch (exception & e)
