@@ -75,7 +75,7 @@ namespace nrtb
 	   * Closes the socket and releases all mmemory associated with
 	   * this class.
 	   * ***********************************************************/
-	  ~transceiver();
+	  virtual ~transceiver();
 	  /**************************************************************
 	   * gets the next message from the socket. If no messages are 
 	   * ready, blocks util one arrives. 
@@ -86,7 +86,7 @@ namespace nrtb
 	   * sent_messages buffer in case it's needed for error recovery.
 	   * ***********************************************************/
 	  void send(outp sendme);
-	  /**q************************************************************
+	  /**************************************************************
 	   * Called by the data consumer when an inbound message was 
 	   * not valid in the current application context. msg_number
 	   * is the sequence number of the offending message.
@@ -171,7 +171,7 @@ transceiver<out,in,outp,inp>::~transceiver()
   Poco::Logger & log = Poco::Logger::get(logname);
   log.information("In ~transciever");
   // shutdown and release  the socket.
-  try {sock->close();} catch (...) {};
+  try {sock->close(); sock.reset(); } catch (...) {};
   // discard the sent messages list.
   sent_messages.clear();
   log.information("shutdown complete.");

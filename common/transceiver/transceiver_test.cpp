@@ -36,14 +36,19 @@ class safe_counter
 private:
   mutex data_lock;
   int er_count;
+
 public:
+  
   safe_counter() { er_count = 0; };
+
   ~safe_counter() {};
+
   void inc()
   {
 	scope_lock lock(data_lock);
 	er_count++;
   };
+
   int operator ()()
   {
 	scope_lock lock(data_lock);
@@ -59,6 +64,12 @@ public:
   
   tcp_socket_p sock;
   unsigned long long last_inbound;
+  
+  ~server_work_thread()
+  {
+	cout << "Destructing server_work_thread" << endl;
+	sock.reset();
+  };
   
   void run()
   {
@@ -108,6 +119,12 @@ protected:
 public:
   listener(const string & add, const int & back)
    : tcp_server_socket_factory(add, back) {};
+  ~listener()
+  {
+	cout << "Destructing listener" << endl;
+	process.reset();
+	task.reset();
+  };
   
   void on_accept()
   {
