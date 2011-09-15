@@ -171,7 +171,13 @@ transceiver<out,in,outp,inp>::~transceiver()
   Poco::Logger & log = Poco::Logger::get(logname);
   log.information("In ~transciever");
   // shutdown and release  the socket.
-  try {sock->close(); sock.reset(); } catch (...) {};
+  try 
+  {
+	if (sock)
+	{
+	  sock.reset(); 
+	};
+  } catch (...) {};
   // discard the sent messages list.
   sent_messages.clear();
   log.information("shutdown complete.");
