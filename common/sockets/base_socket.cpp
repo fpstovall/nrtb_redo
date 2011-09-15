@@ -606,14 +606,9 @@ void tcp_server_socket_factory::stop_listen()
   if (listening())
   {
 	// stop the listener thread
-	if (is_running()) stop();
-	// wait here until the thread stops.
-	if (is_running()) join();
-	try
-	{ 
-	  if (listen_sock) close(listen_sock);
-	}
-	catch (...) {};
+	try { stop(); } catch (...) {};
+//	try { join(); } catch (...) {};
+	try { close(listen_sock); } catch (...) {};
   };
 };
 
