@@ -100,7 +100,7 @@ thread::thread(runnable & do_this)
 
 thread::~thread()
 {
-	stop();
+	try {stop(); } catch (...) {};
 };
 
 void thread::run()
@@ -305,10 +305,7 @@ mutex::mutex()
 
 mutex::~mutex()
 {
-	if (pthread_mutex_destroy(&mymid))
-	{
-		throw can_not_destruct_exception();
-	};
+	pthread_mutex_destroy(&mymid);
 };
 
 void mutex::lock()
@@ -356,10 +353,9 @@ cond_variable::~cond_variable()
 		if (!try_lock() || (waiting > 0))
 		{	
 			// not good, there are others waiting on us or we are locked.
-			can_not_destruct_exception e;
-			e.store(lexical_cast<string>(waiting));
 			unlock();
-			throw e;
+			cerr << "WARNING: there were " << waiting << 
+			  " threads queued in ~cond_variable." << endl; 
 		}
 		else
 		{
@@ -368,9 +364,9 @@ cond_variable::~cond_variable()
 		// unlock before we leave.
 		unlock();
 	}
-	catch (mutex::general_exception & e)
+	catch (...)
 	{
-		throw e;
+		cerr << "WARNING: there was an error in ~cond_variable." << endl;;
 	};
 };
 

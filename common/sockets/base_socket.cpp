@@ -103,8 +103,8 @@ tcp_socket::~tcp_socket()
 {	
 	if (close_on_destruct)
 	{
-		shutdown(mysock,SHUT_RDWR);
-		::close(mysock);
+		try {shutdown(mysock,SHUT_RDWR); } catch (...) {};
+		try {::close(mysock); } catch (...) {};
 		_status = sock_undef;
 	};
 };

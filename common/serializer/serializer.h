@@ -37,7 +37,7 @@ namespace nrtb
 	// constructor which sets the starting number.
 	serializer(unsigned long long start);
 	// NOP distructor for inheritance safety
-	~serializer();
+	virtual ~serializer();
 	// functor method, returns the next value in the sequence.
 	unsigned long long operator ()();
   private:
