@@ -1,4 +1,4 @@
-bz/***********************************************
+/***********************************************
  This file is part of the NRTB project (https://*launchpad.net/nrtb).
  
  NRTB is free software: you can redistribute it and/or modify
