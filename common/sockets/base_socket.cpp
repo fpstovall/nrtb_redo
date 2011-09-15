@@ -1,4 +1,4 @@
-/***********************************************
+bz/***********************************************
  This file is part of the NRTB project (https://*launchpad.net/nrtb).
  
  NRTB is free software: you can redistribute it and/or modify
@@ -583,7 +583,7 @@ tcp_server_socket_factory::tcp_server_socket_factory(
 tcp_server_socket_factory::~tcp_server_socket_factory()
 {
   // make sure we've stopped doing anything.
-  stop_listen();
+  try { stop_listen(); } catch (...) {};
 };
 
 void tcp_server_socket_factory::start_listen()
@@ -606,9 +606,14 @@ void tcp_server_socket_factory::stop_listen()
   if (listening())
   {
 	// stop the listener thread
-	try { stop(); } catch (...) {};
-//	try { join(); } catch (...) {};
-	try { close(listen_sock); } catch (...) {};
+	if (is_running()) stop();
+	// wait here until the thread stops.
+	if (is_running()) join();
+	try
+	{ 
+	  if (listen_sock) close(listen_sock);
+	}
+	catch (...) {};
   };
 };
 
