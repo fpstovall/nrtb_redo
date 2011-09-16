@@ -102,7 +102,7 @@ int main()
 	usleep(5e5);
 	
 	// Send test messages
-	for (int i = 0; i < 1000; i++)
+	for (int i = 0; i < 100; i++)
 	{
 	  stringstream msg;
 	  msg << "test message " << i << "\r";
@@ -115,10 +115,13 @@ int main()
 	  cout << returned.substr(0,returned.size()-1) << ": " 
 		<< ((returned == checkme) ? "Passed" : "Failed")
 		<< endl;
-//	  usleep(1000);
 	};
-	test_server.stop_listen();
-	if (test_server.listening())
+	usleep(1000);
+	try
+	{
+	  test_server.stop_listen();
+	}
+	catch (...)
 	{  
 	  er_count++;
 	  cout << "Server failed to stop. " << endl;
@@ -176,11 +179,11 @@ int main()
   };
 
   // final check.
-  if (test_server.hits != 1000)
+  if (test_server.hits != 100)
   {
 	er_count++;
 	cout << "Server does not report the proper number of hits.\n"
-	  << "\tExpected 1000, got " << test_server.hits 
+	  << "\tExpected 100, got " << test_server.hits 
 	  << endl;
   };
   cout << "=========== tcp_socket test complete =============" << endl;
