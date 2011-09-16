@@ -30,7 +30,7 @@ socket_test:	base_socket.o socket_test.cpp
 
 base_socket.o:	base_socket.cpp base_socket.h Makefile
 	@rm -f base_socket.o
-	g++ -c -O3 base_socket.cpp -I ../include
+	g++ -c base_socket.cpp -I ../include
 
 clean:
 	@rm -vf *.o ../include/base_socket.h socket_test
