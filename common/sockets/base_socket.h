@@ -451,10 +451,8 @@ class tcp_server_socket_factory: private thread
 		 ** connection latency, so for most applications you'll want to queue
 		 ** the connection for processing by another thread.
 		 ** 
-		 ** In either case, be sure the application deletes the tcp_socket object 
-		 ** at connect_sock when it's done with it, as you can be sure of memory
-		 ** leaks if you don't. tcp_server_socket_factory never deletes any 
-		 ** tcp_socket object it created.
+		 ** on_accept() should return true to contine processing, or false 
+		 ** to force a shutdown of the listener.
 		 ** 
 		 ** WARNING: While this class attempts to respect the integrity of any code
 		 ** placed in on_accept(), you must be aware that it may be cancelled 
@@ -467,7 +465,7 @@ class tcp_server_socket_factory: private thread
 		 ** guidelines could result in program deadlocks should on_accept be 
 		 ** cancelled while holding a resource lock.
 		 **/
-		virtual void on_accept() = 0;
+		virtual bool on_accept() = 0;
 		
 	public:
 

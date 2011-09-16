@@ -686,16 +686,16 @@ void tcp_server_socket_factory::run()
 		// accept returned an error.
 		switch (errno) 
 		{
-			case ENETDOWN :
+//			case ENETDOWN :
 			case EPROTO :
-			case ENOPROTOOPT :
+//			case ENOPROTOOPT :
 			case EHOSTDOWN :
-			case ENONET :
+//			case ENONET :
 			case EHOSTUNREACH :
-			case EOPNOTSUPP :
-			case ENETUNREACH :
+//			case EOPNOTSUPP :
+//			case ENETUNREACH :
 			case EAGAIN :
-			case EPERM :
+//			case EPERM :
 			case ECONNABORTED :
 				{
 				  good_connect = false;
@@ -718,7 +718,7 @@ void tcp_server_socket_factory::run()
 		// make the thread easily cancelable.
 		set_cancel_anytime();
 		// call on_accept
-		on_accept();
+		go = on_accept();
 		// set back to cancel_deferred.
 		set_deferred_cancel();
 		// release our claim to the new socket
@@ -727,8 +727,8 @@ void tcp_server_socket_factory::run()
 	  // are we okay to proceed?
 	  if (!go)
 	  {
-		  close(listen_sock);
-		  go = false;
+		  if (listen_sock) close(listen_sock);
+		  exit(0);
 	  };
 	}; // while go;
   }
@@ -739,7 +739,8 @@ void tcp_server_socket_factory::run()
 	* to let the world know that we don't know what killed us.
 	*/
 	_last_thread_fault = -1;
-	try {close(listen_sock);} catch(...) {};
+	if (listen_sock) close(listen_sock);
+	exit(0);
   };
 };
 

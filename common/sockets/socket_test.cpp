@@ -44,7 +44,7 @@ public:
 
 protected:
 	// on_accept() is called on each connection.
-	void on_accept()
+	bool on_accept()
 	{
 		try
 		{
@@ -64,6 +64,7 @@ protected:
 		  errors++;
 		  cerr << "Unexpected error in on_accept()" << endl;
 		};
+		return true;
 	};
 };
 
