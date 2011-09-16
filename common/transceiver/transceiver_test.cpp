@@ -58,7 +58,7 @@ public:
 
 safe_counter er_count;
 
-class server_work_thread: public runnable
+class server_work_thread: public thread
 {
 public:
   
@@ -82,6 +82,7 @@ public:
 		linkt::out_ptr inbound = link.get();
 		last_inbound = inbound->msg_uid();
 		cout << "\tReceived #" << last_inbound << endl;
+		link.send(inbound);
 		if (last_inbound == 99)
 		{
 		  cout << "Receiver thread closing." << endl;
@@ -113,7 +114,6 @@ public:
 class listener: public tcp_server_socket_factory
 {
 protected:
-  boost::shared_ptr<nrtb::thread> process;
   boost::shared_ptr<server_work_thread> task;
 
 public:
@@ -122,19 +122,17 @@ public:
   ~listener()
   {
 	cout << "Destructing listener" << endl;
-	process.reset();
 	task.reset();
   };
   
   void on_accept()
   {
-	if (!process)
+	if (!task)
 	{
 	  task.reset(new server_work_thread);
 	  task->last_inbound = 0;
 	  task->sock = connect_sock;
-	  process.reset(new nrtb::thread);
-	  process->start(*(task.get()));
+	  task->start(*(task.get()));
 	  cout << "server thread running." << endl;
 	}
 	else
@@ -180,8 +178,10 @@ int main()
 	  linkt::out_ptr msg(new my_msg);
 	  sender.send(msg);
 	  cout << "Sent " << msg->msg_uid() << endl;
-	  usleep(1e4);
+	  msg = sender.get();
+	  cout << "Got back " << msg->msg_uid() << endl;
 	};
+	usleep(1e4);
   }
   catch (...)
   {
