@@ -609,11 +609,11 @@ void tcp_server_socket_factory::stop_listen()
 	if (is_running()) stop();
 	// wait here until the thread stops.
 	if (is_running()) join();
-	try
-	{ 
-	  if (listen_sock) close(listen_sock);
-	}
-	catch (...) {};
+//	try
+//	{ 
+//	  if (listen_sock) close(listen_sock);
+//	}
+//	catch (...) {};
   };
 };
 
@@ -638,6 +638,12 @@ unsigned short int tcp_server_socket_factory::backlog()
 	return _backlog;
 };
 
+//socket closer to use with exit trap.
+void closeme(void * sock)
+{
+  ::close(*(static_cast<int*>(sock)));
+};
+
 void tcp_server_socket_factory::run()
 {
   /* Put this entire thing in a try block to protect the application. 
@@ -646,6 +652,9 @@ void tcp_server_socket_factory::run()
 	* application instead of just this
 	* thread.
 	*/
+  int listen_sock;
+  // make sure the listener is closed when we exit.
+  pthread_cleanup_push(closeme, (void*) &listen_sock);
   try
   {
 	bool go = true;
@@ -706,6 +715,7 @@ void tcp_server_socket_factory::run()
 				  // for any other error, we're going to shutdown the 
 				  // this listener thread.
 				  go = false;
+				  good_connect = false;
 				  _last_thread_fault = errno;
 				  break;
 				};
@@ -724,12 +734,6 @@ void tcp_server_socket_factory::run()
 		// release our claim to the new socket
 		connect_sock.reset();
 	  };
-	  // are we okay to proceed?
-	  if (!go)
-	  {
-		  if (listen_sock) close(listen_sock);
-		  exit(0);
-	  };
 	}; // while go;
   }
   catch (...)
@@ -739,9 +743,8 @@ void tcp_server_socket_factory::run()
 	* to let the world know that we don't know what killed us.
 	*/
 	_last_thread_fault = -1;
-	if (listen_sock) close(listen_sock);
-	exit(0);
   };
+  pthread_cleanup_pop(0);
 };
 
 } // namespace nrtb

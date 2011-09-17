@@ -418,7 +418,6 @@ class tcp_server_socket_factory: private thread
 
 	private:
 	
-		int listen_sock;
 		int _last_thread_fault;
 		// Provides the listener thread.
 		void run();
