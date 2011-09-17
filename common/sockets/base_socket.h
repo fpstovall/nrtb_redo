@@ -373,7 +373,7 @@ class tcp_socket
 };
 
 /// smart pointer for use with tcp_sockets
-typedef boost::shared_ptr<nrtb::tcp_socket> tcp_socketp;
+typedef boost::shared_ptr<nrtb::tcp_socket> tcp_socket_p;
 
 /** Abstract "listener" TCP/IP socket for servers. 
  ** 
@@ -405,12 +405,11 @@ typedef boost::shared_ptr<nrtb::tcp_socket> tcp_socketp;
  ** the stop_listen() method, which will return when as soon any current calls
  ** to on_accept() complete.
  ** 
- ** --WARNING--- This class is a tcp_socket factory in that a new tcp_socket is 
- ** created for every connection. It is the responsibility of the host 
- ** application to delete these when they are no longer needed, either in the 
- ** overridden on_accept() method or (more likely) later in the processing flow
- ** when the transaction is complete.
- ** 
+ ** --NOTE--- This class is a tcp_socket_p factory in that a new one 
+ ** is created for each request received. As the tcp_socket_p is a 
+ ** smart pointer, the allocated socket will be closed and deallocated 
+ ** when the last reference to the socket goes out of scope automatically.
+ **
  ** Descendent classes must override on_accept() to provide the necessary
  ** connection handling. See the documentation on on_accept for more details.
  **/
@@ -419,13 +418,7 @@ class tcp_server_socket_factory: private thread
 
 	private:
 	
-		int listen_sock;
-		bool in_on_accept;
-		bool okay_to_continue;
-		int thread_return;
 		int _last_thread_fault;
-		mutex thread_data;
-
 		// Provides the listener thread.
 		void run();
 		
@@ -439,15 +432,12 @@ class tcp_server_socket_factory: private thread
 		 ** only safe to use/manipulate after entry of the method on_accept(); 
 		 ** at any other time this pointer may be altered without notice. 
 		 ** 
-		 ** At entry to on_accept() this will point to a valid base_sock 
-		 ** object. It is up to the application to delete this object when
-		 ** it is done with it; server_sock will not take any actions with or 
-		 ** on the object pointed to by listen_sock once on_accept() is called.
-		 ** However, once on_accept() has returned, server_sock will create 
-		 ** another new base_sock and store it's address here on the next 
-		 ** connection.
+		 ** At entry to on_accept() this will point to a valid tcp_socket_p
+		 ** smart pointer. As with all smart pointers, the object it 
+		 ** points to will be deleted automatically when the last 
+		 ** reference to it goes out of scope. 
 		 **/
-		tcp_socket * connect_sock;
+		tcp_socket_p connect_sock;
 
 		/** Abstract method to process connections. An on_accept() call is 
 		 ** made on every connection accepted immediately after constructing a 
@@ -460,10 +450,8 @@ class tcp_server_socket_factory: private thread
 		 ** connection latency, so for most applications you'll want to queue
 		 ** the connection for processing by another thread.
 		 ** 
-		 ** In either case, be sure the application deletes the tcp_socket object 
-		 ** at connect_sock when it's done with it, as you can be sure of memory
-		 ** leaks if you don't. tcp_server_socket_factory never deletes any 
-		 ** tcp_socket object it created.
+		 ** on_accept() should return true to contine processing, or false 
+		 ** to force a shutdown of the listener.
 		 ** 
 		 ** WARNING: While this class attempts to respect the integrity of any code
 		 ** placed in on_accept(), you must be aware that it may be cancelled 
@@ -476,7 +464,7 @@ class tcp_server_socket_factory: private thread
 		 ** guidelines could result in program deadlocks should on_accept be 
 		 ** cancelled while holding a resource lock.
 		 **/
-		virtual void on_accept() = 0;
+		virtual bool on_accept() = 0;
 		
 	public:
 

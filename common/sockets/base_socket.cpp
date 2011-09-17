@@ -25,6 +25,9 @@
 #include <netdb.h>
 #include <boost/lexical_cast.hpp>
 
+// testing
+#include <iostream>
+
 using boost::lexical_cast;
 using std::string;
 
@@ -100,8 +103,8 @@ tcp_socket::~tcp_socket()
 {	
 	if (close_on_destruct)
 	{
-		shutdown(mysock,SHUT_RDWR);
-		::close(mysock);
+		try {shutdown(mysock,SHUT_RDWR); } catch (...) {};
+		try {::close(mysock); } catch (...) {};
 		_status = sock_undef;
 	};
 };
@@ -569,32 +572,18 @@ string tcp_socket::get_remote_address()
 
 
 tcp_server_socket_factory::tcp_server_socket_factory(
-		const string & address, const unsigned short int & backlog)
+		const string & address, const unsigned short int & backlog = 5)
 {
 	// does not attempt to set up the connection initially.
 	_address = address;
 	_backlog = backlog;
 	_last_thread_fault = 0;
-	thread_return = 0;
-	in_on_accept = false;
-	connect_sock = 0;
 };
 
 tcp_server_socket_factory::~tcp_server_socket_factory()
 {
-	// are we current handling requests?
-	if (is_running())
-	{
-		// yes, this is -rude- shutdown of the listening thread.
-		// Get over it.
-		stop();
-		try
-		{ 
-		  if (listen_sock)
-			close(listen_sock);
-		}
-		catch (...) {};
-	};
+  // make sure we've stopped doing anything.
+  try { stop_listen(); } catch (...) {};
 };
 
 void tcp_server_socket_factory::start_listen()
@@ -602,74 +591,46 @@ void tcp_server_socket_factory::start_listen()
 	// take no action if the listen thread is already running.
 	if (!is_running())
 	{
-		// load up the control flags
-		in_on_accept = false;
-		okay_to_continue = true;
-		thread_return = 0;
 		// start it up!
-		detach();
 		start();
+	}
+	else
+	{
+	  throw already_running_exception();
 	};
 };
 
 void tcp_server_socket_factory::stop_listen()
 {
-	// take action only if the listen thread is running.
-	if (is_running())
-	{
-		bool okay_to_kill = false;
-		// set the flag that indicates the thread should not process any more.
-		{
-			scope_lock lock(thread_data);
-			bool okay_to_kill = !in_on_accept;
-		}
-		// close the listener socket.
-		close(listen_sock);
-		// is is okay to cancel the thread?
-		if (!okay_to_kill)
-		{
-			// we'll allow up to 30 seconds for on_accept() to finish.
-			time_t endtime = time(NULL);
-			endtime += 30;
-			bool done = false;
-			while (!done)
-			{
-				// wait a second...
-				sleep(1);
-				// check boundaries.
-				// -- are we out of on_accept()?
-				{
-				  scope_lock lock(thread_data);
-				  done = !in_on_accept;
-				}
-				// -- are we out of time?
-				okay_to_kill = done;
-				if (time(NULL) > endtime) { done = true; };
-			};
-		};
-		// kill the listener thread.
-		if (!okay_to_kill) { throw on_accept_bound_exception(); };
-		stop();
-	};
+  // take action only if the listen thread is running.
+  if (listening())
+  {
+	// stop the listener thread
+	if (is_running()) stop();
+	// wait here until the thread stops.
+	if (is_running()) join();
+//	try
+//	{ 
+//	  if (listen_sock) close(listen_sock);
+//	}
+//	catch (...) {};
+  };
 };
 
 bool tcp_server_socket_factory::listening()
 {
 	bool running = is_running();
-	if (!running)
+/*	if (!running)
 	{
 		// check to be sure the thread did not die due to an error.
-		if (thread_return != 0)
+		if (_last_thread_fault != 0)
 		{
-			// Clear the error state before throwing an exception.
-			_last_thread_fault = thread_return;
-			thread_return = 0;
-			// if thread_return was non-zero, it is assumed the thread died an
-			// evil and useless death. Scream in anger!
-			throw listen_terminated_exception();
+		  // if thread_return was non-zero, it is assumed the thread died an
+		  // evil and useless death. Scream in anger!
+		  throw listen_terminated_exception();
 		};
 	};
-	return running;
+*/	return running;
 };
 
 unsigned short int tcp_server_socket_factory::backlog()
@@ -677,149 +638,114 @@ unsigned short int tcp_server_socket_factory::backlog()
 	return _backlog;
 };
 
+//socket closer to use with exit trap.
+void closeme(void * sock)
+{
+  std::cerr << "in thread cleanup sock closer" << std::endl;
+  int & socket = *(static_cast<int*>(sock));
+  ::close(socket);
+  std::cerr << "socker closer done." << std::endl;
+};
+
 void tcp_server_socket_factory::run()
 {
-	/* Put this entire thing in a try block to protect the application. 
-	 * Without this, an untrapped exception thrown here or in the user supplied
-	 * on_accept() method would abort the entire application instead of just this
-	 * thread.
-	 */
+  /* Put this entire thing in a try block to protect the application. 
+	* Without this, an untrapped exception thrown here or in the 
+	* user supplied on_accept() method would abort the entire 
+	* application instead of just this
+	* thread.
+	*/
+  int listen_sock;
+  // make sure the listener is closed when we exit.
+  pthread_cleanup_push(closeme, (void*) &listen_sock);
+  try
+  {
+	bool go = true;
+	// set up our listening socket.
+	listen_sock = socket(AF_INET,SOCK_STREAM,0);
+	sockaddr_in myaddr;
 	try
 	{
-		bool go = true;
-		// set up our listening socket.
-		listen_sock = socket(AF_INET,SOCK_STREAM,0);
-		sockaddr_in myaddr;
-		try
-		{
-			myaddr = tcp_socket::str_to_sockaddr(_address);
-		}
-		catch (...)
-		{
-			// probably a tcp_socket::bad_address_exception, 
-			// but any reason will do.
-			go = false;
-		};
-		if (bind(listen_sock,(sockaddr *) &myaddr,sizeof(myaddr)))
-		{
-			// bind did not work.
-			go = false;
-		};	
-		if (listen(listen_sock,_backlog))
-		{
-			// listen failed in some way.. I don't care which.
-			go = false;
-		};
-		// processing loop
-		while (go)
-		{
-			// are we okay to proceed?
-			{
-			  scope_lock lock(thread_data);
-			  in_on_accept = false;
-			  go = okay_to_continue;
-			}
-			if (!go)
-			{
-				close(listen_sock);
-				exit(0);
-			};
-			// accept a new connection
-			bool good_connect = true;
-			int new_conn = accept(listen_sock,NULL,NULL);
-			// validate the accept return value.
-			if (new_conn == -1)
-			{
-				// accept returned an error.
-				switch (errno) 
-				{
-					case ENETDOWN :
-					case EPROTO :
-					case ENOPROTOOPT :
-					case EHOSTDOWN :
-					case ENONET :
-					case EHOSTUNREACH :
-					case EOPNOTSUPP :
-					case ENETUNREACH :
-					case EAGAIN :
-//					case EWOULDBLOCK : 
-					case EPERM :
-					case ECONNABORTED :
-						{
-							good_connect = false;
-							break;
-						};
-					default : 
-						{	
-							// for any other error, we're going to shutdown the 
-							// this listener thread.
-							{
-							  scope_lock lock(thread_data);
-							  // If the error was caused by an attempt to close the 
-							  // socket and shutdown the thread, don't store an
-							  // error flag.
-							  if (okay_to_continue)
-							  {
-								  thread_return = errno;
-							  }
-							  else
-							  {
-								  thread_return = 0;
-							  };
-							};
-							exit(errno);
-							break;
-						};
-				};  // switch (errno)
-			}; // error thrown by accept.
-			// create connect_sock
-			connect_sock = new tcp_socket(new_conn);
-			// are we okay to proceed?
-			{
-			  scope_lock lock(thread_data);
-			  go = okay_to_continue;
-			  // if we are go, then we'll be going to on_accept next.
-			  // Therefore, this equality makes sense if you hold your
-			  // head just so. :-P
-			  in_on_accept = go;
-			}
-			if (!go)
-			{
-				delete connect_sock;
-				close(listen_sock);
-				exit(0);
-			};
-			// only call on_accept() if we have a good connection.
-			if (good_connect)
-			{
-				// make the thread easily cancelable.
-				set_cancel_anytime();
-				// call on_accept
-				on_accept();
-				// set back to cancel_deferred.
-				set_deferred_cancel();
-			};
-		}; // while go;
-		// if we get here then things are not going well...
-		{
-		  scope_lock lock(thread_data);
-		  thread_return = -2;
-		}
-		close(listen_sock);
-		exit(-2);
+		myaddr = tcp_socket::str_to_sockaddr(_address);
 	}
 	catch (...)
 	{
-		/* an untrapped exception was thrown by someone in this thread.
-		 * We'll shutdown this thread and put -1 in the thread_return field
-		 * to let the world know that we don't know what killed us.
-		 */
-		thread_data.lock();
-		thread_return = -1;
-		thread_data.unlock();
-		close(listen_sock);
-		exit(-1);
+		// probably a tcp_socket::bad_address_exception, 
+		// but any reason will do.
+		go = false;
 	};
+	if (bind(listen_sock,(sockaddr *) &myaddr,sizeof(myaddr)))
+	{
+		// bind did not work.
+		go = false;
+	};	
+	if (listen(listen_sock,_backlog))
+	{
+		// listen failed in some way.. I don't care which.
+		go = false;
+	};
+	// processing loop
+	while (go)
+	{
+	  // accept a new connection
+	  bool good_connect = true;
+	  int new_conn = accept(listen_sock,NULL,NULL);
+	  // validate the accept return value.
+	  if (new_conn == -1)
+	  {
+		// accept returned an error.
+		switch (errno) 
+		{
+//			case ENETDOWN :
+			case EPROTO :
+//			case ENOPROTOOPT :
+			case EHOSTDOWN :
+//			case ENONET :
+			case EHOSTUNREACH :
+//			case EOPNOTSUPP :
+//			case ENETUNREACH :
+			case EAGAIN :
+//			case EPERM :
+			case ECONNABORTED :
+				{
+				  good_connect = false;
+				  break;
+				};
+			default : 
+				{	
+				  // for any other error, we're going to shutdown the 
+				  // this listener thread.
+				  go = false;
+				  good_connect = false;
+				  _last_thread_fault = errno;
+				  break;
+				};
+		};  // switch (errno)
+	  }; // error thrown by accept.
+	  if (good_connect)
+	  {
+		// create connect_sock
+		connect_sock.reset(new tcp_socket(new_conn));
+		// make the thread easily cancelable.
+		set_cancel_anytime();
+		// call on_accept
+		go = on_accept();
+		// set back to cancel_deferred.
+		set_deferred_cancel();
+		// release our claim to the new socket
+		connect_sock.reset();
+	  };
+	}; // while go;
+  }
+  catch (...)
+  {
+	/* an untrapped exception was thrown by someone in this thread.
+	* We'll shutdown this thread and put -1 in the thread_return field
+	* to let the world know that we don't know what killed us.
+	*/
+	_last_thread_fault = -1;
+  };
+  pthread_cleanup_pop(0);
 };
 
 } // namespace nrtb

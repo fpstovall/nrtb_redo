@@ -24,7 +24,7 @@ lib:	socket_test
 
 socket_test:	base_socket.o socket_test.cpp
 	@rm -f socket_test
-	g++ -c socket_test.cpp -I ../include
+	g++ -c -O3 socket_test.cpp -I ../include
 	g++ -o socket_test socket_test.o base_socket.o ../obj/hires_timer.o ../obj/common.o ../obj/base_thread.o -lpthread 
 
 

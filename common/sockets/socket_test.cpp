@@ -26,8 +26,6 @@
 using namespace nrtb;
 using namespace std;
 
-typedef boost::shared_ptr<tcp_socket> sockp;
-
 class myserver: public tcp_server_socket_factory
 {
 public:
@@ -46,29 +44,30 @@ public:
 
 protected:
 	// on_accept() is called on each connection.
-	void on_accept()
+	bool on_accept()
 	{
 		try
 		{
-			sockp c(connect_sock);
 			// just return what we've recieved.
-			string msg = c->getln();
-			c->put(msg);
-			// Close the socket.
-			c->close();
+			string msg = connect_sock->getln();
+			connect_sock->put(msg);
 			// Update our hit count. 
 			hits++;
 		}
 		catch (base_exception & e)
 		{
 		  errors++;
-		  cerr << "Caught " << e.what() << endl;
+		  cerr << "server Caught " << e.what() << endl;
 		}
 		catch (...)
 		{
 		  errors++;
 		  cerr << "Unexpected error in on_accept()" << endl;
 		};
+		if (hits > 99) 
+		  return false;
+		else
+		  return true;
 	};
 };
 
@@ -79,6 +78,7 @@ string transceiver(const string address, const string sendme)
   sender.connect(address);
   sender.put(sendme);
   returnme = sender.getln();
+  sender.close();//cerr << "tc>> sock closed" << endl;
   return returnme;
 };
 
@@ -106,7 +106,7 @@ int main()
 	usleep(5e5);
 	
 	// Send test messages
-	for (int i = 0; i < 1000; i++)
+	for (int i = 0; i < 100; i++)
 	{
 	  stringstream msg;
 	  msg << "test message " << i << "\r";
@@ -119,13 +119,6 @@ int main()
 	  cout << returned.substr(0,returned.size()-1) << ": " 
 		<< ((returned == checkme) ? "Passed" : "Failed")
 		<< endl;
-	  usleep(1000);
-	};
-	test_server.stop_listen();
-	if (test_server.listening())
-	{  
-	  er_count++;
-	  cout << "Server failed to stop. " << endl;
 	};
   }
   catch (myserver::bind_failure_exception)
@@ -149,6 +142,26 @@ int main()
 	  cout << "A bad_connect_exception was thrown.\n" 
 		<< e.comment() << endl;
   }
+  catch (tcp_socket::not_open_exception & e)
+  {
+	  cout << "A tcp not open exception was caught.\n" 
+		<< e.comment() << endl;
+  }
+  catch (tcp_socket::close_exception & e)
+  {
+	  cout << "A close_exception was caught.\n" 
+		<< e.comment() << endl;
+  }
+  catch (tcp_socket::overrun_exception & e)
+  {
+	  cout << "An overrun_exception was caught.\n" 
+		<< e.comment() << endl;
+  }
+  catch (tcp_socket::buffer_full_exception & e)
+  {
+	  cout << "A buffer_full_exception was caught.\n" 
+		<< e.comment() << endl;
+  }
   catch (tcp_socket::general_exception & e)
   {
 	  cout << "A tcp_socket exception was caught.\n" 
@@ -160,11 +173,11 @@ int main()
   };
 
   // final check.
-  if (test_server.hits != 1000)
+  if (test_server.hits != 100)
   {
 	er_count++;
 	cout << "Server does not report the proper number of hits.\n"
-	  << "\tExpected 1000, got " << test_server.hits 
+	  << "\tExpected 100, got " << test_server.hits 
 	  << endl;
   };
   cout << "=========== tcp_socket test complete =============" << endl;
