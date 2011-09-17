@@ -125,7 +125,7 @@ public:
 	task.reset();
   };
   
-  void on_accept()
+  bool on_accept()
   {
 	if (!task)
 	{
@@ -134,6 +134,8 @@ public:
 	  task->sock = connect_sock;
 	  task->start(*(task.get()));
 	  cout << "server thread running." << endl;
+	  // shutdown the listener thead.. our work is done here.
+	  return false;
 	}
 	else
 	{
