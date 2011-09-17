@@ -64,7 +64,10 @@ protected:
 		  errors++;
 		  cerr << "Unexpected error in on_accept()" << endl;
 		};
-		return true;
+		if (hits > 99) 
+		  return false;
+		else
+		  return true;
 	};
 };
 
@@ -116,16 +119,6 @@ int main()
 	  cout << returned.substr(0,returned.size()-1) << ": " 
 		<< ((returned == checkme) ? "Passed" : "Failed")
 		<< endl;
-	};
-	usleep(1000);
-	try
-	{
-	  test_server.stop_listen();
-	}
-	catch (...)
-	{  
-	  er_count++;
-	  cout << "Server failed to stop. " << endl;
 	};
   }
   catch (myserver::bind_failure_exception)

@@ -641,7 +641,10 @@ unsigned short int tcp_server_socket_factory::backlog()
 //socket closer to use with exit trap.
 void closeme(void * sock)
 {
-  ::close(*(static_cast<int*>(sock)));
+  std::cerr << "in thread cleanup sock closer" << std::endl;
+  int & socket = *(static_cast<int*>(sock));
+  ::close(socket);
+  std::cerr << "socker closer done." << std::endl;
 };
 
 void tcp_server_socket_factory::run()
@@ -686,9 +689,7 @@ void tcp_server_socket_factory::run()
 	{
 	  // accept a new connection
 	  bool good_connect = true;
-	  set_cancel_anytime();
 	  int new_conn = accept(listen_sock,NULL,NULL);
-	  set_deferred_cancel();
 	  // validate the accept return value.
 	  if (new_conn == -1)
 	  {

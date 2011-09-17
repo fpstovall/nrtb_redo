@@ -24,7 +24,7 @@ lib:	thread_test
 
 base_thread.o:	base_thread.cpp base_thread.h Makefile
 	@rm -f base_thread.o
-	g++ -c -O1 base_thread.cpp -I ../include
+	g++ -c -O3 base_thread.cpp -I ../include
 
 thread_test:	base_thread.o thread_test.cpp
 	@rm -f thread_test
