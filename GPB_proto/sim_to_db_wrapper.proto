@@ -18,10 +18,10 @@ message sim_to_db {
                                   //  for each message on a channel.
   // all the below messages are defined in 
   // the files included above.
-  repeated message_ack ack = 2;
-  repeated message_nak nak = 3;
-  repeated tq_data quanta_results = 4;
-  repeated sim_setup_data = 5
-  repeated sim_termination_data = 6
-  repeated db_request_sim_stop = 7
+  optional message_ack ack = 2;
+  optional message_nak nak = 3;
+  optional tq_data quanta_results = 4;
+  optional sim_setup_data sim_setup = 5;
+  optional sim_termination_data sim_end = 6;
+  optional db_request_sim_stop db_abort = 7;
 }

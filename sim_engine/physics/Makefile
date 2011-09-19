@@ -18,13 +18,15 @@
 
 lib: ../lib/nrtb_physics.a
 
-../lib/nrtb_physics.a:
-	@cd ../../common; make 
+../lib/nrtb_physics.a: ../../commmon/lib.nrtb_common.a
 	@echo "============= building physics ==============="
 	@make action=lib doit
 	@ar -r ../lib/nrtb_physics.a ./obj/*.o
 	@cp -v ./include/* ../include
 	@echo "============= physics complete ==============="
+
+../../commmon/lib.nrtb_common.a:
+	@cd ../../common; make
 
 modules:
 	@echo "============= building physics modules ==============="
@@ -33,12 +35,11 @@ modules:
 
 clean:
 	@echo "============= cleaning physics ==============="
-	@rm -fv ../lib/nrtb_physics.a
 	@cd include; for file in *; do rm -fv ../include/$$file; done
 	@make action=clean doit
 	@rm -fv ./obj/* ./lib/* ./include/*
 	@echo "========== physics cleanup complete ==========="
 
 doit:
-	@cd abstract_effector; make ${action}
-	@cd point_mass; make ${action}
+#	@cd abstract_effector; make ${action}
+#	@cd point_mass; make ${action}
