@@ -1,0 +1,29 @@
+// Messages used to get a listing of available simulations from 
+// the data broker.
+//
+// This file released under the GPL 3.0 license.
+// 
+// Note: these are never sent bare.. they are always payloads 
+// 	in a channel wrapper message.
+
+package nrtb_msg;
+
+message vis_get_sim_listing {
+  optional string name = 1;			// may include sql wild-cards
+  optional string start_date = 2;	// ISO SQL style date
+  optional string end_date = 3; 	// ISO SQL style date
+  optional uint32 max_count = 4;	// max number to return
+}
+
+message db_sim_record {
+  required uint32 uid = 1;		// simulation UID.
+  required string name = 2;		// human readable name 
+  optional uint32 quantas = 3;	// number of time quantas available.
+  optional bool inprogress = 4;	// true if the sim is still running
+  optional string started = 5;	// ISO datetime the sim started
+  optional string ended = 6;	// ISO datetime the sim ended
+}
+
+message db_sim_listing {
+  repeated db_sim_record sim_list = 1; // available sims.
+}

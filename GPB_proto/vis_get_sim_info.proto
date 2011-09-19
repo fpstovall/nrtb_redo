@@ -1,0 +1,40 @@
+// Messages used by the visualization client to request 
+// information on a specific simulation from the data broker
+//
+// This file released under the GPL 3.0 license.
+// 
+// Note: these are never sent bare.. they are always payloads 
+// 	in a channel wrapper message.
+
+import "physics_common.proto";
+
+package nrtb_msg;
+
+// this message must be sent from the visualization to databroker
+// to request data on a specific simulation.
+message vis_get_sim_info {
+  required uint32 sim_uid = 1;		// the uid for the sim
+}
+
+// this record holds invidual object information
+message vis_obj_record {
+  required uint32 obj_uid = 1;
+  required uint32 obj_type = 2;
+  optional string obj_name = 3;
+  required location_data postion = 4;
+  required velocity_data velocity = 5;
+}
+
+// This message is sent from the databroker to visualization
+// in reponse to a vis_get_sim_info message.
+message db_sim_info {
+  required uint32 sim_uid = 1;
+  optional string start = 2;
+  optional string end = 3;
+  optional uint32 length = 4;
+  optional uint32 quanta_ms = 5;
+  optional uint32 bot_count = 6;
+  optional float avg_cook_ms = 7;
+  optional float avg_quanta_ms = 8;
+  repeated vis_obj_record objects = 9;
+}

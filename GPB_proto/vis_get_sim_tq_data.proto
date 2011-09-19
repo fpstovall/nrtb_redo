@@ -1,0 +1,24 @@
+// Messages to request and send time quanta updates from the 
+// databroker to a visualization client.
+//
+// This file released under the GPL 3.0 license.
+// 
+// Note: these are never sent bare.. they are always payloads 
+// 	in a channel wrapper message.
+
+package nrtb_msg;
+
+import "sim_obj_tq_update.proto";
+
+// This message is sent by a visualizattion client to request a 
+// time quanta or a  block of time quanta data from the databroker.
+message vis_tq_request {
+  required uint32 start_tq = 1;
+  optional uint32 end_tq = 2;
+}
+
+// This message is sent by databroker to a visualization client
+// in response to a vis_tq_request message.
+message db_tq_response {
+  repeated tq_data tq_record = 1;
+}

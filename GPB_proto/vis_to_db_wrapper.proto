@@ -1,0 +1,35 @@
+// Channel wrapper for sim engine to data broker messages.
+//
+// Rick Stovall, 2009-03-18
+//
+// This file released under the GPL 3.0 license.
+// 
+// Note: The message defined here is a "channel wrapper", a container for 
+//  all messages between the simulation engine and the data broker.
+
+package nrtb_msg;
+
+import "ack_nak.proto";
+import "sim_obj_tq_update.proto";
+import "vis_management.proto";
+import "vis_get_listing.proto";
+import "vis_get_sim_info.proto";
+import "vis_get_sim_tq_data.proto";
+
+message vis_to_db {
+  required uint32 msg_uid = 1;    // the msg_uid must be unique for 
+                                  //  for each message on a channel.
+  // all the below messages are defined in 
+  // the files included above.
+  optional message_ack ack = 2;
+  optional message_nak nak = 3;
+  optional vis_init init = 4;
+  optional vis_end done = 5;
+  optional db_cant_continue db_abort = 6;
+  optional vis_get_sim_listing request_sims = 7;
+  optional db_sim_listing avail_sims = 8;
+  optional vis_get_sim_info request_sim_info = 9;
+  optional db_sim_info sim_info = 10;
+  optional vis_tq_request request_tq_data = 11;
+  optional db_tq_response tq_response = 12;
+}
