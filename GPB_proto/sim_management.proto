@@ -1,0 +1,39 @@
+// Messages for managing the conversation between the 
+// simulation engine and the databroker.
+//
+// This file released under the GPL 3.0 license.
+// 
+// Note: these are never sent bare.. they are always payloads 
+// 	in a channel wrapper message.
+
+package nrtb_msg;
+
+// This message is sent by the sim engine to notify the 
+// databroker that a new simulation is starting and to 
+// provide identity and simulation setup data.
+message sim_setup_data {
+  required string name = 1;			// simulation name
+  required string model = 2;		// filename of the model
+  required uint32 quanta_ms = 3;	// timestep in milliseconds
+  optional uint32 max_quantas = 4;	// time limit in quantas.
+  optional string started_by = 5;	// who requested this run
+}
+
+// This message is sent by the sim engine to notify the 
+// databroker that a simulation has ended and provide
+// termination and final run information.
+message sim_termination_data {
+  required uint32 last_quanta = 1;	// the index of the last quanta ran.
+  optional string reason = 2;		// human readable cause.
+  optional uint32 error_code = 3;		// If zero, normal termination
+  optional float avg_cook_ms = 4;	// average machine time per quanta.
+  optional float avg_quanta_ms = 5;	// average overall time per quanta.
+}
+
+// This message is sent by the databroker to notify 
+// sim engine that there is some problem and it can not 
+// continue.
+message db_request_sim_stop {
+  required bool data_lost = 1;		// true if data has been lost
+  optional string reason = 2;		// human readable cause
+}

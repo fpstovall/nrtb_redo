@@ -1,0 +1,32 @@
+// Messages used to manage requests and data flow between the 
+// simulation engine 
+//
+// This file released under the GPL 3.0 license.
+// 
+// Note: these are never sent bare.. they are always payloads 
+// 	in a channel wrapper message.
+
+package nrtb_msg;
+
+// this message must be sent from the visualization to databroker
+// on initialization of a new connnection.
+message vis_init {
+  required string vis_type = 1;	// client id string
+  optional string user = 2;		// user id (if appropriate
+  optional string pw_hash = 3;	// user pwd hash (not used in alpha)
+  optional bool needs_mesh = 4;	// if true, client needs geometry data
+  optional bool streamning = 5;	// if false, client needs msgs one at a time.
+}
+
+// this message is sent from the visualization clien to databroker
+// at the end of a conversation, before the connection is dropped.
+message vis_end {
+  optional string save_state_uid = 1; // if provided, save the save for 
+									  // for next time.
+}
+
+message db_cant_continue {
+  required bool must_close = 1;	// if true, connection will be dropped.
+  required bool may_reset=  2;	// if true, the client may reconnect.
+  optional string cause = 3;	// human readable cause 
+}
