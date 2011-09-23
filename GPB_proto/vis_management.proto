@@ -18,13 +18,14 @@ message vis_init {
   optional bool streamning = 5;	// if false, client needs msgs one at a time.
 }
 
-// this message is sent from the visualization clien to databroker
+// this message is sent from the visualization client to databroker
 // at the end of a conversation, before the connection is dropped.
 message vis_end {
   optional string save_state_uid = 1; // if provided, save the save for 
 									  // for next time.
 }
 
+// sent by the data broker if it must terminate activities.
 message db_cant_continue {
   required bool must_close = 1;	// if true, connection will be dropped.
   required bool may_reset=  2;	// if true, the client may reconnect.
