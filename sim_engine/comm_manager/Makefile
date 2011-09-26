@@ -22,7 +22,10 @@ lib:	sim_db_channel_test
 	@cp -v sim_db_channel.o ../obj/
 	@echo build complete
 
-sim_db_channel_test:	sim_db_channel.o sim_db_channel_test.cpp
+../../common/lib/nrtb_common.a:
+	@cd ../../commmon; make
+
+sim_db_channel_test:	sim_db_channel.o sim_db_channel_test.cpp ../../common/lib/nrtb_common.a
 	@rm -f sim_db_channel_test
 	g++ -c sim_db_channel_test.cpp -I ../include
 	g++ -o sim_db_channel_test sim_db_channel_test.o sim_db_channel.o -L ../../common/lib/

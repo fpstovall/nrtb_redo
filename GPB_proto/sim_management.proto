@@ -34,6 +34,6 @@ message sim_termination_data {
 // sim engine that there is some problem and it can not 
 // continue.
 message db_request_sim_stop {
-  required bool data_lost = 1;		// true if data has been lost
+  required bool failed = 1;		// true if run ended with error
   optional string reason = 2;		// human readable cause
 }
