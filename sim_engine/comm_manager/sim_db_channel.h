@@ -1,5 +1,5 @@
 /***********************************************
- This file is part of the NRTB project (https://*launchpad.net/nrtb).
+ This file is part of the NRTB project (https://launchpad.net/nrtb).
  
  NRTB is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -47,15 +47,15 @@ namespace nrtb
 	  triplet attitude;
 	  triplet velocity;
 	  triplet rotation;    
-	}
+	};
 	// overall simulation info
 	struct sim_info
 	{
 	  uint32 uid;
 	  std::string name;
 	  uint32 quanta_ms:
-	  std::list<obj_setup_info> objects;
-	}
+	  std::list<obj_setup_info> items;
+	};
 	// obj per instant status info
 	struct tq_obj_data
 	{
@@ -67,7 +67,7 @@ namespace nrtb
 	  strlist in_msgs;
 	  strlist out_msgs;
 	  strlist notes;
-	}
+	};
 	// time quanta update record
 	struct tq_update
 	{
@@ -76,13 +76,17 @@ namespace nrtb
 	  uint32 actual_ms;
 	  uint32 cook_ms;
 	  std::list<tq_obj_data> updates;
-	}
+	};
+	
+
+	/***************************************************
+	 in alpha phase, all exceptions will force the channel 
+	 back to it's initial state, closing any connection
+	 which may be active at the time.
+	***************************************************/
 	
 	// general parent for all class exceptions
-	// in alpha phase, all exceptions will force the channel 
-	// back to it's initial state, closing any connection
-	// which may be active at the time.
-	class general_exception: public nrtb::base_exception {};
+	class general_exception: public base_exception {};
 	class cant_connect_exception: public general_exception {};
 	class unrecoverable_com_error: public general_exception {};
 	class local_invalid_context: public general_exception {};
@@ -153,13 +157,14 @@ namespace nrtb
 	  
 	  
   protected:
-	typedef boost::shared_ptr<tranceiver> io_p;
+	typedef boost::shared_ptr<transceiver> io_p;
 	io_p link;
 	typedef boost::shared_ptr<thread> thread_p;
+	thread_p input_manager;
 	thread_p output_manager;
 	typedef sim_to_db_wrapper msg_t;
 	typedef boost::shared_ptr<msg_t> msg_p;
-	typedef boost::circular_buffer<msg_p> msg_buff
+	typedef boost::circular_buffer<msg_p> msg_buff;
 	typedef boost::shared_ptr<msg_buff> msg_buff_p;
 	msg_buff_p out_queue;
 	msg_buff_p in_queue;
