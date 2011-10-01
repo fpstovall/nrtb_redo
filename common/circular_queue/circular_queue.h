@@ -24,7 +24,21 @@
 
 namespace nrtb
 {
-  
+
+  /********************************************************
+   * The circular_queue template is designed for use with 
+   * the classic producer/consumer thread management model. 
+   * The producer uses circular_queue::push() to put items
+   * in the queue as they become available, and the consumer
+   * thread calls circular_queue::park() when it is ready 
+   * for the next item to work.
+   * 
+   * Common uses would be for buffering outgoing or incomming
+   * messages from a communications channel, providing a feed
+   * queue for parallel threads to make full use of multi-core 
+   * processors, or any case where one or more threads are 
+   * passing data to another set of threads.
+  ********************************************************/
   template <class T>
   class cirular_queue
   {
@@ -43,27 +57,19 @@ namespace nrtb
 	virtual ~circular_queue();
 	
 	/*********************************************
-	 * Puts an item in the queue. If threads are 
-	 * parked waiting on items, they'll be released.
+	 * Puts an item in the queue. 
 	*********************************************/
 	void push(T);
-	
+		
 	/*********************************************
-	 * Pops an item off the queue, or throws if 
-	 * one is not availale.
+	 * Pops the next item off the queue, blocking 
+	 * if needed until an item becomes available. 
 	*********************************************/
 	T pop();
 	
-	/*********************************************
-	 * Like pop, but instead of throwing blocks 
-	 * until an item becomes available. This is 
-	 * the prefered method for use when threads
-	 * are looking for data to work with.
-	*********************************************/
-	T park();
-	
 	int size();
 	void resize(int newsize);
+	void clear();
 	
   protected:
 	
