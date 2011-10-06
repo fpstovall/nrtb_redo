@@ -24,7 +24,7 @@ lib:	circular_queue_test
 circular_queue_test:	circular_queue.h circular_queue_test.cpp
 	@rm -f circular_queue_test
 	g++ -c circular_queue_test.cpp -I../include
-	g++ -o circular_queue_test circular_queue_test.o ../obj/common.o ../obj/log_setup.o ../obj/serializer.o ../obj/base_thread.o  -lpthread -lPocoFoundation
+	g++ -o circular_queue_test circular_queue_test.o ../obj/common.o ../obj/base_thread.o -lpthread 
 
 clean:
 	@rm -rvf *.o circular_queue_test ../include/circular_queue.h *.log ../obj/circular_queue.o
