@@ -20,8 +20,30 @@
 #include "sim_db_channel.h"
 #include <confreader.h>
 
+using string;
+
 namespace nrtb
 {
+
+void sim_db_channel::return_to_base_state()
+{
+  // shutdown the work threads, if any.
+  if (input_manager) 
+  {
+	input_manager->stop();
+	input_manager.reset();
+  };
+  if (output_manager) 
+  {
+	output_manager->stop();
+	output_manager.reset();
+  };
+  // release the buffers
+  out_queue.reset();
+  in_queue.reset();
+  // close and deallocate the transceiver
+  link.reset();   
+};
 
 sim_db_channel::sim_db_channel()
 {
@@ -34,14 +56,8 @@ sim_db_channel::sim_db_channel()
 
 sim_db_channel::~sim_db_channel()
 {
-  // shutdown the work threads, if any.
-  if (input_manager) input_manager.reset();
-  if (output_manager) output_manager.reset();
-  // close and deallocate the transceiver
-  if (link) link.reset(); 
-  // release the buffers
-  if (out_queue) out_queue.reset();
-  if (in_queue) in_queue.reset();
+  try { return_to_base_state(); }
+  catch (...) {};
 };
 
 void sim_db_channel::establish_link(std::string address)
@@ -55,21 +71,42 @@ void sim_db_channel::establish_link(std::string address)
 		"127.0.0.1:63456");
   };
   // See if we need to add the port to the address.
-  if (address.find(":") == string::npos)
+  if (address.find(":") == std::string::npos)
   {
 	address = address.append(":63456");
   };
   // okay.. at this point we should have the valid
   // address to start the transceiver with.
-  // TODO: instanciate link
-  // TODO: instanciate in_queue
-  // TODO: instanciate out_queue
-  // TODO: instanciate the output_manager
-  // TODO: Start output_manager
-  // TODO: instanciate the input_manager
-  // TODO: Start input_manager
-}
+  string breadcrumbs = "init ";
+  try
+  {
+	// TODO: instanciate link
+	breadcrumbs.append("link ");
+	// TODO: instanciate in_queue
+	breadcrumbs.append("in_queue ");
+	// TODO: instanciate out_queue
+	breadcrumbs.append("out_queue");
+	// TODO: instanciate the output_manager
+	breadcrumbs.append("output_manager ");
+	// TODO: Start output_manager
+	breadcrumbs.append("started ");
+	// TODO: instanciate the input_manager
+	breadcrumbs.append("input_manager ");
+	// TODO: Start input_manager
+	breadcrumbs.append("started ");
+  }
+  catch (...)
+  {
+	// roll back the startup attempt
+	return_to_base_state();
+	// whine and complain.
+	cant_connect_exception e;
+	e.store(breadcrumbs);
+	throw e;
+  };
+};
 
+  
 
 } // namespace nrtb
 

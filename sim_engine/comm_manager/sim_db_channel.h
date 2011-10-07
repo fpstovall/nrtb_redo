@@ -169,6 +169,9 @@ namespace nrtb
 	msg_buff_p out_queue;
 	msg_buff_p in_queue;
 	unsigned int in_queue_limit, out_queue_limit;
+	// the other methods call this in case of error.
+	void return_to_base_state();
+	
   };
 
 } // namepace nrtb
