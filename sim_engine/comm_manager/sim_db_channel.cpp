@@ -1,4 +1,4 @@
-/***********************************************
+cd /***********************************************
  This file is part of the NRTB project (https://*launchpad.net/nrtb).
  
  NRTB is free software: you can redistribute it and/or modify
@@ -27,15 +27,17 @@ namespace nrtb
 
 void sim_db_channel::return_to_base_state()
 {
-  // shutdown the work threads, if any.
+  // shutdown the queues and threads, if any.
+  if (in_queue) in_queue->shutdown();
+  if (out_queue) out_queue->shutdown();
   if (input_manager) 
   {
-	input_manager->stop();
+	input_manager->join();
 	input_manager.reset();
   };
   if (output_manager) 
   {
-	output_manager->stop();
+	output_manager->join();
 	output_manager.reset();
   };
   // release the buffers
@@ -80,20 +82,20 @@ void sim_db_channel::establish_link(std::string address)
   string breadcrumbs = "init ";
   try
   {
-	// TODO: instanciate link
-	breadcrumbs.append("link ");
-	// TODO: instanciate in_queue
+	in_queue.reset(new msg_buff(in_queue_limit));
 	breadcrumbs.append("in_queue ");
-	// TODO: instanciate out_queue
+	out_queue.reset(new msg_buff(out_queue_limit));
 	breadcrumbs.append("out_queue");
 	// TODO: instanciate the output_manager
 	breadcrumbs.append("output_manager ");
-	// TODO: Start output_manager
-	breadcrumbs.append("started ");
 	// TODO: instanciate the input_manager
 	breadcrumbs.append("input_manager ");
+	// TODO: instanciate link
+	breadcrumbs.append("link ");
+	// TODO: Start output_manager
+	breadcrumbs.append("out_started ");
 	// TODO: Start input_manager
-	breadcrumbs.append("started ");
+	breadcrumbs.append("in_started ");
   }
   catch (...)
   {
