@@ -352,22 +352,15 @@ cond_variable::~cond_variable()
 		// is there anyone waiting on this cond_variable?
 		if (!try_lock() || (waiting > 0))
 		{	
-			// not good, there are others waiting on us or we are locked.
-			unlock();
 			cerr << "WARNING: there were " << waiting << 
 			  " threads queued in ~cond_variable." << endl; 
-		}
-		else
-		{
-			pthread_cond_destroy(&mycv);
 		};
-		// unlock before we leave.
-		unlock();
 	}
 	catch (...)
 	{
 		cerr << "WARNING: there was an error in ~cond_variable." << endl;;
 	};
+	pthread_cond_destroy(&mycv);
 };
 
 void cond_variable::lock()
