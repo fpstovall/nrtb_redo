@@ -85,16 +85,19 @@ void sim_db_channel::establish_link(std::string address)
 	in_queue.reset(new msg_buff(in_queue_limit));
 	breadcrumbs.append("in_queue ");
 	out_queue.reset(new msg_buff(out_queue_limit));
-	breadcrumbs.append("out_queue");
-	// TODO: instanciate the output_manager
-	breadcrumbs.append("output_manager ");
-	// TODO: instanciate the input_manager
-	breadcrumbs.append("input_manager ");
-	// TODO: instanciate link
+	breadcrumbs.append("out_queue ");
+	tcp_socket_p sock(new tcp_socket);
+	link.reset(new io_t(sock));
 	breadcrumbs.append("link ");
-	// TODO: Start output_manager
+	output_manager.reset(new out_processor(out_queue, link));
+	breadcrumbs.append("output_manager ");
+	input_manager.reset(new in_processor(in_queue, link));
+	breadcrumbs.append("input_manager ");
+	sock->connect(address);
+	breadcrumbs.append("connected ");
+	output_manager->start();
 	breadcrumbs.append("out_started ");
-	// TODO: Start input_manager
+	input_manager->start();
 	breadcrumbs.append("in_started ");
   }
   catch (...)
@@ -108,7 +111,58 @@ void sim_db_channel::establish_link(std::string address)
   };
 };
 
+void sim_db_channel::sim_start(sim_db_channel::sim_info data)
+{
+  // send the sim setup information
+  msg_p msg(new nrtb_msg::sim_setup_data());
+  msg->set_name(data.name);
+  msg->set_model(data.model);
+  msg->set_quanta_ms(data.quanta_ms);
+  msg->set_max_quantas(data.max_quantas);
+  msg->set_started_by(data.started_by);
+  // assemble the new objects
+  obj_setup_list::iterator c = data.items.begin();
+  obj_setup_list::iterator e = data.items.end();
+  while (c != e)
+  {
+	// get a new obj_setup_data.
+	nrtb_msg::obj_setup_data * item;
+	item = msg->add_item();
+	// map the data..
+	item->set_uid(c->uid);
+	item->set_name(c->name);
+	item->set_obj_type(c->obj_type);
+	//TODO: More to do here.
+	
+  }
+  // message is done, send it.
+  out_queue->push(msg);
   
+  
+};
+
+sim_db_channel::in_processor::in_processor(
+  sim_db_channel::msg_buff_p buf, io_p io)
+{
+
+};
+
+sim_db_channel::in_processor::run()
+{
+
+};
+
+sim_db_channel::out_processor::out_processor(
+  sim_db_channel::msg_buff_p buf, io_p io)
+{
+
+};
+
+sim_db_channel::out_processor::run()
+{
+
+};
+
 
 } // namespace nrtb
 

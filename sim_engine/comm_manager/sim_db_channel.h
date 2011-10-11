@@ -39,21 +39,25 @@ public:
   //  individual object setup info
   struct obj_setup_info
   {
-	uint32 uid;
+	uint32_t uid;
 	std::string name;
-	uint32 obj_type;
+	uint32_t obj_type;
 	triplet location;
 	triplet attitude;
 	triplet velocity;
 	triplet rotation;    
   };
+  // typedef a list of obj_setup_infos
+  typedef std::list<obj_setup_info> obj_setup_list;
   // overall simulation info
   struct sim_info
   {
-	uint32 uid;
+	uint32_t uid;
 	std::string name;
-	uint32 quanta_ms:
-	std::list<obj_setup_info> items;
+	uint32_t quanta_ms:
+	uint32_t max_quantas;
+	std::string started_by;
+	obj_setup_list items;
   };
   // obj per instant status info
   struct tq_obj_data
@@ -67,6 +71,7 @@ public:
 	strlist out_msgs;
 	strlist notes;
   };
+  typedef std::list<tq_obj_data> tq_obj_updates;
   // time quanta update record
   struct tq_update
   {
@@ -74,10 +79,10 @@ public:
 	uint32 quanta_index;
 	uint32 actual_ms;
 	uint32 cook_ms;
-	std::list<tq_obj_data> updates;
+	tq_obj_updates updates;
+	obj_setup_list new_items;
   };
   
-
   /***************************************************
 	in alpha phase, all exceptions will force the channel 
 	back to it's initial state, closing any connection
@@ -171,8 +176,21 @@ protected:
   unsigned int in_queue_limit, out_queue_limit;
   // the other methods call this in case of error.
   void return_to_base_state();
-	
+  class in_processor: thread
+  {
+	in_processor(msg_buff_p buf, io_p io);
+	virtual ~in_processor() {};
+	run();
   };
+
+  class out_processor: thread
+  {
+	out_processor(msg_buff_p buf, io_p io);
+	virtual ~out_processor() {};
+	run();	
+  };
+  
+};
 
 } // namepace nrtb
 
