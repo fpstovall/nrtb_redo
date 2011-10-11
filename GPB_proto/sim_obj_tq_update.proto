@@ -33,5 +33,5 @@ message tq_data {
     required uint32 quanta_id = 1; // at 20 ms, this allows 2.72 years!
     required uint32 sim_uid = 2;
     repeated sim_obj_tq_data obj_data = 3; 
-	repeated obj_setup_data new_objs = 4
+	repeated obj_setup_data new_objs = 4;
 }
