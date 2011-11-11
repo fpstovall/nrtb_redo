@@ -20,11 +20,30 @@
 #define triplet_header
 
 #include <triad.h>
+#include <physics_common.pb.h>
 
-namespace nrtb
+namespace nrtb_com
 {
 
-  // -- typedefs to be used by callers
-  typedef triad<long double> triplet;
+// -- typedefs to be used by callers
+typedef triad<long double> triplet;
 
-#endif // sim_db_channel_header
+class com_triplet:
+{
+public:
+  com_triplet(triplet in);
+  com_triplet(nrtb_msg::triplet * ext);
+  virtual ~com_triplet() {};
+  
+  void set(triplet in);
+  triplet get();
+  void set_from_message(nrtb_msg::triplet * ext);
+  void load_message(nrtb_msg::triplet * ext);
+  
+protected:
+  triplet internal;
+};
+
+} // namespace nrtb_com
+
+#endif // triplet_header
