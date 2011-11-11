@@ -133,6 +133,7 @@ void sim_db_channel::sim_start(sim_db_channel::sim_info data)
 	item->set_name(c->name);
 	item->set_obj_type(c->obj_type);
 	//TODO: More to do here.
+	nrtb_msg::location_data * loc = item->mutable_location();
 	
   }
   // message is done, send it.

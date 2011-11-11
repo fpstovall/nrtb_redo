@@ -162,7 +162,7 @@ public:
 	
 protected:
   typedef boost::shared_ptr<thread> thread_p;
-  typedef sim_to_db_wrapper msg_t;
+  typedef nrtb_msg::sim_to_db_wrapper msg_t;
   typedef transceiver<msg_t, msg_t> io_t;
   typedef boost::shared_ptr<io_t> io_p;
   typedef boost::shared_ptr<msg_t> msg_p;
@@ -187,7 +187,7 @@ protected:
   {
 	out_processor(msg_buff_p buf, io_p io);
 	virtual ~out_processor() {};
-	run();	
+	run();
   };
   
 };
