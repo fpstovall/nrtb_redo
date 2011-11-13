@@ -22,28 +22,27 @@
 #include <triad.h>
 #include <physics_common.pb.h>
 
-namespace nrtb_com
-{
+namespace nrtb_com {
 
 // -- typedefs to be used by callers
 typedef triad<long double> triplet;
 
-class com_triplet:
+class com_triplet
 {
 public:
-  com_triplet(triplet in);
-  com_triplet(nrtb_msg::triplet * ext);
-  virtual ~com_triplet() {};
+  triplet(triplet in);
+  triplet(nrtb_msg::triplet* ext);
+  virtual ~triplet() {};
   
   void set(triplet in);
   triplet get();
-  void set_from_message(nrtb_msg::triplet * ext);
-  void load_message(nrtb_msg::triplet * ext);
+  void set_from_message(nrtb_msg::triplet* ext);
+  void load_message(nrtb_msg::triplet* ext);
   
 protected:
   triplet internal;
 };
 
-} // namespace nrtb_com
+}} // namespace nrtb::com
 
 #endif // triplet_header
