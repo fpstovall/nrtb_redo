@@ -1,5 +1,3 @@
-#TODO: need to revamp his to build the triplet component.
-
 #***********************************************
 # This file is part of the NRTB project (https://launchpad.net/nrtb).
 #
@@ -18,27 +16,25 @@
 #
 #***********************************************
 
-lib:	sim_db_channel_test
-	@./sim_db_channel_test
-	@cp -v sim_db_channel.h ../include/
-	@cp -v sim_db_channel.o ../obj/
-	@echo build complete
+lib:	triplet_test
+	@./triplet_test
+	@cp -v triplet.h ../../include/
+	@cp -v triplet.o ../../obj/
+	@echo triplet build complete!
 
-../../common/lib/nrtb_common.a:
-	@cd ../../commmon; make
+../../../common/lib/nrtb_common.a:
+	@cd ../../../commmon; make
 
-sim_db_channel_test:	sim_db_channel.o sim_db_channel_test.cpp ../../common/lib/nrtb_common.a
-	@rm -f sim_db_channel_test
-	g++ -c sim_db_channel_test.cpp -I ../include
-	g++ -o sim_db_channel_test sim_db_channel_test.o sim_db_channel.o -L ../../common/lib/
-	nrtb_common.a nrtb_gpb.a -lpthread 
+triplet_test:	triplet.o triplet_test.cpp
+	@rm -f triplet_test
+	g++ -c triplet_test.cpp -I ../../../common/include
+	g++ -o triplet_test triplet_test.o triplet.o ../../../common/lib/nrtb_common.a ../../../common/lib/nrtb_gpb.a -lprotobuf -lpthread
 
-
-sim_db_channel.o:	sim_db_channel.cpp sim_db_channel.h Makefile
-	@rm -f sim_db_channel.o
-	g++ -c -O3 sim_db_channel.cpp -I ../../common/include
+triplet.o:	../../../common/lib/nrtb_common.a triplet.cpp triplet.h Makefile
+	@rm -f triplet.o
+	g++ -c -O3 triplet.cpp -I../../../common/include
 
 clean:
-	@rm -vf *.o ../include/sim_db_channel.h sim_db_channel_test
+	@rm -vf *.o ../../include/triplet.h triplet_test
 	@echo all objects and executables have been erased.
 

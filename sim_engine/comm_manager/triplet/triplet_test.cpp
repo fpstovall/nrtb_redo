@@ -1,5 +1,5 @@
 /***********************************************
- This file is part of the NRTB project (https://launchpad.net/nrtb).
+ This file is part of the NRTB project (https://*launchpad.net/nrtb).
  
  NRTB is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -15,34 +15,28 @@
  along with NRTB.  If not, see <http://www.gnu.org/licenses/>.
  
  **********************************************/
- 
-#ifndef triplet_header
-#define triplet_header
 
-#include <triad.h>
+
+#include "triplet.h"
 #include <physics_common.pb.h>
+#include <iostream>
 
-namespace nrtb_com {
+using namespace std;
 
-// -- typedefs to be used by callers
-typedef nrtb::triad<long double> triplet;
-
-class com_triplet
+int main()
 {
-public:
-  com_triplet(triplet in);
-  com_triplet(nrtb_msg::triplet* ext);
-  virtual ~com_triplet() {};
-  
-  void set(triplet in);
-  triplet get();
-  void set_from_message(nrtb_msg::triplet* ext);
-  void load_message(nrtb_msg::triplet* ext);
-  
-protected:
-  triplet internal;
+  int returncode = 0;
+  nrtb_com::triplet seed(1,2,3);
+  nrtb_com::com_triplet t(seed);
+  nrtb_msg::triplet gpb;
+  t.load_message(&gpb);
+  nrtb_com::com_triplet a(&gpb);
+  if (t.get() != a.get())
+  {
+	returncode = 1;
+	cout << "WARNING: Results did not match expected values "
+	  << t.get() << " : " << a.get() << endl;
+  };
+	  
+  return returncode;
 };
-
-} // namespace nrtb::com
-
-#endif // triplet_header
