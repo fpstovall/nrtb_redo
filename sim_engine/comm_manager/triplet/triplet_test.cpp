@@ -34,8 +34,12 @@ int main()
   if (t.get() != a.get())
   {
 	returncode = 1;
-	cout << "WARNING: Results did not match expected values "
+	cout << "nrtb_com::com_triplet unit test FAIL "
 	  << t.get() << " : " << a.get() << endl;
+  }
+  else
+  {
+	cout << "nrtb_com::com_triplet unit test PASS" << endl;
   };
 	  
   return returncode;

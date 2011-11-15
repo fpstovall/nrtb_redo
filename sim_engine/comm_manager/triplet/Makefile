@@ -27,7 +27,7 @@ triplet_test:	triplet.o triplet_test.cpp
 	g++ -c triplet_test.cpp -I ../../../common/include
 	g++ -o triplet_test triplet_test.o triplet.o ../../../common/lib/nrtb_common.a ../../../common/lib/nrtb_gpb.a -lprotobuf -lpthread
 
-triplet.o:	triplet.cpp triplet.h Makefile
+triplet.o:	triplet.cpp triplet.h Makefile ../../../common/lib/nrtb_common.a
 	@rm -f triplet.o
 	g++ -c -O3 triplet.cpp -I../../../common/include
 
@@ -35,3 +35,5 @@ clean:
 	@rm -vf *.o ../../include/triplet.h triplet_test
 	@echo all objects and executables have been erased.
 
+../../../common/lib/nrtb_common.a: 
+	@cd ../../../common; make
