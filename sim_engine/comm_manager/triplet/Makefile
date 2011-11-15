@@ -22,15 +22,12 @@ lib:	triplet_test
 	@cp -v triplet.o ../../obj/
 	@echo triplet build complete!
 
-../../../common/lib/nrtb_common.a:
-	@cd ../../../commmon; make
-
 triplet_test:	triplet.o triplet_test.cpp
 	@rm -f triplet_test
 	g++ -c triplet_test.cpp -I ../../../common/include
 	g++ -o triplet_test triplet_test.o triplet.o ../../../common/lib/nrtb_common.a ../../../common/lib/nrtb_gpb.a -lprotobuf -lpthread
 
-triplet.o:	../../../common/lib/nrtb_common.a triplet.cpp triplet.h Makefile
+triplet.o:	triplet.cpp triplet.h Makefile
 	@rm -f triplet.o
 	g++ -c -O3 triplet.cpp -I../../../common/include
 
