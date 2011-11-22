@@ -30,6 +30,7 @@ typedef nrtb::triad<long double> triplet;
 class com_triplet
 {
 public:
+  com_triplet();
   com_triplet(triplet in);
   com_triplet(nrtb_msg::triplet* ext);
   virtual ~com_triplet() {};

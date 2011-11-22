@@ -22,6 +22,9 @@
 namespace nrtb_com
 {
 
+com_triplet::com_triplet() 
+{};
+
 com_triplet::com_triplet(triplet in)
 {
   set(in);
