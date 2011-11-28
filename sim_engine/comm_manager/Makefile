@@ -39,4 +39,4 @@ doit:
 	@cd triplet; make ${action}
 	@cd location_data; make ${action}
 	@cd velocity_data; make ${action}
-	#@cd obj_setup_data; make ${action}
+	@cd obj_setup_info; make ${action}
