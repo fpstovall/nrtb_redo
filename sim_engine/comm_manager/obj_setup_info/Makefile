@@ -32,7 +32,7 @@ obj_setup_info.o:	obj_setup_info.cpp obj_setup_info.h Makefile ../../../common/l
 	g++ -c -O3 obj_setup_info.cpp -I ../../include -I../../../common/include
 
 clean:
-	@rm -vf *.o ../../include/obj_setup_info.h obj_setup_info_data_test
+	@rm -vf *.o ../../include/obj_setup_info.h obj_setup_info_test
 	@echo all objects and executables have been erased.
 
 ../../../common/lib/nrtb_common.a: 
