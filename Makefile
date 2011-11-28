@@ -19,9 +19,6 @@
 all:
 	@echo "============= building all targets ==============="
 	@make action=lib doit
-	#temp target
-	touch ./bin/nrtb_simulation
-	@echo temp target created.
 	@echo "============= all targets complete ==============="
 
 modules:
