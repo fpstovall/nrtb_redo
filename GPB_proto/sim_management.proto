@@ -18,7 +18,7 @@ message obj_setup_data {
   required string name = 2;			// obj name
   required uint32 obj_type = 3; 		// obj type
   required location_data location = 4;
-  optional velocity_data velocity = 5;
+  required velocity_data velocity = 5;
 }
 
 // This message is sent by the sim engine to notify the 
