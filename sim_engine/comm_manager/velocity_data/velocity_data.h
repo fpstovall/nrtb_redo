@@ -27,20 +27,17 @@ namespace nrtb_com {
 class com_velocity
 {
 public:
+  com_triplet speed;
+  com_triplet rotation;
+  
   com_velocity();
-  com_velocity(com_triplet pos, com_triplet att );
   com_velocity(nrtb_msg::velocity_data * ext);
   virtual ~com_velocity() {};
   
-  void set(com_triplet pos, com_triplet att);
-  com_triplet get_speed();
-  com_triplet get_rotation();
   void set_from_message(nrtb_msg::velocity_data* ext);
   void load_message(nrtb_msg::velocity_data* ext);
-  
-protected:
-  com_triplet speed;
-  com_triplet rotation;
+
+  bool operator ==(com_velocity & a);
 };
 
 } // namespace nrtb::com

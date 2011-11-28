@@ -30,18 +30,16 @@ typedef nrtb::triad<long double> triplet;
 class com_triplet
 {
 public:
+  triplet internal;
+
   com_triplet();
-  com_triplet(triplet in);
   com_triplet(nrtb_msg::triplet* ext);
   virtual ~com_triplet() {};
   
-  void set(triplet in);
-  triplet get();
   void set_from_message(nrtb_msg::triplet* ext);
   void load_message(nrtb_msg::triplet* ext);
   
-protected:
-  triplet internal;
+  bool operator ==(com_triplet & a);
 };
 
 } // namespace nrtb::com

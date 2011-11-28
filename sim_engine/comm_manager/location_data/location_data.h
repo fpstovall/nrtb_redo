@@ -27,20 +27,18 @@ namespace nrtb_com {
 class com_location
 {
 public:
+  com_triplet position;
+  com_triplet attitude;
+  
   com_location();
-  com_location(com_triplet pos, com_triplet att );
   com_location(nrtb_msg::location_data * ext);
   virtual ~com_location() {};
   
-  void set(com_triplet pos, com_triplet att);
-  com_triplet get_pos();
-  com_triplet get_att();
   void set_from_message(nrtb_msg::location_data* ext);
   void load_message(nrtb_msg::location_data* ext);
+
+  bool operator ==(com_location & a);
   
-protected:
-  com_triplet position;
-  com_triplet attitude;
 };
 
 } // namespace nrtb::com

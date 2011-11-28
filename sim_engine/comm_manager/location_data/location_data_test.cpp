@@ -26,15 +26,15 @@ using namespace std;
 int main()
 {
   int returncode = 0;
-  nrtb_com::triplet seeda(1,2,3);
+  nrtb_com::triplet seeda (1,2,3);
   nrtb_com::triplet seedb = seeda + 1;
-  nrtb_com::com_location t(seeda,seedb);
+  nrtb_com::com_location t;
+  t.position.internal = seeda;
+  t.attitude.internal = seedb;
   nrtb_msg::location_data gpb;
   t.load_message(&gpb);
   nrtb_com::com_location a(&gpb);
-  if ((t.get_pos().get() != a.get_pos().get())
-	 or (t.get_att().get() != a.get_att().get())
-  )
+  if (!(t == a))
   {
 	returncode = 1;
 	cout << "nrtb_com::com_location unit test FAIL " << endl;

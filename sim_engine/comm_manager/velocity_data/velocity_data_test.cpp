@@ -28,13 +28,13 @@ int main()
   int returncode = 0;
   nrtb_com::triplet seeda(1,2,3);
   nrtb_com::triplet seedb = seeda + 1;
-  nrtb_com::com_velocity t(seeda,seedb);
+  nrtb_com::com_velocity t;
+  t.speed.internal = seeda;
+  t.rotation.internal = seedb;
   nrtb_msg::velocity_data gpb;
   t.load_message(&gpb);
   nrtb_com::com_velocity a(&gpb);
-  if ((t.get_speed().get() != a.get_speed().get())
-	 or (t.get_rotation().get() != a.get_rotation().get())
-  )
+  if (!(t == a))
   {
 	returncode = 1;
 	cout << "nrtb_com::com_velocity unit test FAIL " << endl;

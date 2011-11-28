@@ -26,30 +26,9 @@ namespace nrtb_com
 com_location::com_location() {};
 
   
-com_location::com_location(com_triplet pos, com_triplet att)
-{
-  set(pos, att);
-};
-
 com_location::com_location(nrtb_msg::location_data * ext)
 {
   set_from_message(ext);
-};
-
-void com_location::set(com_triplet pos, com_triplet att)
-{
-  position = pos;
-  attitude = att;
-};
-
-com_triplet com_location::get_pos()
-{
-  return position;
-};
-
-com_triplet com_location::get_att()
-{
-  return attitude;
 };
 
 void com_location::set_from_message(nrtb_msg::location_data* ext)
@@ -64,8 +43,13 @@ void com_location::load_message(nrtb_msg::location_data* ext)
   attitude.load_message(ext->mutable_attitude());
 };
 
-
-
+bool com_location::operator==(com_location& a)
+{
+  bool returnme = true;
+  returnme = (position == a.position) and returnme;
+  returnme = (attitude == a.attitude) and returnme;
+  return returnme;
+}
   
 } // namespace nrtb::com
 

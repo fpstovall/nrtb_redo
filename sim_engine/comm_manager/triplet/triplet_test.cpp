@@ -27,15 +27,16 @@ int main()
 {
   int returncode = 0;
   nrtb_com::triplet seed(1,2,3);
-  nrtb_com::com_triplet t(seed);
+  nrtb_com::com_triplet t;
+  t.internal = seed;
   nrtb_msg::triplet gpb;
   t.load_message(&gpb);
   nrtb_com::com_triplet a(&gpb);
-  if (t.get() != a.get())
+  if (!(t == a))
   {
 	returncode = 1;
 	cout << "nrtb_com::com_triplet unit test FAIL "
-	  << t.get() << " : " << a.get() << endl;
+	  << t.internal << " : " << a.internal << endl;
   }
   else
   {

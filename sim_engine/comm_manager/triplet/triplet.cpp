@@ -25,24 +25,9 @@ namespace nrtb_com
 com_triplet::com_triplet() 
 {};
 
-com_triplet::com_triplet(triplet in)
-{
-  set(in);
-};
-
 com_triplet::com_triplet(nrtb_msg::triplet* ext)
 {
   set_from_message(ext);
-};
-
-void com_triplet::set(triplet in)
-{
-  internal = in;
-};
-
-triplet com_triplet::get()
-{
-  return internal;
 };
 
 void com_triplet::set_from_message(nrtb_msg::triplet* ext)
@@ -59,6 +44,11 @@ void com_triplet::load_message(nrtb_msg::triplet* ext)
   ext->set_y(internal.y);
   ext->set_z(internal.z);
 };
+
+bool com_triplet::operator==(com_triplet& a)
+{
+  return internal == a.internal;
+}
 
 
 

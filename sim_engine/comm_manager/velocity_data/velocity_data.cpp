@@ -26,30 +26,9 @@ namespace nrtb_com
 com_velocity::com_velocity() {};
 
   
-com_velocity::com_velocity(com_triplet v, com_triplet r)
-{
-  set(v,r);
-};
-
 com_velocity::com_velocity(nrtb_msg::velocity_data * ext)
 {
   set_from_message(ext);
-};
-
-void com_velocity::set(com_triplet v, com_triplet r)
-{
-  speed = v;
-  rotation = r;
-};
-
-com_triplet com_velocity::get_speed()
-{
-  return speed;
-};
-
-com_triplet com_velocity::get_rotation()
-{
-  return rotation;
 };
 
 void com_velocity::set_from_message(nrtb_msg::velocity_data* ext)
@@ -64,8 +43,13 @@ void com_velocity::load_message(nrtb_msg::velocity_data* ext)
   rotation.load_message(ext->mutable_rotation());
 };
 
+bool com_velocity::operator==(com_velocity& a)
+{
+  bool returnme = true;
+  returnme = (speed == a.speed) and returnme;
+  returnme = (rotation == a.rotation) and returnme;
+  return returnme;
+};
 
-
-  
 } // namespace nrtb::com
 
