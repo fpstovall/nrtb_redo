@@ -40,3 +40,4 @@ doit:
 	@cd location_data; make ${action}
 	@cd velocity_data; make ${action}
 	@cd obj_setup_info; make ${action}
+	@cd sim_info; make ${action}
