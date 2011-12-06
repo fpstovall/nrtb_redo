@@ -44,8 +44,12 @@ void com_sim_termination::set_from_message(nrtb_msg::sim_termination_data* ext)
   error_code = ext->error_code();
   if (ext->has_avg_cook_ms())
 	avg_cook_ms = ext->avg_cook_ms();
+  else
+	avg_cook_ms = 0;
   if (ext->has_avg_quanta_ms())
 	avg_quanta_ms = ext->avg_quanta_ms();
+  else
+	avg_quanta_ms = 0;
 };
 
 void com_sim_termination::load_message(nrtb_msg::sim_termination_data* ext)
