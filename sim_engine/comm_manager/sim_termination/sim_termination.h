@@ -16,8 +16,8 @@
  
  **********************************************/
  
-#ifndef sim_setup_header
-#define sim_setup_header
+#ifndef sim_termination_header
+#define sim_termination_header
 
 #include <sim_management.pb.h>
 #include <boost/shared_ptr.hpp>
@@ -45,4 +45,4 @@ public:
 
 } // namespace nrtb::com
 
-#endif // sim_setup_header
+#endif // sim_terminmation_header
