@@ -35,21 +35,21 @@ int main()
   t.velocity.speed.internal = seedb;
   t.velocity.speed.internal = seeda;
   // populate events
-  for (int i=0; i++; i<10)
+  for (int i=0; i<10; i++)
   {
 	stringstream buffer;
 	buffer << "event " << i;
 	t.event.push_back(buffer.str());
   };
   // populate inbound_com
-  for (int i=0; i++; i<10)
+  for (int i=0; i<10; i++)
   {
 	stringstream buffer;
 	buffer << "Command " << i;
 	t.inbound_com.push_back(buffer.str());
   };
   // populate outbound_com
-  for (int i=0; i++; i<10)
+  for (int i=0; i<10; i++)
   {
 	stringstream buffer;
 	buffer << "Response " << i;

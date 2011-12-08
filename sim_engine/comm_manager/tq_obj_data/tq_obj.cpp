@@ -41,19 +41,19 @@ void com_tq_obj_update::set_from_message(nrtb_msg::sim_obj_tq_data* ext)
   velocity.set_from_message(ext->mutable_velocity());
   // load the events
   int l = ext->event_size();
-  for (int i=0; i++; i<l)
+  for (int i=0; i<l; i++)
   {
 	event.push_back(ext->event(i));
   };
   // load the inbound messages
   l = ext->inbound_comm_size();
-  for (int i=0; i++; i<l)
+  for (int i=0; i<l; i++)
   {
 	inbound_com.push_back(ext->inbound_comm(i));
   };
   // load the outbound messages
   l = ext->outbound_comm_size();
-  for (int i=0; i++; i<l)
+  for (int i=0; i<l; i++)
   {
 	outbound_com.push_back(ext->outbound_comm(i));
   };
@@ -71,6 +71,7 @@ void com_tq_obj_update::load_message(nrtb_msg::sim_obj_tq_data* ext)
   while (c != e)
   {
 	ext->add_event(*c);
+	c++;
   };
   // load inbound com messages
   c = inbound_com.begin();
@@ -78,13 +79,15 @@ void com_tq_obj_update::load_message(nrtb_msg::sim_obj_tq_data* ext)
   while (c != e)
   {
 	ext->add_inbound_comm(*c);
+	c++;
   };
   // load outbound com messages
   c = outbound_com.begin();
   e = outbound_com.end();
   while (c != e)
   {
-	ext->add_inbound_comm(*c);
+	ext->add_outbound_comm(*c);
+	c++;
   };
 };
 
@@ -99,7 +102,7 @@ bool com_tq_obj_update::operator ==(com_tq_obj_update& a)
   if (returnme)
   {
 	int l = event.size();
-	for (int i=0; i++; i<l)
+	for (int i=0; i<l; i++)
 	{
 	  returnme = (a.event[i] == event[i]) && returnme;
 	};
@@ -109,7 +112,7 @@ bool com_tq_obj_update::operator ==(com_tq_obj_update& a)
   if (returnme)
   {
 	int l = inbound_com.size();
-	for (int i=0; i++; i<l)
+	for (int i=0; i<l; i++)
 	{
 	  returnme = (a.inbound_com[i] == inbound_com[i]) && returnme;
 	};
@@ -119,7 +122,7 @@ bool com_tq_obj_update::operator ==(com_tq_obj_update& a)
   if (returnme)
   {
 	int l = outbound_com.size();
-	for (int i=0; i++; i<l)
+	for (int i=0; i<l; i++)
 	{
 	  returnme = (a.outbound_com[i] == outbound_com[i]) && returnme;
 	};
