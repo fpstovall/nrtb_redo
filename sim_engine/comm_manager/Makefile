@@ -36,13 +36,4 @@ clean:
 	@echo "========== communication lib cleanup complete ==========="
 
 doit:
-	@cd triplet; make ${action}
-	@cd location_data; make ${action}
-	@cd velocity_data; make ${action}
-	@cd obj_setup_info; make ${action}
-	@cd sim_info; make ${action}
-	@cd sim_termination; make ${action}
-	@cd sim_stop; make ${action}
-	@cd tq_obj_data; make ${action}
-	@cd tq_update; make ${action}
 

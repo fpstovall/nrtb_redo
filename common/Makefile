@@ -48,4 +48,13 @@ doit:
 	@cd logger; make ${action}
 	@cd confreader; make ${action}
 	@cd GPB; make ${action}
+	@cd triplet; make ${action}
+	@cd location_data; make ${action}
+	@cd velocity_data; make ${action}
+	@cd obj_setup_info; make ${action}
+	@cd sim_info; make ${action}
+	@cd sim_termination; make ${action}
+	@cd sim_stop; make ${action}
+	@cd tq_obj_data; make ${action}
+	@cd tq_update; make ${action}
 	@cd transceiver; make ${action}
