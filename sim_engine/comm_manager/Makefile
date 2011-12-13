@@ -44,4 +44,5 @@ doit:
 	@cd sim_termination; make ${action}
 	@cd sim_stop; make ${action}
 	@cd tq_obj_data; make ${action}
+	@cd tq_update; make ${action}
 
