@@ -1,5 +1,5 @@
 #***********************************************
-#This file is part of the NRTB project (https://launchpad.net/nrtb).
+# This file is part of the NRTB project (https://launchpad.net/nrtb).
 #
 #    NRTB is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -16,24 +16,22 @@
 #
 #***********************************************
 
-lib: ../lib/sim_communications.a
+lib:	sim_stop_test
+	@./sim_stop_test
+	@cp -v sim_stop.h ../include/
+	@cp -v sim_stop.o ../obj/
+	@echo sim_stop build complete!
 
-../lib/sim_communications.a:
-	@echo "============= building communication libs ==============="
-#	@make action=lib doit
-	@touch ../lib/sim_communications.a
-	@echo "============= communication libs complete ==============="
+sim_stop_test:	sim_stop.o sim_stop_test.cpp
+	@rm -f sim_stop_test
+	g++ -c sim_stop_test.cpp -I ../../include -I ../include
+	g++ -o sim_stop_test sim_stop_test.o sim_stop.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread
 
-modules:
-	@echo "============= building communication modules ==============="
-	@make doit
-	@echo "============= completed communication modules =============="
+sim_stop.o:	sim_stop.cpp sim_stop.h Makefile
+	@rm -f sim_stop.o
+	g++ -c -O3 sim_stop.cpp -I ../include -I ../../include
 
 clean:
-	@echo "============= cleaning communication libs ==============="
-#	@make action=clean doit
-	@rm -fv ../lib/sim_communications.a
-	@echo "========== communication lib cleanup complete ==========="
-
-doit:
+	@rm -vf *.o ../include/sim_stop.h ../obj/sim_stop.o sim_stop_test
+	@echo all objects and executables have been erased.
 

@@ -16,24 +16,22 @@
 #
 #***********************************************
 
-lib:	tq_obj_test
-	@./tq_obj_test
-	@cp -v tq_obj.h ../../include/
-	@cp -v tq_obj.o ../../obj/
-	@echo tq_obj_update build complete!
+lib:	velocity_data_test
+	@./velocity_data_test
+	@cp -v velocity_data.h ../include/
+	@cp -v velocity_data.o ../obj/
+	@echo velocity_data build complete!
 
-tq_obj_test:	tq_obj.o tq_obj_test.cpp
-	@rm -f tq_obj_test
-	g++ -c tq_obj_test.cpp -I ../../../common/include -I ../../include
-	g++ -o tq_obj_test tq_obj_test.o tq_obj.o ../../obj/triplet.o ../../obj/location_data.o ../../obj/velocity_data.o ../../../common/lib/nrtb_common.a ../../../common/lib/nrtb_gpb.a -lprotobuf -lpthread
+velocity_data_test:	velocity_data.o velocity_data_test.cpp
+	@rm -f velocity_data_test
+	g++ -c velocity_data_test.cpp -I ../../include -I ../include
+	g++ -o velocity_data_test velocity_data_test.o velocity_data.o ../obj/triplet.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread
 
-tq_obj.o:	tq_obj.cpp tq_obj.h Makefile ../../../common/lib/nrtb_common.a
-	@rm -f tq_obj.o
-	g++ -c -O3 tq_obj.cpp -I ../../include -I../../../common/include
+velocity_data.o:	velocity_data.cpp velocity_data.h Makefile
+	@rm -f velocity_data.o
+	g++ -c -O3 velocity_data.cpp -I ../include -I../../include
 
 clean:
-	@rm -vf *.o ../../include/tq_obj.h ../../lib/tq_obj.o tq_obj_test
+	@rm -vf *.o ../include/velocity_data.h ../obj/velocity_data.o velocity_data_test
 	@echo all objects and executables have been erased.
 
-../../../common/lib/nrtb_common.a: 
-	@cd ../../../common; make

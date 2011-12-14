@@ -16,24 +16,22 @@
 #
 #***********************************************
 
-lib:	sim_termination_test
-	@./sim_termination_test
-	@cp -v sim_termination.h ../../include/
-	@cp -v sim_termination.o ../../obj/
-	@echo sim_termination build complete!
+lib:	triplet_test
+	@./triplet_test
+	@cp -v triplet.h ../include/
+	@cp -v triplet.o ../obj/
+	@echo triplet build complete!
 
-sim_termination_test:	sim_termination.o sim_termination_test.cpp
-	@rm -f sim_termination_test
-	g++ -c sim_termination_test.cpp -I ../../../common/include -I ../../include
-	g++ -o sim_termination_test sim_termination_test.o sim_termination.o ../../../common/lib/nrtb_common.a ../../../common/lib/nrtb_gpb.a -lprotobuf -lpthread
+triplet_test:	triplet.o triplet_test.cpp
+	@rm -f triplet_test
+	g++ -c triplet_test.cpp -I ../../include
+	g++ -o triplet_test triplet_test.o triplet.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread
 
-sim_termination.o:	sim_termination.cpp sim_termination.h Makefile ../../../common/lib/nrtb_common.a
-	@rm -f sim_termination.o
-	g++ -c -O3 sim_termination.cpp -I ../../include -I../../../common/include
+triplet.o:	triplet.cpp triplet.h Makefile
+	@rm -f triplet.o
+	g++ -c -O3 triplet.cpp -I../../include
 
 clean:
-	@rm -vf *.o ../../include/sim_termination_info.h sim_termination_test
+	@rm -vf *.o ../include/triplet.h ../obj/triplet.o triplet_test
 	@echo all objects and executables have been erased.
 
-../../../common/lib/nrtb_common.a: 
-	@cd ../../../common; make

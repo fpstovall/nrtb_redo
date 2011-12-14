@@ -16,24 +16,22 @@
 #
 #***********************************************
 
-lib:	triplet_test
-	@./triplet_test
-	@cp -v triplet.h ../../include/
-	@cp -v triplet.o ../../obj/
-	@echo triplet build complete!
+lib:	tq_obj_test
+	@./tq_obj_test
+	@cp -v tq_obj.h ../include/
+	@cp -v tq_obj.o ../obj/
+	@echo tq_obj_update build complete!
 
-triplet_test:	triplet.o triplet_test.cpp
-	@rm -f triplet_test
-	g++ -c triplet_test.cpp -I ../../../common/include
-	g++ -o triplet_test triplet_test.o triplet.o ../../../common/lib/nrtb_common.a ../../../common/lib/nrtb_gpb.a -lprotobuf -lpthread
+tq_obj_test:	tq_obj.o tq_obj_test.cpp
+	@rm -f tq_obj_test
+	g++ -c tq_obj_test.cpp -I ../../include -I ../include
+	g++ -o tq_obj_test tq_obj_test.o tq_obj.o ../obj/triplet.o ../obj/location_data.o ../obj/velocity_data.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread
 
-triplet.o:	triplet.cpp triplet.h Makefile ../../../common/lib/nrtb_common.a
-	@rm -f triplet.o
-	g++ -c -O3 triplet.cpp -I../../../common/include
+tq_obj.o:	tq_obj.cpp tq_obj.h Makefile
+	@rm -f tq_obj.o
+	g++ -c -O3 tq_obj.cpp -I ../include -I../../include
 
 clean:
-	@rm -vf *.o ../../include/triplet.h triplet_test
+	@rm -vf *.o ../include/tq_obj.h ../obj/tq_obj.o tq_obj_test
 	@echo all objects and executables have been erased.
 
-../../../common/lib/nrtb_common.a: 
-	@cd ../../../common; make

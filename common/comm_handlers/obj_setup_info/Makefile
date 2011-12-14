@@ -16,24 +16,22 @@
 #
 #***********************************************
 
-lib:	sim_stop_test
-	@./sim_stop_test
-	@cp -v sim_stop.h ../../include/
-	@cp -v sim_stop.o ../../obj/
-	@echo sim_stop build complete!
+lib:	obj_setup_info_test
+	@./obj_setup_info_test
+	@cp -v obj_setup_info.h ../include/
+	@cp -v obj_setup_info.o ../obj/
+	@echo obj_setup_info build complete!
 
-sim_stop_test:	sim_stop.o sim_stop_test.cpp
-	@rm -f sim_stop_test
-	g++ -c sim_stop_test.cpp -I ../../../common/include -I ../../include
-	g++ -o sim_stop_test sim_stop_test.o sim_stop.o ../../../common/lib/nrtb_common.a ../../../common/lib/nrtb_gpb.a -lprotobuf -lpthread
+obj_setup_info_test:	obj_setup_info.o obj_setup_info_test.cpp
+	@rm -f obj_setup_info_test
+	g++ -c obj_setup_info_test.cpp -I ../../include -I ../include
+	g++ -o obj_setup_info_test obj_setup_info_test.o obj_setup_info.o ../obj/triplet.o ../obj/location_data.o ../obj/velocity_data.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread
 
-sim_stop.o:	sim_stop.cpp sim_stop.h Makefile ../../../common/lib/nrtb_common.a
-	@rm -f sim_stop.o
-	g++ -c -O3 sim_stop.cpp -I ../../include -I../../../common/include
+obj_setup_info.o:	obj_setup_info.cpp obj_setup_info.h Makefile
+	@rm -f obj_setup_info.o
+	g++ -c -O3 obj_setup_info.cpp -I ../include -I../..//include
 
 clean:
-	@rm -vf *.o ../../include/sim_stop_info.h sim_stop_test
+	@rm -vf *.o ../include/obj_setup_info.h ../obj/obj_setup_info.o obj_setup_info_test
 	@echo all objects and executables have been erased.
 
-../../../common/lib/nrtb_common.a: 
-	@cd ../../../common; make

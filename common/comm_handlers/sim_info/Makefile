@@ -16,24 +16,22 @@
 #
 #***********************************************
 
-lib:	tq_update_test
-	@./tq_update_test
-	@cp -v tq_update.h ../../include/
-	@cp -v tq_update.o ../../obj/
-	@echo tq_update_update build complete!
+lib:	sim_setup_info_test
+	@./sim_setup_info_test
+	@cp -v sim_setup_info.h ../include/
+	@cp -v sim_setup_info.o ../obj/
+	@echo sim_setup_info build complete!
 
-tq_update_test:	tq_update.o tq_update_test.cpp
-	@rm -f tq_update_test
-	g++ -c tq_update_test.cpp -I ../../../common/include -I ../../include
-	g++ -o tq_update_test tq_update_test.o tq_update.o ../../obj/triplet.o ../../obj/location_data.o ../../obj/velocity_data.o ../../obj/tq_obj.o ../../obj/obj_setup_info.o ../../../common/lib/nrtb_common.a ../../../common/lib/nrtb_gpb.a -lprotobuf -lpthread
+sim_setup_info_test:	sim_setup_info.o sim_setup_info_test.cpp
+	@rm -f sim_setup_info_test
+	g++ -c sim_setup_info_test.cpp -I ../../include -I ../include
+	g++ -o sim_setup_info_test sim_setup_info_test.o sim_setup_info.o ../obj/triplet.o ../obj/location_data.o ../obj/velocity_data.o ../obj/obj_setup_info.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread
 
-tq_update.o:	tq_update.cpp tq_update.h Makefile ../../../common/lib/nrtb_common.a
-	@rm -f tq_update.o
-	g++ -c -O3 tq_update.cpp -I ../../include -I../../../common/include
+sim_setup_info.o:	sim_setup_info.cpp sim_setup_info.h Makefile
+	@rm -f sim_setup_info.o
+	g++ -c -O3 sim_setup_info.cpp -I ../include -I../../include
 
 clean:
-	@rm -vf *.o ../../include/tq_update.h ../../lib/tq_update.o tq_update_test
+	@rm -vf *.o ../include/sim_setup_info.h ../obj/sim_setup_info.o sim_setup_info_test
 	@echo all objects and executables have been erased.
 
-../../../common/lib/nrtb_common.a: 
-	@cd ../../../common; make

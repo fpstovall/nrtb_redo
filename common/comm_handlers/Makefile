@@ -16,12 +16,13 @@
 #
 #***********************************************
 
-lib: ../lib/sim_communications.a
+lib: ../lib/nrtb_communication.a
 
-../lib/sim_communications.a:
+../lib/nrtb_communication.a:
 	@echo "============= building communication libs ==============="
-#	@make action=lib doit
-	@touch ../lib/sim_communications.a
+	@make action=lib doit
+	@ar -r ../lib/nrtb_communication.a obj/*.o
+	cp -a include/* ../include
 	@echo "============= communication libs complete ==============="
 
 modules:
@@ -31,9 +32,19 @@ modules:
 
 clean:
 	@echo "============= cleaning communication libs ==============="
-#	@make action=clean doit
-	@rm -fv ../lib/sim_communications.a
+	@make action=clean doit
+	@rm -fv obj/* lib/* include/*
+	@rm -fv ../lib/nrtb_communication.a
 	@echo "========== communication lib cleanup complete ==========="
 
 doit:
+	@cd triplet; make ${action}
+	@cd location_data; make ${action}
+	@cd velocity_data; make ${action}
+	@cd obj_setup_info; make ${action}
+	@cd sim_info; make ${action}
+	@cd sim_termination; make ${action}
+	@cd sim_stop; make ${action}
+	@cd tq_obj_data; make ${action}
+	@cd tq_update; make ${action}
 
