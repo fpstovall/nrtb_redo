@@ -18,22 +18,21 @@
 
 lib:	location_data_test
 	@./location_data_test
-	@cp -v location_data.h ../../include/
-	@cp -v location_data.o ../../obj/
+	@cp -v location_data.h ../include/
+	@cp -v location_data.o ../obj/
 	@echo location_data build complete!
 
 location_data_test:	location_data.o location_data_test.cpp
 	@rm -f location_data_test
-	g++ -c location_data_test.cpp -I ../../../common/include -I ../../include
-	g++ -o location_data_test location_data_test.o location_data.o ../../obj/triplet.o ../../../common/lib/nrtb_common.a ../../../common/lib/nrtb_gpb.a -lprotobuf -lpthread
+	g++ -c location_data_test.cpp -I ../../include -I ../include
+	g++ -o location_data_test location_data_test.o location_data.o ../obj/triplet.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread
 
-location_data.o:	location_data.cpp location_data.h Makefile ../../../common/lib/nrtb_common.a
+location_data.o:	location_data.cpp location_data.h Makefile
 	@rm -f location_data.o
-	g++ -c -O3 location_data.cpp -I ../../include -I../../../common/include
+	g++ -c -O3 location_data.cpp -I ../include -I../../include
 
 clean:
-	@rm -vf *.o ../../include/location_data.h location_data_test
+	@rm -vf *.o ../include/location_data.h ../obj/location_data.o location_data_test
 	@echo all objects and executables have been erased.
 
-../../../common/lib/nrtb_common.a: 
-	@cd ../../../common; make
+
