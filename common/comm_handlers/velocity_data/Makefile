@@ -18,22 +18,20 @@
 
 lib:	velocity_data_test
 	@./velocity_data_test
-	@cp -v velocity_data.h ../../include/
-	@cp -v velocity_data.o ../../obj/
+	@cp -v velocity_data.h ../include/
+	@cp -v velocity_data.o ../obj/
 	@echo velocity_data build complete!
 
 velocity_data_test:	velocity_data.o velocity_data_test.cpp
 	@rm -f velocity_data_test
-	g++ -c velocity_data_test.cpp -I ../../../common/include -I ../../include
-	g++ -o velocity_data_test velocity_data_test.o velocity_data.o ../../obj/triplet.o ../../../common/lib/nrtb_common.a ../../../common/lib/nrtb_gpb.a -lprotobuf -lpthread
+	g++ -c velocity_data_test.cpp -I ../../include -I ../include
+	g++ -o velocity_data_test velocity_data_test.o velocity_data.o ../obj/triplet.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread
 
-velocity_data.o:	velocity_data.cpp velocity_data.h Makefile ../../../common/lib/nrtb_common.a
+velocity_data.o:	velocity_data.cpp velocity_data.h Makefile
 	@rm -f velocity_data.o
-	g++ -c -O3 velocity_data.cpp -I ../../include -I../../../common/include
+	g++ -c -O3 velocity_data.cpp -I ../include -I../../include
 
 clean:
-	@rm -vf *.o ../../include/velocity_data.h velocity_data_test
+	@rm -vf *.o ../include/velocity_data.h ../obj/velocity_data.o velocity_data_test
 	@echo all objects and executables have been erased.
 
-../../../common/lib/nrtb_common.a: 
-	@cd ../../../common; make
