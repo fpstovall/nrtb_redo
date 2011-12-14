@@ -18,22 +18,20 @@
 
 lib:	sim_stop_test
 	@./sim_stop_test
-	@cp -v sim_stop.h ../../include/
-	@cp -v sim_stop.o ../../obj/
+	@cp -v sim_stop.h ../include/
+	@cp -v sim_stop.o ../obj/
 	@echo sim_stop build complete!
 
 sim_stop_test:	sim_stop.o sim_stop_test.cpp
 	@rm -f sim_stop_test
-	g++ -c sim_stop_test.cpp -I ../../../common/include -I ../../include
-	g++ -o sim_stop_test sim_stop_test.o sim_stop.o ../../../common/lib/nrtb_common.a ../../../common/lib/nrtb_gpb.a -lprotobuf -lpthread
+	g++ -c sim_stop_test.cpp -I ../../include -I ../include
+	g++ -o sim_stop_test sim_stop_test.o sim_stop.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread
 
-sim_stop.o:	sim_stop.cpp sim_stop.h Makefile ../../../common/lib/nrtb_common.a
+sim_stop.o:	sim_stop.cpp sim_stop.h Makefile
 	@rm -f sim_stop.o
-	g++ -c -O3 sim_stop.cpp -I ../../include -I../../../common/include
+	g++ -c -O3 sim_stop.cpp -I ../include -I ../../include
 
 clean:
-	@rm -vf *.o ../../include/sim_stop_info.h sim_stop_test
+	@rm -vf *.o ../include/sim_stop.h ../obj/sim_stop.o sim_stop_test
 	@echo all objects and executables have been erased.
 
-../../../common/lib/nrtb_common.a: 
-	@cd ../../../common; make
