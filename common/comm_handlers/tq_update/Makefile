@@ -18,22 +18,20 @@
 
 lib:	tq_update_test
 	@./tq_update_test
-	@cp -v tq_update.h ../../include/
-	@cp -v tq_update.o ../../obj/
+	@cp -v tq_update.h ../include/
+	@cp -v tq_update.o ../obj/
 	@echo tq_update_update build complete!
 
 tq_update_test:	tq_update.o tq_update_test.cpp
 	@rm -f tq_update_test
-	g++ -c tq_update_test.cpp -I ../../../common/include -I ../../include
-	g++ -o tq_update_test tq_update_test.o tq_update.o ../../obj/triplet.o ../../obj/location_data.o ../../obj/velocity_data.o ../../obj/tq_obj.o ../../obj/obj_setup_info.o ../../../common/lib/nrtb_common.a ../../../common/lib/nrtb_gpb.a -lprotobuf -lpthread
+	g++ -c tq_update_test.cpp -I ../../include -I ../include
+	g++ -o tq_update_test tq_update_test.o tq_update.o ../obj/triplet.o ../obj/location_data.o ../obj/velocity_data.o ../obj/tq_obj.o ../obj/obj_setup_info.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread
 
-tq_update.o:	tq_update.cpp tq_update.h Makefile ../../../common/lib/nrtb_common.a
+tq_update.o:	tq_update.cpp tq_update.h Makefile
 	@rm -f tq_update.o
-	g++ -c -O3 tq_update.cpp -I ../../include -I../../../common/include
+	g++ -c -O3 tq_update.cpp -I ../include -I../../include
 
 clean:
-	@rm -vf *.o ../../include/tq_update.h ../../lib/tq_update.o tq_update_test
+	@rm -vf *.o ../include/tq_update.h ../obj/tq_update.o tq_update_test
 	@echo all objects and executables have been erased.
 
-../../../common/lib/nrtb_common.a: 
-	@cd ../../../common; make
