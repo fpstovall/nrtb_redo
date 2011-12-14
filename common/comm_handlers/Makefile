@@ -16,12 +16,13 @@
 #
 #***********************************************
 
-lib: ./lib/nrtb_communication.a
+lib: ../lib/nrtb_communication.a
 
-./lib/nrtb_communication.a:
+../lib/nrtb_communication.a:
 	@echo "============= building communication libs ==============="
 	@make action=lib doit
 	@ar -r ../lib/nrtb_communication.a obj/*.o
+	cp -a include/* ../include
 	@echo "============= communication libs complete ==============="
 
 modules:
@@ -33,6 +34,7 @@ clean:
 	@echo "============= cleaning communication libs ==============="
 	@make action=clean doit
 	@rm -fv obj/* lib/* include/*
+	@rm -fv ../lib/nrtb_communication.a
 	@echo "========== communication lib cleanup complete ==========="
 
 doit:
