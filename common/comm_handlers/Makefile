@@ -47,4 +47,5 @@ doit:
 	@cd sim_stop; make ${action}
 	@cd tq_obj_data; make ${action}
 	@cd tq_update; make ${action}
+	@cd ack_nak; make ${action}
 
