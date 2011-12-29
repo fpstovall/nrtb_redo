@@ -48,4 +48,5 @@ doit:
 	@cd tq_obj_data; make ${action}
 	@cd tq_update; make ${action}
 	@cd ack_nak; make ${action}
+	@cd sim_db_wrapper; make ${action}
 
