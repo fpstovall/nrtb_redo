@@ -8,6 +8,19 @@
 
 package nrtb_msg;
 
+import "physics_common.proto";
+
+// This message is sent when a new object is
+// created, and as a part of the sim_setup_data
+// message below.
+message obj_setup_data {
+  required uint32 uid = 1;			// obj uid
+  required string name = 2;			// obj name
+  required uint32 obj_type = 3; 		// obj type
+  required location_data location = 4;
+  required velocity_data velocity = 5;
+}
+
 // This message is sent by the sim engine to notify the 
 // databroker that a new simulation is starting and to 
 // provide identity and simulation setup data.
@@ -17,6 +30,7 @@ message sim_setup_data {
   required uint32 quanta_ms = 3;	// timestep in milliseconds
   optional uint32 max_quantas = 4;	// time limit in quantas.
   optional string started_by = 5;	// who requested this run
+  repeated obj_setup_data item = 6; // list of objects at start
 }
 
 // This message is sent by the sim engine to notify the 
@@ -34,6 +48,6 @@ message sim_termination_data {
 // sim engine that there is some problem and it can not 
 // continue.
 message db_request_sim_stop {
-  required bool data_lost = 1;		// true if data has been lost
+  required bool failed = 1;		// true if run ended with error
   optional string reason = 2;		// human readable cause
 }

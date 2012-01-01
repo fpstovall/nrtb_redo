@@ -8,6 +8,7 @@
 
 package nrtb_msg;
 
+// visualization uses this to request a listing of sims in the database
 message vis_get_sim_listing {
   optional string name = 1;			// may include sql wild-cards
   optional string start_date = 2;	// ISO SQL style date
@@ -15,6 +16,7 @@ message vis_get_sim_listing {
   optional uint32 max_count = 4;	// max number to return
 }
 
+// Each one of these contians information on one simulation.
 message db_sim_record {
   required uint32 uid = 1;		// simulation UID.
   required string name = 2;		// human readable name 
@@ -24,6 +26,7 @@ message db_sim_record {
   optional string ended = 6;	// ISO datetime the sim ended
 }
 
+// Databroker returns this to provide a listing of available matching sims
 message db_sim_listing {
   repeated db_sim_record sim_list = 1; // available sims.
 }

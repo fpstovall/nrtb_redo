@@ -16,13 +16,16 @@
 #
 #***********************************************
 
-lib: ./lib/nrtb_common.a
+lib: ./lib/nrtb_common.a ./lib/nrtb_communication.a
 
 ./lib/nrtb_common.a:
 	@echo "============= building common libs ==============="
 	@make action=lib doit
 	@ar -r ./lib/nrtb_common.a ./obj/*.o
 	@echo "============= common libs complete ==============="
+
+./lib/nrtb_communication.a:
+	@cd comm_handlers; make lib
 
 modules:
 	@echo "============= building common modules ==============="
@@ -32,7 +35,8 @@ modules:
 clean:
 	@echo "============= cleaning common libs ==============="
 	@make action=clean doit
-	@rm -fv ./obj/* ./lib/*
+	@rm -fv ./obj/* ./lib/* ./include/*
+	@cd comm_handlers; make clean
 	@echo "========== common lib cleanup complete ==========="
 
 doit:
@@ -49,3 +53,4 @@ doit:
 	@cd confreader; make ${action}
 	@cd GPB; make ${action}
 	@cd transceiver; make ${action}
+	
