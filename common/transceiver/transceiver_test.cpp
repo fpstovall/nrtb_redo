@@ -45,14 +45,14 @@ public:
 
   void inc()
   {
-	scope_lock lock(data_lock);
-	er_count++;
+	  scope_lock lock(data_lock);
+	  er_count++;
   };
 
   int operator ()()
   {
-	scope_lock lock(data_lock);
-	return er_count;
+	  scope_lock lock(data_lock);
+	  return er_count;
   };
 };
 
@@ -67,47 +67,47 @@ public:
   
   ~server_work_thread()
   {
-	cout << "Destructing server_work_thread" << endl;
-	sock.reset();
+	  cout << "Destructing server_work_thread" << endl;
+	  sock.reset();
   };
   
   void run()
   {
-	set_cancel_anytime();
-	linkt link(sock);
-	while (sock->status() == tcp_socket::sock_connect)
-	{
-	  try 
+	  set_cancel_anytime();
+	  linkt link(sock);
+	  while (sock->status() == tcp_socket::sock_connect)
 	  {
-		linkt::out_ptr inbound = link.get();
-		last_inbound = inbound->msg_uid();
-		cout << "\tReceived #" << last_inbound << endl;
-		link.send(inbound);
-		if (last_inbound == 99)
-		{
-		  cout << "Receiver thread closing." << endl;
-		  exit(0);
-		};
-	  }
-	  catch (linkt::general_exception & e)
-	  {
-		cerr << "Server work thread caught " << e.what()
-		  << "\n\tComment: " << e.comment() << endl;
-		er_count.inc();;
-	  }
-	  catch (tcp_socket::general_exception & e)
-	  {
-		cerr << "Server work thread caught " << e.what()
-		  << "\n\tComment: " << e.comment() << endl;
-		er_count.inc();;
-	  }
-	  catch (std::exception & e)
-	  {
-		cerr << "Server work thread caught " << e.what() 
-		  << endl;
-		er_count.inc();;
+	    try 
+	    {
+		    linkt::out_ptr inbound = link.get();
+		    last_inbound = inbound->msg_uid();
+		    cout << "\tReceived #" << last_inbound << endl;
+		    link.send(inbound);
+		    if (last_inbound == 99)
+		    {
+		      cout << "Receiver thread closing." << endl;
+		      exit(0);
+		    };
+      }
+      catch (linkt::general_exception & e)
+      {
+	      cerr << "Server work thread caught " << e.what()
+	        << "\n\tComment: " << e.comment() << endl;
+	      er_count.inc();;
+      }
+      catch (tcp_socket::general_exception & e)
+      {
+	      cerr << "Server work thread caught " << e.what()
+	        << "\n\tComment: " << e.comment() << endl;
+	      er_count.inc();;
+      }
+      catch (std::exception & e)
+      {
+	      cerr << "Server work thread caught " << e.what() 
+	        << endl;
+	      er_count.inc();;
+	    };
 	  };
-	};
   };
 };
 
@@ -121,28 +121,28 @@ public:
    : tcp_server_socket_factory(add, back) {};
   ~listener()
   {
-	cout << "Destructing listener" << endl;
-	task.reset();
+	  cout << "Destructing listener" << endl;
+	  task.reset();
   };
   
   bool on_accept()
   {
-	if (!task)
-	{
-	  task.reset(new server_work_thread);
-	  task->last_inbound = 0;
-	  task->sock = connect_sock;
-	  task->start(*(task.get()));
-	  cout << "server thread running." << endl;
-	  // shutdown the listener thead.. our work is done here.
-	  return false;
-	}
-	else
-	{
-	  connect_sock->close();
-	  cerr << "Multiple attempts to connect to server" 
-		<< endl;
-	};
+	  if (!task)
+	  {
+	    task.reset(new server_work_thread);
+	    task->last_inbound = 0;
+	    task->sock = connect_sock;
+	    task->start(*(task.get()));
+	    cout << "server thread running." << endl;
+	    // shutdown the listener thead.. our work is done here.
+	    return false;
+	  }
+	  else
+	  {
+	    connect_sock->close();
+	    cerr << "Multiple attempts to connect to server" 
+		  << endl;
+	  };
   };
 };
 
@@ -155,35 +155,35 @@ int main()
 
   try
   {
-	//set up our port and address
-	boost::mt19937 rng;
-	rng.seed(time(0));
-	boost::uniform_int<> r(0,1000);
-	stringstream s;
-	s << address << port_base + r(rng);
-	address = s.str();
-	cout << "Using " << address << endl;
+    //set up our port and address
+    boost::mt19937 rng;
+    rng.seed(time(0));
+    boost::uniform_int<> r(0,1000);
+    stringstream s;
+    s << address << port_base + r(rng);
+    address = s.str();
+    cout << "Using " << address << endl;
 
-	// kick off the listener thread.
-	listener server(address,5);
-	server.start_listen();
-	usleep(1e4);
+    // kick off the listener thread.
+    listener server(address,5);
+    server.start_listen();
+    usleep(1e4);
 
-	// set up our sender
-	tcp_socket_p sock(new tcp_socket);
-	sock->connect(address);
-	linkt sender(sock);
+    // set up our sender
+    tcp_socket_p sock(new tcp_socket);
+    sock->connect(address);
+    linkt sender(sock);
 
-	// Let's send a few things.
-	for (int i=0; i<100; i++)
-	{
-	  linkt::out_ptr msg(new my_msg);
-	  sender.send(msg);
-	  cout << "Sent " << msg->msg_uid() << endl;
-	  msg = sender.get();
-	  cout << "Got back " << msg->msg_uid() << endl;
-	};
-	usleep(1e4);
+    // Let's send a few things.
+    for (int i=0; i<100; i++)
+    {
+      linkt::out_ptr msg(new my_msg);
+      sender.send(msg);
+      cout << "Sent " << msg->msg_uid() << endl;
+      msg = sender.get();
+      cout << "Got back " << msg->msg_uid() << endl;
+    };
+    usleep(1e4);
   }
   catch (...)
   {

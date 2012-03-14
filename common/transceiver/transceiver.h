@@ -51,8 +51,8 @@ namespace nrtb
    * specification this class implements.
    * ***************************************************************/
   template <class out, class in,
-	class outp = boost::shared_ptr<out>,
-	class inp = boost::shared_ptr<in> >
+	class outp = std::unique_ptr<out>,
+	class inp = std::unique_ptr<in> >
   class transceiver
   {
 	public:
@@ -70,7 +70,7 @@ namespace nrtb
 	   * socket. Once created this class assumes it uniquely owns the 
 	   * socket and will close it upon distruction.
 	   * ***********************************************************/
-	  transceiver(tcp_socket_p socket);
+	  transceiver(tcp_socket_p & socket);
 	  /*************************************************************
 	   * Closes the socket and releases all mmemory associated with
 	   * this class.
@@ -80,12 +80,12 @@ namespace nrtb
 	   * gets the next message from the socket. If no messages are 
 	   * ready, blocks util one arrives. 
 	   * ***********************************************************/
-	  inp get();
+	  inp & get();
 	  /**************************************************************
 	   * Sends a message over the socket and adds it to the 
 	   * sent_messages buffer in case it's needed for error recovery.
 	   * ***********************************************************/
-	  void send(outp sendme);
+	  void send(outp & sendme);
 	  /**************************************************************
 	   * Called by the data consumer when an inbound message was 
 	   * not valid in the current application context. msg_number
@@ -136,7 +136,7 @@ namespace nrtb
 serializer tscvr_sequence(0);
 
 template <class out, class in, class outp, class inp>
-transceiver<out,in,outp,inp>::transceiver(tcp_socket_p socket)
+transceiver<out,in,outp,inp>::transceiver(tcp_socket_p & socket)
 {
   // get the configuration parameters.
   global_conf_reader & config = global_conf_reader::get_instance();
@@ -173,10 +173,10 @@ transceiver<out,in,outp,inp>::~transceiver()
   // shutdown and release  the socket.
   try 
   {
-	if (sock)
-	{
-	  sock.reset(); 
-	};
+	  if (sock)
+	  {
+	    sock.reset(); 
+	  };
   } catch (...) {};
   // discard the sent messages list.
   sent_messages.clear();
@@ -184,63 +184,56 @@ transceiver<out,in,outp,inp>::~transceiver()
 };
 
 template <class out, class in, class outp, class inp>
-inp transceiver<out,in,outp,inp>::get()
+inp & transceiver<out,in,outp,inp>::get()
 {
   // get the message length first.
   std::string len_field = sock->get(4,10);
-//std::cout << "len_field=" << http_chartohex(len_field) << std::endl;  
   msg_num_t msg_len;
   for (int i=0; i<4; i++)
   {
-	msg_len.bytes[i] = len_field[i];
+  	msg_len.bytes[i] = len_field[i];
   };
-//std::cout << ":len=" << msg_len.number << std::endl;
   // get the rest of the message.
   inp returnme(new in);
   std::string input = sock->get(msg_len.number);
-//std::cout << ":received=" << http_chartohex(input) << std::endl;
   returnme->ParseFromString(input);
   // for the first messsge any number is
   // accepted.
   if (last_inbound == 0)
   {
-	last_inbound = returnme->msg_uid();
+  	last_inbound = returnme->msg_uid();
   }
   else
   {
-	last_inbound++;
-	int temp = returnme->msg_uid();
-	if (temp != last_inbound)
-	{ 
-	  inbound_seq_error e;
-	  std::stringstream message;
-	  message << "Expected " << last_inbound
-		<< " received "  << temp;
-	  e.store(message.str());
-	  throw e;
-	};
+	  last_inbound++;
+	  int temp = returnme->msg_uid();
+	  if (temp != last_inbound)
+	  { 
+	    inbound_seq_error e;
+	    std::stringstream message;
+	    message << "Expected " << last_inbound
+		  << " received "  << temp;
+	    e.store(message.str());
+	    throw e;
+	  };
   };
   return returnme;
 };
 
 template <class out, class in, class outp, class inp>
-void transceiver<out,in,outp,inp>::send(outp sendme)
+void transceiver<out,in,outp,inp>::send(outp & sendme)
 {
   sendme->set_msg_uid(out_msg_num());
   std::string output;
   output = sendme->SerializeAsString();
   msg_num_t msg_len;
   msg_len.number = output.size();
-//std::cout << "num:len" << msg_len.number << ":" << output.length() << //std::endl;
   std::string num_field = "    ";
   for (int i=0; i<4; i++)
   {
-	num_field[i] = msg_len.bytes[i];
-//std::cout << int(num_field[i]) << "," ;
+	  num_field[i] = msg_len.bytes[i];
   };
-//std::cout << " = " << msg_len.number << std::endl;  
   output = num_field + output;
-//std::cout << "out msg=" << http_chartohex(output) << std::endl;  
   sock->put(output);
   sent_messages.push_back(sendme);
 };
