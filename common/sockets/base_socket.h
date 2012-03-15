@@ -20,7 +20,7 @@
 #define base_socket_header
 
 #include <base_thread.h>
-#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
+#include <memory>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
