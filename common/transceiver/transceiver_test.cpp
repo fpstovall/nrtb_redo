@@ -79,7 +79,7 @@ public:
 	  {
 	    try 
 	    {
-		    linkt::out_ptr inbound = link.get();
+		    linkt::in_ptr inbound = link.get();
 		    last_inbound = inbound->msg_uid();
 		    cout << "\tReceived #" << last_inbound << endl;
 		    link.send(inbound);
@@ -114,7 +114,7 @@ public:
 class listener: public tcp_server_socket_factory
 {
 protected:
-  boost::shared_ptr<server_work_thread> task;
+  std::unique_ptr<server_work_thread> task;
 
 public:
   listener(const string & add, const int & back)
@@ -131,7 +131,7 @@ public:
 	  {
 	    task.reset(new server_work_thread);
 	    task->last_inbound = 0;
-	    task->sock = connect_sock;
+	    task->sock = std::move(connect_sock);
 	    task->start(*(task.get()));
 	    cout << "server thread running." << endl;
 	    // shutdown the listener thead.. our work is done here.

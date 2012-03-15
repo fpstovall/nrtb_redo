@@ -26,7 +26,6 @@
 #include <serializer.h>
 #include <confreader.h>
 #include <Poco/Logger.h>
-#include <boost/shared_ptr.hpp>
 #include <boost/circular_buffer.hpp>
 
 namespace nrtb
@@ -80,7 +79,7 @@ namespace nrtb
 	   * gets the next message from the socket. If no messages are 
 	   * ready, blocks util one arrives. 
 	   * ***********************************************************/
-	  inp & get();
+	  inp get();
 	  /**************************************************************
 	   * Sends a message over the socket and adds it to the 
 	   * sent_messages buffer in case it's needed for error recovery.
@@ -152,7 +151,7 @@ transceiver<out,in,outp,inp>::transceiver(tcp_socket_p & socket)
   logname = s.str();
   Poco::Logger & log = Poco::Logger::get(logname);
   // set up the socket.
-  sock = socket;
+  sock = std::move(socket);
   // annouce ourselves...
   log.information("Instanciated."); 
   s.str("");
@@ -184,7 +183,7 @@ transceiver<out,in,outp,inp>::~transceiver()
 };
 
 template <class out, class in, class outp, class inp>
-inp & transceiver<out,in,outp,inp>::get()
+inp transceiver<out,in,outp,inp>::get()
 {
   // get the message length first.
   std::string len_field = sock->get(4,10);
@@ -235,7 +234,7 @@ void transceiver<out,in,outp,inp>::send(outp & sendme)
   };
   output = num_field + output;
   sock->put(output);
-  sent_messages.push_back(sendme);
+  sent_messages.push_back(std::move(sendme));
 };
 
 template <class out, class in, class outp, class inp>
