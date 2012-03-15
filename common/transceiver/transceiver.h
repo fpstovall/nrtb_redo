@@ -123,7 +123,7 @@ namespace nrtb
 	  unsigned long long  last_inbound;
 	  /// buffer to hold previously sent messages; required for 
 	  /// error recovery.
-	  boost::circular_buffer<outp> sent_messages;
+	  boost::circular_buffer<out> sent_messages;
 	  /// fence post for recovery efforts, zero if none in play
 	  unsigned long long nak_fence_post;
 	  /// These methods implment actual nak recovery.
@@ -234,7 +234,7 @@ void transceiver<out,in,outp,inp>::send(outp & sendme)
   };
   output = num_field + output;
   sock->put(output);
-  sent_messages.push_back(std::move(sendme));
+  sent_messages.push_back(*sendme);
 };
 
 template <class out, class in, class outp, class inp>
