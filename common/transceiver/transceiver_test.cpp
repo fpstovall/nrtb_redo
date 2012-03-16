@@ -68,7 +68,14 @@ public:
   ~server_work_thread()
   {
 	  cout << "Destructing server_work_thread" << endl;
-	  sock.reset();
+	  // Altered to close the socket if it's open, but not reset 
+	  // it. we'll let destruction happen automatically when it
+	  // goes out of scope.
+	  // sock.reset();
+	  if (sock->status() == tcp_socket::sock_connect)
+	  {
+	    sock->close();
+	  }
   };
   
   void run()
@@ -122,7 +129,28 @@ public:
   ~listener()
   {
 	  cout << "Destructing listener" << endl;
-	  task.reset();
+	  // check to see if the listener is still up.
+	  try
+	  {
+	    if is_listening()
+      {
+        stop_listen();
+      };
+	  }
+	  catch (...)
+	  {
+	    cerr << "  is_listening() threw, presuming listener is down." 
+	      << endl;
+	  };
+	  // check to see if task is still running and display
+	  // a warning if it is.
+	  if (task->is_running())
+	  {
+	    cerr << "WARNING: Worker is still running!!" << endl;
+	    task->stop();
+	    task->join();
+	    cerr << "Worker thread shutdown is complete." << endl;
+	  };
   };
   
   bool on_accept()
@@ -132,8 +160,8 @@ public:
 	    task.reset(new server_work_thread);
 	    task->last_inbound = 0;
 	    task->sock = std::move(connect_sock);
-	    task->start(*(task.get()));
-	    cout << "server thread running." << endl;
+	    task->start();
+	    cout << "server thread started." << endl;
 	    // shutdown the listener thead.. our work is done here.
 	    return false;
 	  }
@@ -187,19 +215,21 @@ int main()
   }
   catch (...)
   {
-	cout << "exception caught during test." << endl;
-	er_count.inc();
+	  cout << "exception caught during test." << endl;
+	  er_count.inc();
   };
 
   int faults = er_count(); 
   if (faults)
   {
-	cout << "========== ** There were " << faults 
-	  << "errors logged. =========" << endl; 
+	  cout << "========== ** There were " << faults 
+	    << "errors logged. =========" << endl; 
   }
   else
-	cout << "========= nrtb::transceiver test complete.=========" 
-	  << endl;
+  {
+	  cout << "========= nrtb::transceiver test complete.=========" 
+	    << endl;
+  };
 
   return faults;
 };
