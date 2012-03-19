@@ -118,11 +118,10 @@ public:
   };
 };
 
+std::unique_ptr<server_work_thread> task;
+
 class listener: public tcp_server_socket_factory
 {
-protected:
-  std::unique_ptr<server_work_thread> task;
-
 public:
   listener(const string & add, const int & back)
    : tcp_server_socket_factory(add, back) {};
@@ -195,7 +194,11 @@ int main()
     // kick off the listener thread.
     listener server(address,5);
     server.start_listen();
-    usleep(1e4);
+    do
+    {
+      usleep(1e3);
+    }
+    until (server.listening())
 
     // set up our sender
     tcp_socket_p sock(new tcp_socket);

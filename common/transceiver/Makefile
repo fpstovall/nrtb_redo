@@ -23,7 +23,7 @@ lib:	transceiver_test
 
 transceiver_test:	transceiver.h transceiver_test.cpp
 	@rm -f transceiver_test
-	g++ -c transceiver_test.cpp -I../include -std=gnu++0x -DBOOST_CB_DISABLE_DEBUG
+	g++ -c transceiver_test.cpp -I../include -std=gnu++0x
 	g++ -o transceiver_test transceiver_test.o ../obj/common.o ../obj/log_setup.o ../obj/serializer.o ../obj/base_thread.o ../obj/base_socket.o ../obj/confreader.o -lpthread -lprotobuf  ../lib/nrtb_gpb.a -lPocoFoundation -std=gnu++0x
 
 clean:
