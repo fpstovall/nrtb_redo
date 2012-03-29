@@ -75,6 +75,11 @@ namespace nrtb
 	   * this class.
 	   * ***********************************************************/
 	  virtual ~transceiver();
+	  /*************************************************************
+	   * is_connected() returns true if the socket is up and ready
+	   * to use, false otherwise.
+	   *************************************************************/
+	   bool is_connected();
 	  /**************************************************************
 	   * gets the next message from the socket. If no messages are 
 	   * ready, blocks util one arrives. 
@@ -180,6 +185,17 @@ transceiver<out,in,outp,inp>::~transceiver()
   // discard the sent messages list.
   sent_messages.clear();
   log.information("shutdown complete.");
+};
+
+template <class out, class in, class outp, class inp>
+bool transciever<out,in,outp,inp>::is_connected()
+{
+  returnme = false;
+  if (sock and (sock->status() == tcp_socket::sock_connect))
+  {
+    returnme = true;
+  };
+  return returnme;
 };
 
 template <class out, class in, class outp, class inp>

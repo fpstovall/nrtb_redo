@@ -68,21 +68,13 @@ public:
   ~server_work_thread()
   {
 	  cout << "Destructing server_work_thread" << endl;
-	  // Altered to close the socket if it's open, but not reset 
-	  // it. we'll let destruction happen automatically when it
-	  // goes out of scope.
-	  // sock.reset();
-	  if (sock->status() == tcp_socket::sock_connect)
-	  {
-	    sock->close();
-	  }
   };
   
   void run()
   {
 	  set_cancel_anytime();
 	  linkt link(sock);
-	  while (sock->status() == tcp_socket::sock_connect)
+	  while (link.is_connected())
 	  {
 	    try 
 	    {
@@ -194,11 +186,10 @@ int main()
     // kick off the listener thread.
     listener server(address,5);
     server.start_listen();
-    do
+    while !(server.listening())
     {
       usleep(1e3);
-    }
-    until (server.listening())
+    };
 
     // set up our sender
     tcp_socket_p sock(new tcp_socket);
