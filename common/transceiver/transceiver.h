@@ -188,9 +188,9 @@ transceiver<out,in,outp,inp>::~transceiver()
 };
 
 template <class out, class in, class outp, class inp>
-bool transciever<out,in,outp,inp>::is_connected()
+bool transceiver<out,in,outp,inp>::is_connected()
 {
-  returnme = false;
+  bool returnme = false;
   if (sock and (sock->status() == tcp_socket::sock_connect))
   {
     returnme = true;

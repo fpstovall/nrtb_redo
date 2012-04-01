@@ -64,6 +64,12 @@ public:
   
   tcp_socket_p sock;
   unsigned long long last_inbound;
+
+  server_work_thread()
+  {
+    cout << "Creating server_work_thread." << endl;
+    last_inbound = 0;
+  }
   
   ~server_work_thread()
   {
@@ -80,7 +86,6 @@ public:
 	    {
 		    linkt::in_ptr inbound = link.get();
 		    last_inbound = inbound->msg_uid();
-		    cout << "\tReceived #" << last_inbound << endl;
 		    link.send(inbound);
 		    if (last_inbound == 99)
 		    {
@@ -110,32 +115,42 @@ public:
   };
 };
 
-std::unique_ptr<server_work_thread> task;
-
 class listener: public tcp_server_socket_factory
 {
 public:
+
+  std::unique_ptr<server_work_thread> task;
+
   listener(const string & add, const int & back)
-   : tcp_server_socket_factory(add, back) {};
+   : tcp_server_socket_factory(add, back)
+  {
+    cout << "Listener constructed." << endl;
+  };
+   
   ~listener()
   {
 	  cout << "Destructing listener" << endl;
 	  // check to see if the listener is still up.
 	  try
 	  {
-	    if is_listening()
+	    if (listening())
       {
+        cerr << "  Listener is still running...";
         stop_listen();
+        cerr << " shutdown is complete." << endl;
       };
 	  }
 	  catch (...)
 	  {
-	    cerr << "  is_listening() threw, presuming listener is down." 
-	      << endl;
+	    cerr << "  Presuming listener is down." << endl;
 	  };
+    if (!task)
+    {
+      cerr << "  Task is not allocated. " << endl;
+    }
 	  // check to see if task is still running and display
 	  // a warning if it is.
-	  if (task->is_running())
+	  if (task and (task->is_running()))
 	  {
 	    cerr << "WARNING: Worker is still running!!" << endl;
 	    task->stop();
@@ -148,11 +163,11 @@ public:
   {
 	  if (!task)
 	  {
-	    task.reset(new server_work_thread);
-	    task->last_inbound = 0;
-	    task->sock = std::move(connect_sock);
-	    task->start();
-	    cout << "server thread started." << endl;
+      cout << "In listener::on_accept()" << endl;
+      task.reset(new server_work_thread);
+      task->sock = std::move(connect_sock);
+      task->start();
+      cout << "server thread started." << endl;
 	    // shutdown the listener thead.. our work is done here.
 	    return false;
 	  }
@@ -166,7 +181,7 @@ public:
 };
 
 string address = "127.0.0.1:";
-int port_base = 12334;
+int port_base = 14334;
 
 int main()
 {
@@ -186,24 +201,45 @@ int main()
     // kick off the listener thread.
     listener server(address,5);
     server.start_listen();
-    while !(server.listening())
+    while (!server.listening())
     {
       usleep(1e3);
     };
+    cout << "Listener thread is ready." << endl;
 
     // set up our sender
     tcp_socket_p sock(new tcp_socket);
-    sock->connect(address);
+    int trycount = 0;
+    while (sock->status() != tcp_socket::sock_connect)
+    {
+      try
+      {
+        sock->connect(address);
+      }
+      catch (tcp_socket::bad_connect_exception & e)
+      {
+        trycount++;
+        if (trycount > 99)
+        {
+          cerr << "Too many connect failures for the sender socket."
+            << endl;
+          throw e;
+        };  
+        usleep(1e4);
+      };
+    }
+    cout << "sender socket is connected to listener" << endl;
     linkt sender(sock);
+    cout << "Sender transciever is ready to use." << endl;
 
     // Let's send a few things.
     for (int i=0; i<100; i++)
     {
       linkt::out_ptr msg(new my_msg);
       sender.send(msg);
-      cout << "Sent " << msg->msg_uid() << endl;
+      cout << "Sent " << msg->msg_uid() << ", ";
       msg = sender.get();
-      cout << "Got back " << msg->msg_uid() << endl;
+      cout << "good return." << endl;
     };
     usleep(1e4);
   }
@@ -216,8 +252,8 @@ int main()
   int faults = er_count(); 
   if (faults)
   {
-	  cout << "========== ** There were " << faults 
-	    << "errors logged. =========" << endl; 
+	  cout << "========== ** There were " << faults
+	    << " errors logged. =========" << endl; 
   }
   else
   {
