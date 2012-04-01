@@ -21,7 +21,6 @@
 #include <string>
 #include <boost/random.hpp>
 #include "base_socket.h"
-#include <boost/shared_ptr.hpp>
 
 using namespace nrtb;
 using namespace std;
