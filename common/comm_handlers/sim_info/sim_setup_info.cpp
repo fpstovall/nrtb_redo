@@ -50,8 +50,8 @@ void com_sim_setup::set_from_message(nrtb_msg::sim_setup_data* ext)
   int count = ext->item_size();
   for (int i=0; i<count; i++)
   {
-	obj_p t(new com_obj_setup(ext->mutable_item(i)));
-	items.push_back(t);
+    obj_p t(std::move(new com_obj_setup(ext->mutable_item(i))));
+    items.push_back(std::move(t));
   };
 };
 
