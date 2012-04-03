@@ -24,12 +24,12 @@ lib:	ack_nak_test
 
 ack_nak_test:	ack_nak.o ack_nak_test.cpp
 	@rm -f ack_nak_test
-	g++ -c ack_nak_test.cpp -I ../../include -I ../include
-	g++ -o ack_nak_test ack_nak_test.o ack_nak.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread
+	g++ -c ack_nak_test.cpp -I ../../include -I ../include -std=gnu++0x 
+	g++ -o ack_nak_test ack_nak_test.o ack_nak.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread -std=gnu++0x 
 
 ack_nak.o:	ack_nak.cpp ack_nak.h Makefile
 	@rm -f ack_nak.o
-	g++ -c -O3 ack_nak.cpp -I ../include -I ../../include
+	g++ -c -O3 ack_nak.cpp -I ../include -I ../../include -std=gnu++0x 
 
 clean:
 	@rm -vf *.o ../include/ack_nak.h ../obj/ack_nak.o ack_nak_test
