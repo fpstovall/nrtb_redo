@@ -24,12 +24,12 @@ lib:	triplet_test
 
 triplet_test:	triplet.o triplet_test.cpp
 	@rm -f triplet_test
-	g++ -c triplet_test.cpp -I ../../include
-	g++ -o triplet_test triplet_test.o triplet.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread
+	g++ -c triplet_test.cpp -I ../../include -std=gnu++0x
+	g++ -o triplet_test triplet_test.o triplet.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread -std=gnu++0x
 
 triplet.o:	triplet.cpp triplet.h Makefile
 	@rm -f triplet.o
-	g++ -c -O3 triplet.cpp -I../../include
+	g++ -c -O3 triplet.cpp -I../../include -std=gnu++0x
 
 clean:
 	@rm -vf *.o ../include/triplet.h ../obj/triplet.o triplet_test

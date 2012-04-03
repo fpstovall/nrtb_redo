@@ -24,12 +24,12 @@ lib:	sim_termination_test
 
 sim_termination_test:	sim_termination.o sim_termination_test.cpp
 	@rm -f sim_termination_test
-	g++ -c sim_termination_test.cpp -I ../../include -I ../include
-	g++ -o sim_termination_test sim_termination_test.o sim_termination.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread
+	g++ -c sim_termination_test.cpp -I ../../include -I ../include -std=gnu++0x
+	g++ -o sim_termination_test sim_termination_test.o sim_termination.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread -std=gnu++0x
 
 sim_termination.o:	sim_termination.cpp sim_termination.h Makefile
 	@rm -f sim_termination.o
-	g++ -c -O3 sim_termination.cpp -I ../include -I../../include
+	g++ -c -O3 sim_termination.cpp -I ../include -I../../include -std=gnu++0x
 
 clean:
 	@rm -vf *.o ../include/sim_termination.h ../obj/sim_termination.o sim_termination_test

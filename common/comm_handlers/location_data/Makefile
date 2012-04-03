@@ -24,12 +24,12 @@ lib:	location_data_test
 
 location_data_test:	location_data.o location_data_test.cpp
 	@rm -f location_data_test
-	g++ -c location_data_test.cpp -I ../../include -I ../include
-	g++ -o location_data_test location_data_test.o location_data.o ../obj/triplet.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread
+	g++ -c location_data_test.cpp -I ../../include -I ../include -std=gnu++0x 
+	g++ -o location_data_test location_data_test.o location_data.o ../obj/triplet.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread -std=gnu++0x 
 
 location_data.o:	location_data.cpp location_data.h Makefile
 	@rm -f location_data.o
-	g++ -c -O3 location_data.cpp -I ../include -I../../include
+	g++ -c -O3 location_data.cpp -I ../include -I../../include -std=gnu++0x 
 
 clean:
 	@rm -vf *.o ../include/location_data.h ../obj/location_data.o location_data_test
