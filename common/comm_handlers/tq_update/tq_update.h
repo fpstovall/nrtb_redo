@@ -20,7 +20,7 @@
 #define tq_update_header
 
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <location_data.h>
 #include <velocity_data.h>
 #include <tq_obj.h>
@@ -32,8 +32,8 @@ namespace nrtb_com {
 class com_tq_update
 {
 public:
-  typedef boost::shared_ptr<nrtb_com::com_tq_obj_update> up_p;
-  typedef boost::shared_ptr<nrtb_com::com_obj_setup> obj_p;
+  typedef std::unique_ptr<nrtb_com::com_tq_obj_update> up_p;
+  typedef std::unique_ptr<nrtb_com::com_obj_setup> obj_p;
   typedef std::vector<nrtb_com::com_tq_obj_update> up_list;
   typedef std::vector<nrtb_com::com_obj_setup> ob_list;
   uint32_t quanta_id;
