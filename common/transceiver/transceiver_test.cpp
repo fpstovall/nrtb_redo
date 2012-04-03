@@ -45,14 +45,14 @@ public:
 
   void inc()
   {
-	scope_lock lock(data_lock);
-	er_count++;
+	  scope_lock lock(data_lock);
+	  er_count++;
   };
 
   int operator ()()
   {
-	scope_lock lock(data_lock);
-	return er_count;
+	  scope_lock lock(data_lock);
+	  return er_count;
   };
 };
 
@@ -64,90 +64,124 @@ public:
   
   tcp_socket_p sock;
   unsigned long long last_inbound;
+
+  server_work_thread()
+  {
+    cout << "Creating server_work_thread." << endl;
+    last_inbound = 0;
+  }
   
   ~server_work_thread()
   {
-	cout << "Destructing server_work_thread" << endl;
-	sock.reset();
+	  cout << "Destructing server_work_thread" << endl;
   };
   
   void run()
   {
-	set_cancel_anytime();
-	linkt link(sock);
-	while (sock->status() == tcp_socket::sock_connect)
-	{
-	  try 
+	  set_cancel_anytime();
+	  linkt link(sock);
+	  while (link.is_connected())
 	  {
-		linkt::out_ptr inbound = link.get();
-		last_inbound = inbound->msg_uid();
-		cout << "\tReceived #" << last_inbound << endl;
-		link.send(inbound);
-		if (last_inbound == 99)
-		{
-		  cout << "Receiver thread closing." << endl;
-		  exit(0);
-		};
-	  }
-	  catch (linkt::general_exception & e)
-	  {
-		cerr << "Server work thread caught " << e.what()
-		  << "\n\tComment: " << e.comment() << endl;
-		er_count.inc();;
-	  }
-	  catch (tcp_socket::general_exception & e)
-	  {
-		cerr << "Server work thread caught " << e.what()
-		  << "\n\tComment: " << e.comment() << endl;
-		er_count.inc();;
-	  }
-	  catch (std::exception & e)
-	  {
-		cerr << "Server work thread caught " << e.what() 
-		  << endl;
-		er_count.inc();;
+	    try 
+	    {
+		    linkt::in_ptr inbound = link.get();
+		    last_inbound = inbound->msg_uid();
+		    link.send(inbound);
+		    if (last_inbound == 99)
+		    {
+		      cout << "Receiver thread closing." << endl;
+		      exit(0);
+		    };
+      }
+      catch (linkt::general_exception & e)
+      {
+	      cerr << "Server work thread caught " << e.what()
+	        << "\n\tComment: " << e.comment() << endl;
+	      er_count.inc();;
+      }
+      catch (tcp_socket::general_exception & e)
+      {
+	      cerr << "Server work thread caught " << e.what()
+	        << "\n\tComment: " << e.comment() << endl;
+	      er_count.inc();;
+      }
+      catch (std::exception & e)
+      {
+	      cerr << "Server work thread caught " << e.what() 
+	        << endl;
+	      er_count.inc();;
+	    };
 	  };
-	};
   };
 };
 
 class listener: public tcp_server_socket_factory
 {
-protected:
-  boost::shared_ptr<server_work_thread> task;
-
 public:
+
+  std::unique_ptr<server_work_thread> task;
+
   listener(const string & add, const int & back)
-   : tcp_server_socket_factory(add, back) {};
+   : tcp_server_socket_factory(add, back)
+  {
+    cout << "Listener constructed." << endl;
+  };
+   
   ~listener()
   {
-	cout << "Destructing listener" << endl;
-	task.reset();
+	  cout << "Destructing listener" << endl;
+	  // check to see if the listener is still up.
+	  try
+	  {
+	    if (listening())
+      {
+        cerr << "  Listener is still running...";
+        stop_listen();
+        cerr << " shutdown is complete." << endl;
+      };
+	  }
+	  catch (...)
+	  {
+	    cerr << "  Presuming listener is down." << endl;
+	  };
+    if (!task)
+    {
+      cerr << "  Task is not allocated. " << endl;
+    }
+	  // check to see if task is still running and display
+	  // a warning if it is.
+	  if (task and (task->is_running()))
+	  {
+	    cerr << "WARNING: Worker is still running!!" << endl;
+	    task->stop();
+	    task->join();
+	    cerr << "Worker thread shutdown is complete." << endl;
+	  };
   };
   
   bool on_accept()
   {
-	if (!task)
-	{
-	  task.reset(new server_work_thread);
-	  task->last_inbound = 0;
-	  task->sock = connect_sock;
-	  task->start(*(task.get()));
-	  cout << "server thread running." << endl;
-	  // shutdown the listener thead.. our work is done here.
-	  return false;
-	}
-	else
-	{
-	  connect_sock->close();
-	  cerr << "Multiple attempts to connect to server" 
-		<< endl;
-	};
+	  if (!task)
+	  {
+      cout << "In listener::on_accept()" << endl;
+      task.reset(new server_work_thread);
+      task->sock = std::move(connect_sock);
+      task->start();
+      cout << "server thread started." << endl;
+	    // shutdown the listener thead.. our work is done here.
+	    return false;
+	  }
+	  else
+	  {
+	    connect_sock->close();
+	    cerr << "Multiple attempts to connect to server" 
+		  << endl;
+	  };
   };
 };
 
 string address = "127.0.0.1:";
-int port_base = 12334;
+int port_base = 14334;
 
 int main()
 {
@@ -155,51 +189,77 @@ int main()
 
   try
   {
-	//set up our port and address
-	boost::mt19937 rng;
-	rng.seed(time(0));
-	boost::uniform_int<> r(0,1000);
-	stringstream s;
-	s << address << port_base + r(rng);
-	address = s.str();
-	cout << "Using " << address << endl;
+    //set up our port and address
+    boost::mt19937 rng;
+    rng.seed(time(0));
+    boost::uniform_int<> r(0,1000);
+    stringstream s;
+    s << address << port_base + r(rng);
+    address = s.str();
+    cout << "Using " << address << endl;
 
-	// kick off the listener thread.
-	listener server(address,5);
-	server.start_listen();
-	usleep(1e4);
+    // kick off the listener thread.
+    listener server(address,5);
+    server.start_listen();
+    while (!server.listening())
+    {
+      usleep(1e3);
+    };
+    cout << "Listener thread is ready." << endl;
 
-	// set up our sender
-	tcp_socket_p sock(new tcp_socket);
-	sock->connect(address);
-	linkt sender(sock);
+    // set up our sender
+    tcp_socket_p sock(new tcp_socket);
+    int trycount = 0;
+    while (sock->status() != tcp_socket::sock_connect)
+    {
+      try
+      {
+        sock->connect(address);
+      }
+      catch (tcp_socket::bad_connect_exception & e)
+      {
+        trycount++;
+        if (trycount > 99)
+        {
+          cerr << "Too many connect failures for the sender socket."
+            << endl;
+          throw e;
+        };  
+        usleep(1e4);
+      };
+    }
+    cout << "sender socket is connected to listener" << endl;
+    linkt sender(sock);
+    cout << "Sender transciever is ready to use." << endl;
 
-	// Let's send a few things.
-	for (int i=0; i<100; i++)
-	{
-	  linkt::out_ptr msg(new my_msg);
-	  sender.send(msg);
-	  cout << "Sent " << msg->msg_uid() << endl;
-	  msg = sender.get();
-	  cout << "Got back " << msg->msg_uid() << endl;
-	};
-	usleep(1e4);
+    // Let's send a few things.
+    for (int i=0; i<100; i++)
+    {
+      linkt::out_ptr msg(new my_msg);
+      sender.send(msg);
+      cout << "Sent " << msg->msg_uid() << ", ";
+      msg = sender.get();
+      cout << "good return." << endl;
+    };
+    usleep(1e4);
   }
   catch (...)
   {
-	cout << "exception caught during test." << endl;
-	er_count.inc();
+	  cout << "exception caught during test." << endl;
+	  er_count.inc();
   };
 
   int faults = er_count(); 
   if (faults)
   {
-	cout << "========== ** There were " << faults 
-	  << "errors logged. =========" << endl; 
+	  cout << "========== ** There were " << faults
+	    << " errors logged. =========" << endl; 
   }
   else
-	cout << "========= nrtb::transceiver test complete.=========" 
-	  << endl;
+  {
+	  cout << "========= nrtb::transceiver test complete.=========" 
+	    << endl;
+  };
 
   return faults;
 };

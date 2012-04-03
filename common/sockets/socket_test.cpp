@@ -21,7 +21,6 @@
 #include <string>
 #include <boost/random.hpp>
 #include "base_socket.h"
-#include <boost/shared_ptr.hpp>
 
 using namespace nrtb;
 using namespace std;
@@ -29,46 +28,48 @@ using namespace std;
 class myserver: public tcp_server_socket_factory
 {
 public:
-	int hits;
-	int errors;
+  int hits;
+  int errors;
 
-	// constructor
-	myserver(const string & a, const unsigned short int & b) 
-		: tcp_server_socket_factory(a,b)
-	{
-		// Don't need to lock here because we know the 
-		// listener thread is not running.
-		hits = 0;
-		errors = 0;
-	};
+  // constructor
+  myserver(const string & a, const unsigned short int & b)
+    : tcp_server_socket_factory(a,b)
+  {
+    // Don't need to lock here because we know the
+    // listener thread is not running.
+    hits = 0;
+    errors = 0;
+  };
 
 protected:
-	// on_accept() is called on each connection.
-	bool on_accept()
-	{
-		try
-		{
-			// just return what we've recieved.
-			string msg = connect_sock->getln();
-			connect_sock->put(msg);
-			// Update our hit count. 
-			hits++;
-		}
-		catch (base_exception & e)
-		{
-		  errors++;
-		  cerr << "server Caught " << e.what() << endl;
-		}
-		catch (...)
-		{
-		  errors++;
-		  cerr << "Unexpected error in on_accept()" << endl;
-		};
-		if (hits > 99) 
-		  return false;
-		else
-		  return true;
-	};
+
+  // on_accept() is called on each connection.
+  bool on_accept()
+  {
+    try
+    {
+      tcp_socket_p sock = std::move(connect_sock);
+      // just return what we've recieved.
+      string msg = sock->getln();
+      sock->put(msg);
+      // Update our hit count.
+      hits++;
+    }
+    catch (base_exception & e)
+    {
+      errors++;
+      cerr << "server Caught " << e.what() << endl;
+    }
+    catch (...)
+    {
+      errors++;
+      cerr << "Unexpected error in on_accept()" << endl;
+    };
+    if (hits > 99)
+      return false;
+    else
+      return true;
+  };
 };
 
 string transceiver(const string address, const string sendme)
@@ -78,7 +79,7 @@ string transceiver(const string address, const string sendme)
   sender.connect(address);
   sender.put(sendme);
   returnme = sender.getln();
-  sender.close();//cerr << "tc>> sock closed" << endl;
+  sender.close();
   return returnme;
 };
 
@@ -101,86 +102,103 @@ int main()
 
   try
   {
-	// start the receiver/server
-	test_server.start_listen();
-	usleep(5e5);
-	
-	// Send test messages
-	for (int i = 0; i < 100; i++)
-	{
-	  stringstream msg;
-	  msg << "test message " << i << "\r";
-	  string checkme = msg.str();
-	  string returned = transceiver(address, checkme);
-	  if (returned != checkme)
-	  {
-		er_count++;
-	  };
-	  cout << returned.substr(0,returned.size()-1) << ": " 
-		<< ((returned == checkme) ? "Passed" : "Failed")
-		<< endl;
-	};
+    // start the receiver/server
+    test_server.start_listen();
+    int countdown = 99;
+    while ((!test_server.listening()) and countdown)
+    {
+      usleep(1e3);
+      countdown++;
+    };
+    if (!countdown)
+    {
+      cerr << "Could not start listener." << endl;
+      exit(1);
+    }
+    cout << "test_server ready." << endl;
+
+    // Send test messages
+    for (int i = 0; i < 100; i++)
+    {
+      stringstream msg;
+      msg << "test message " << i << "\r";
+      string checkme = msg.str();
+      string returned = transceiver(address, checkme);
+      if (returned != checkme)
+      {
+        er_count++;
+      };
+      cout << returned.substr(0,returned.size()-1) << ": "
+      << ((returned == checkme) ? "Passed" : "Failed")
+      << endl;
+    };
   }
   catch (myserver::bind_failure_exception)
   {
-	  cout << "Could not bind port" << endl;
+    cout << "Could not bind port" << endl;
   }
   catch (myserver::mem_exhasted_exception)
   {
-	  cout << "myserver reports out of memory." << endl;
+    cout << "myserver reports out of memory." << endl;
   }
   catch (myserver::listen_terminated_exception)
   {
-	  cout << "Listener terminated unexpectedly." << endl;
+    cout << "Listener terminated unexpectedly." << endl;
   }
   catch (myserver::on_accept_bound_exception)
   {
-	  cout << "myserver::on_accept() seems bound." << endl;
+    cout << "myserver::on_accept() seems bound." << endl;
   }
   catch (tcp_socket::bad_connect_exception & e)
   {
-	  cout << "A bad_connect_exception was thrown.\n" 
-		<< e.comment() << endl;
+    cout << "A bad_connect_exception was thrown.\n"
+      << "  comment: " << e.comment() << endl;
+    cout << "  test_server.last_fault() = "
+      << test_server.last_fault() << endl;
   }
   catch (tcp_socket::not_open_exception & e)
   {
-	  cout << "A tcp not open exception was caught.\n" 
-		<< e.comment() << endl;
+    cout << "A tcp not open exception was caught.\n"
+      << e.comment() << endl;
   }
   catch (tcp_socket::close_exception & e)
   {
-	  cout << "A close_exception was caught.\n" 
-		<< e.comment() << endl;
+    cout << "A close_exception was caught.\n"
+      << e.comment() << endl;
   }
   catch (tcp_socket::overrun_exception & e)
   {
-	  cout << "An overrun_exception was caught.\n" 
-		<< e.comment() << endl;
+    cout << "An overrun_exception was caught.\n"
+      << e.comment() << endl;
   }
   catch (tcp_socket::buffer_full_exception & e)
   {
-	  cout << "A buffer_full_exception was caught.\n" 
-		<< e.comment() << endl;
+    cout << "A buffer_full_exception was caught.\n"
+      << e.comment() << endl;
   }
   catch (tcp_socket::general_exception & e)
   {
-	  cout << "A tcp_socket exception was caught.\n" 
-		<< e.comment() << endl;
+    cout << "A tcp_socket exception was caught.\n"
+      << "  comment: " << e.comment() << endl;
+    cout << "  test_server.last_fault() = "
+      << test_server.last_fault() << endl;
   }
   catch (exception & e)
   {
-	  cout << "A unexpected " << e.what() << " exception was caught." << endl;
+    cout << "A unexpected " << e.what()
+      << " exception was caught." << endl;
   };
 
   // final check.
   if (test_server.hits != 100)
   {
-	er_count++;
-	cout << "Server does not report the proper number of hits.\n"
-	  << "\tExpected 100, got " << test_server.hits 
-	  << endl;
+    er_count++;
+    cout << "Server does not report the proper number of hits.\n"
+      << "\tExpected 100, got " << test_server.hits
+      << endl;
   };
-  cout << "=========== tcp_socket test complete =============" << endl;
+  cout << "=========== tcp_socket test complete ============="
+    << endl;
   
   return er_count;
 };

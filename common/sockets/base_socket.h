@@ -20,7 +20,7 @@
 #define base_socket_header
 
 #include <base_thread.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
@@ -373,7 +373,7 @@ class tcp_socket
 };
 
 /// smart pointer for use with tcp_sockets
-typedef boost::shared_ptr<nrtb::tcp_socket> tcp_socket_p;
+typedef std::unique_ptr<nrtb::tcp_socket> tcp_socket_p;
 
 /** Abstract "listener" TCP/IP socket for servers. 
  ** 

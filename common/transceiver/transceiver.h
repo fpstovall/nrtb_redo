@@ -26,7 +26,6 @@
 #include <serializer.h>
 #include <confreader.h>
 #include <Poco/Logger.h>
-#include <boost/shared_ptr.hpp>
 #include <boost/circular_buffer.hpp>
 
 namespace nrtb
@@ -51,8 +50,8 @@ namespace nrtb
    * specification this class implements.
    * ***************************************************************/
   template <class out, class in,
-	class outp = boost::shared_ptr<out>,
-	class inp = boost::shared_ptr<in> >
+	class outp = std::unique_ptr<out>,
+	class inp = std::unique_ptr<in> >
   class transceiver
   {
 	public:
@@ -70,12 +69,17 @@ namespace nrtb
 	   * socket. Once created this class assumes it uniquely owns the 
 	   * socket and will close it upon distruction.
 	   * ***********************************************************/
-	  transceiver(tcp_socket_p socket);
+	  transceiver(tcp_socket_p & socket);
 	  /*************************************************************
 	   * Closes the socket and releases all mmemory associated with
 	   * this class.
 	   * ***********************************************************/
 	  virtual ~transceiver();
+	  /*************************************************************
+	   * is_connected() returns true if the socket is up and ready
+	   * to use, false otherwise.
+	   *************************************************************/
+	   bool is_connected();
 	  /**************************************************************
 	   * gets the next message from the socket. If no messages are 
 	   * ready, blocks util one arrives. 
@@ -85,7 +89,7 @@ namespace nrtb
 	   * Sends a message over the socket and adds it to the 
 	   * sent_messages buffer in case it's needed for error recovery.
 	   * ***********************************************************/
-	  void send(outp sendme);
+	  void send(outp & sendme);
 	  /**************************************************************
 	   * Called by the data consumer when an inbound message was 
 	   * not valid in the current application context. msg_number
@@ -124,7 +128,7 @@ namespace nrtb
 	  unsigned long long  last_inbound;
 	  /// buffer to hold previously sent messages; required for 
 	  /// error recovery.
-	  boost::circular_buffer<outp> sent_messages;
+	  boost::circular_buffer<out> sent_messages;
 	  /// fence post for recovery efforts, zero if none in play
 	  unsigned long long nak_fence_post;
 	  /// These methods implment actual nak recovery.
@@ -136,7 +140,7 @@ namespace nrtb
 serializer tscvr_sequence(0);
 
 template <class out, class in, class outp, class inp>
-transceiver<out,in,outp,inp>::transceiver(tcp_socket_p socket)
+transceiver<out,in,outp,inp>::transceiver(tcp_socket_p & socket)
 {
   // get the configuration parameters.
   global_conf_reader & config = global_conf_reader::get_instance();
@@ -152,7 +156,7 @@ transceiver<out,in,outp,inp>::transceiver(tcp_socket_p socket)
   logname = s.str();
   Poco::Logger & log = Poco::Logger::get(logname);
   // set up the socket.
-  sock = socket;
+  sock = std::move(socket);
   // annouce ourselves...
   log.information("Instanciated."); 
   s.str("");
@@ -173,10 +177,10 @@ transceiver<out,in,outp,inp>::~transceiver()
   // shutdown and release  the socket.
   try 
   {
-	if (sock)
-	{
-	  sock.reset(); 
-	};
+	  if (sock)
+	  {
+	    sock.reset(); 
+	  };
   } catch (...) {};
   // discard the sent messages list.
   sent_messages.clear();
@@ -184,65 +188,69 @@ transceiver<out,in,outp,inp>::~transceiver()
 };
 
 template <class out, class in, class outp, class inp>
-inp transceiver<out,in,outp,inp>::get()
+bool transceiver<out,in,outp,inp>::is_connected()
 {
-  // get the message length first.
-  std::string len_field = sock->get(4,10);
-//std::cout << "len_field=" << http_chartohex(len_field) << std::endl;  
-  msg_num_t msg_len;
-  for (int i=0; i<4; i++)
+  bool returnme = false;
+  if (sock and (sock->status() == tcp_socket::sock_connect))
   {
-	msg_len.bytes[i] = len_field[i];
-  };
-//std::cout << ":len=" << msg_len.number << std::endl;
-  // get the rest of the message.
-  inp returnme(new in);
-  std::string input = sock->get(msg_len.number);
-//std::cout << ":received=" << http_chartohex(input) << std::endl;
-  returnme->ParseFromString(input);
-  // for the first messsge any number is
-  // accepted.
-  if (last_inbound == 0)
-  {
-	last_inbound = returnme->msg_uid();
-  }
-  else
-  {
-	last_inbound++;
-	int temp = returnme->msg_uid();
-	if (temp != last_inbound)
-	{ 
-	  inbound_seq_error e;
-	  std::stringstream message;
-	  message << "Expected " << last_inbound
-		<< " received "  << temp;
-	  e.store(message.str());
-	  throw e;
-	};
+    returnme = true;
   };
   return returnme;
 };
 
 template <class out, class in, class outp, class inp>
-void transceiver<out,in,outp,inp>::send(outp sendme)
+inp transceiver<out,in,outp,inp>::get()
+{
+  // get the message length first.
+  std::string len_field = sock->get(4,10);
+  msg_num_t msg_len;
+  for (int i=0; i<4; i++)
+  {
+  	msg_len.bytes[i] = len_field[i];
+  };
+  // get the rest of the message.
+  inp returnme(new in);
+  std::string input = sock->get(msg_len.number);
+  returnme->ParseFromString(input);
+  // for the first messsge any number is
+  // accepted.
+  if (last_inbound == 0)
+  {
+  	last_inbound = returnme->msg_uid();
+  }
+  else
+  {
+	  last_inbound++;
+	  int temp = returnme->msg_uid();
+	  if (temp != last_inbound)
+	  { 
+	    inbound_seq_error e;
+	    std::stringstream message;
+	    message << "Expected " << last_inbound
+		  << " received "  << temp;
+	    e.store(message.str());
+	    throw e;
+	  };
+  };
+  return returnme;
+};
+
+template <class out, class in, class outp, class inp>
+void transceiver<out,in,outp,inp>::send(outp & sendme)
 {
   sendme->set_msg_uid(out_msg_num());
   std::string output;
   output = sendme->SerializeAsString();
   msg_num_t msg_len;
   msg_len.number = output.size();
-//std::cout << "num:len" << msg_len.number << ":" << output.length() << //std::endl;
   std::string num_field = "    ";
   for (int i=0; i<4; i++)
   {
-	num_field[i] = msg_len.bytes[i];
-//std::cout << int(num_field[i]) << "," ;
+	  num_field[i] = msg_len.bytes[i];
   };
-//std::cout << " = " << msg_len.number << std::endl;  
   output = num_field + output;
-//std::cout << "out msg=" << http_chartohex(output) << std::endl;  
   sock->put(output);
-  sent_messages.push_back(sendme);
+  sent_messages.push_back(*sendme);
 };
 
 template <class out, class in, class outp, class inp>

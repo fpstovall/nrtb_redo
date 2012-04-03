@@ -605,32 +605,21 @@ void tcp_server_socket_factory::stop_listen()
   // take action only if the listen thread is running.
   if (listening())
   {
-	// stop the listener thread
-	if (is_running()) stop();
-	// wait here until the thread stops.
-	if (is_running()) join();
-//	try
-//	{ 
-//	  if (listen_sock) close(listen_sock);
-//	}
-//	catch (...) {};
+    // stop the listener thread
+    stop();
+    join();
   };
 };
 
 bool tcp_server_socket_factory::listening()
 {
-	bool running = is_running();
-/*	if (!running)
-	{
-		// check to be sure the thread did not die due to an error.
-		if (_last_thread_fault != 0)
-		{
-		  // if thread_return was non-zero, it is assumed the thread died an
-		  // evil and useless death. Scream in anger!
-		  throw listen_terminated_exception();
-		};
-	};
-*/	return running;
+  bool running = is_running();
+  return running;
+};
+
+int tcp_server_socket_factory::last_fault()
+{
+  return _last_thread_fault;
 };
 
 unsigned short int tcp_server_socket_factory::backlog()
@@ -643,108 +632,104 @@ void closeme(void * sock)
 {
   std::cerr << "in thread cleanup sock closer" << std::endl;
   int & socket = *(static_cast<int*>(sock));
-  ::close(socket);
+  try { ::close(socket); } catch  (...) {};
   std::cerr << "socker closer done." << std::endl;
 };
 
 void tcp_server_socket_factory::run()
 {
-  /* Put this entire thing in a try block to protect the application. 
-	* Without this, an untrapped exception thrown here or in the 
-	* user supplied on_accept() method would abort the entire 
-	* application instead of just this
-	* thread.
-	*/
+  // set up the listening socket.
   int listen_sock;
-  // make sure the listener is closed when we exit.
-  pthread_cleanup_push(closeme, (void*) &listen_sock);
+  _last_thread_fault = 0;
+  bool go = false;
   try
   {
-	bool go = true;
-	// set up our listening socket.
-	listen_sock = socket(AF_INET,SOCK_STREAM,0);
-	sockaddr_in myaddr;
-	try
-	{
-		myaddr = tcp_socket::str_to_sockaddr(_address);
-	}
-	catch (...)
-	{
-		// probably a tcp_socket::bad_address_exception, 
-		// but any reason will do.
-		go = false;
-	};
-	if (bind(listen_sock,(sockaddr *) &myaddr,sizeof(myaddr)))
-	{
-		// bind did not work.
-		go = false;
-	};	
-	if (listen(listen_sock,_backlog))
-	{
-		// listen failed in some way.. I don't care which.
-		go = false;
-	};
-	// processing loop
-	while (go)
-	{
-	  // accept a new connection
-	  bool good_connect = true;
-	  int new_conn = accept(listen_sock,NULL,NULL);
-	  // validate the accept return value.
-	  if (new_conn == -1)
-	  {
-		// accept returned an error.
-		switch (errno) 
-		{
-//			case ENETDOWN :
-			case EPROTO :
-//			case ENOPROTOOPT :
-			case EHOSTDOWN :
-//			case ENONET :
-			case EHOSTUNREACH :
-//			case EOPNOTSUPP :
-//			case ENETUNREACH :
-			case EAGAIN :
-//			case EPERM :
-			case ECONNABORTED :
-				{
-				  good_connect = false;
-				  break;
-				};
-			default : 
-				{	
-				  // for any other error, we're going to shutdown the 
-				  // this listener thread.
-				  go = false;
-				  good_connect = false;
-				  _last_thread_fault = errno;
-				  break;
-				};
-		};  // switch (errno)
-	  }; // error thrown by accept.
-	  if (good_connect)
-	  {
-		// create connect_sock
-		connect_sock.reset(new tcp_socket(new_conn));
-		// make the thread easily cancelable.
-		set_cancel_anytime();
-		// call on_accept
-		go = on_accept();
-		// set back to cancel_deferred.
-		set_deferred_cancel();
-		// release our claim to the new socket
-		connect_sock.reset();
-	  };
-	}; // while go;
+    listen_sock = socket(AF_INET,SOCK_STREAM,0);
+    sockaddr_in myaddr;
+    myaddr = tcp_socket::str_to_sockaddr(_address);
+    int a = bind(listen_sock,(sockaddr *) &myaddr,sizeof(myaddr));
+    int b = listen(listen_sock,_backlog);
+    if (a || b)
+    {
+      go = false;
+      if (a) _last_thread_fault += 1;
+      if (b) _last_thread_fault += 2;
+    }
+    else go = true;
   }
   catch (...)
   {
-	/* an untrapped exception was thrown by someone in this thread.
-	* We'll shutdown this thread and put -1 in the thread_return field
-	* to let the world know that we don't know what killed us.
-	*/
-	_last_thread_fault = -1;
+    _last_thread_fault = 100;
   };
+  // if not in a good state, terminate the thread.
+  if (!go)
+  {
+    _last_thread_fault =+ 200;
+    exit(0);
+  };
+  // make sure the listener is closed when we exit.
+  pthread_cleanup_push(closeme, (void*) &listen_sock);
+  // processing loop
+  while (go)
+  {
+    // accept a new connection
+    bool good_connect = true;
+    int new_conn = accept(listen_sock,NULL,NULL);
+    // validate the accept return value.
+    if (new_conn == -1)
+    {
+      // accept returned an error.
+      switch (errno)
+      {
+        case EPROTO :
+        case EHOSTDOWN :
+        case EHOSTUNREACH :
+        case EAGAIN :
+        case ECONNABORTED :
+        {
+          // abandon this connection
+          good_connect = false;
+          break;
+        };
+        default :
+        {
+          // for any other error, we're going to shutdown the
+          // this listener thread.
+          go = false;
+          good_connect = false;
+          _last_thread_fault = errno;
+          break;
+        };
+      };  // switch (errno)
+    }; // error thrown by accept.
+    if (good_connect)
+    {
+      connect_sock.reset(new tcp_socket(new_conn));
+      set_cancel_anytime();
+      // call the connection handler.
+      try
+      {
+        go = on_accept();
+      }
+      catch (...)
+      {
+        go = false;
+        _last_thread_fault = 501;
+      };
+      set_deferred_cancel();
+      // safety check.
+      if (connect_sock)
+      {
+        std::cerr << "WARNING: on_accept() did not take ownership of "
+          << "connect_sock.\n"
+          << "  This can lead to leaks and should be fixed."
+          << std::endl;
+        connect_sock.reset();
+        _last_thread_fault = 500;
+        go = false;
+      };
+    };
+  }; // while go;
   pthread_cleanup_pop(0);
 };
 
