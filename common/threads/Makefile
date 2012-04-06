@@ -24,12 +24,12 @@ lib:	thread_test
 
 base_thread.o:	base_thread.cpp base_thread.h Makefile
 	@rm -f base_thread.o
-	g++ -c -O3 base_thread.cpp -I ../include
+	g++ -c -O3 base_thread.cpp -I ../include -std=gnu++0x
 
 thread_test:	base_thread.o thread_test.cpp
 	@rm -f thread_test
-	g++ -c thread_test.cpp -I../include
-	g++ -o thread_test thread_test.o base_thread.o ../obj/hires_timer.o ../obj/common.o -lpthread
+	g++ -c thread_test.cpp -I../include -std=gnu++0x
+	g++ -o thread_test thread_test.o base_thread.o ../obj/hires_timer.o ../obj/common.o -lpthread -std=gnu++0x
 
 clean:
 	@rm -rvf *.o thread_test ../include/base_thread.h ../obj/base_thread.o
