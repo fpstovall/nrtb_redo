@@ -24,12 +24,12 @@ lib:	serializer_test
 
 serializer.o:	serializer.h serializer.cpp Makefile
 	@rm -f serializer.o
-	g++ -c serializer.cpp -I ../include
+	g++ -c serializer.cpp -I ../include -std=gnu++0x
 
 serializer_test:	serializer.o serializer_test.cpp
 	@rm -f serializer_test
-	g++ -c serializer_test.cpp -I../include
-	g++ -o serializer_test serializer_test.o serializer.o ../obj/base_thread.o -lpthread ../obj/common.o
+	g++ -c serializer_test.cpp -I../include -std=gnu++0x
+	g++ -o serializer_test serializer_test.o serializer.o ../obj/base_thread.o -lpthread ../obj/common.o -std=gnu++0x
 
 clean:
 	@rm -rvf *.o serializer_test ../include/serializer.h ../obj/serializer.o
