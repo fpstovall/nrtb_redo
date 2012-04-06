@@ -26,12 +26,12 @@ lib:	conftest
 
 confreader.o:	confreader.h confreader.cpp Makefile 
 	@rm -f confreader.o
-	g++ -c confreader.cpp -I../include
+	g++ -c confreader.cpp -I../include -std=gnu++0x
 
 conftest:	confreader.o conftest.cpp
 	@rm -f conftest
-	g++ -c conftest.cpp -I../include
-	g++ -o conftest conftest.o confreader.o ../obj/common.o ../obj/log_setup.o ../obj/base_thread.o -lpthread -lPocoFoundation -lPocoUtil
+	g++ -c conftest.cpp -I../include -std=gnu++0x
+	g++ -o conftest conftest.o confreader.o ../obj/common.o ../obj/log_setup.o ../obj/base_thread.o -lpthread -lPocoFoundation -lPocoUtil -std=gnu++0x
 
 clean:
 	@rm -rvf *.o conftest ../include/confreader.h ../obj/confreader.o conf_test.log
