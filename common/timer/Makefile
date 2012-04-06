@@ -24,12 +24,12 @@ lib:	timer_test
 
 hires_timer.o:	hires_timer.h hires_timer.cpp Makefile
 	@rm -f hires_timer.o
-	g++ -c -O3 hires_timer.cpp
+	g++ -c -O3 hires_timer.cpp -std=gnu++0x
 
 timer_test:	hires_timer.o timer_test.cpp
 	@rm -f timer_test
-	g++ -c timer_test.cpp
-	g++ -o timer_test timer_test.o hires_timer.o
+	g++ -c timer_test.cpp -std=gnu++0x
+	g++ -o timer_test timer_test.o hires_timer.o -std=gnu++0x
 
 clean:
 	@rm -rvf *.o timer_test ../include/hires_timer.h ../obj/hires_timer.o
