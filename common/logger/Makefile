@@ -27,12 +27,12 @@ lib:	log_test
 
 log_setup.o:	log_setup.h log_setup.cpp Makefile
 	@rm -f log_setup.o
-	g++ -c log_setup.cpp -I ../include
+	g++ -c log_setup.cpp -I ../include -std=gnu++0x
 
 log_test:	log_setup.o log_test.cpp Makefile
 	@rm -vf log_test
-	g++ -c log_test.cpp -I../include 
-	g++ -o log_test log_setup.o log_test.o -lPocoFoundation
+	g++ -c log_test.cpp -I../include  -std=gnu++0x
+	g++ -o log_test log_setup.o log_test.o -lPocoFoundation -std=gnu++0x
 #	g++ -g common_test.cpp  -idirafter . -o common_test
 
 clean:
