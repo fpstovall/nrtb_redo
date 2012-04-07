@@ -201,11 +201,22 @@ int main()
     // kick off the listener thread.
     listener server(address,5);
     server.start_listen();
-    while (!server.listening())
+    int countdown = 99;
+    while (!server.listening() and countdown)
     {
       usleep(1e3);
+      countdown--;
     };
-    cout << "Listener thread is ready." << endl;
+    if (server.listening())
+    {
+      cout << "Listener thread is ready." << endl;
+    }
+    else
+    {
+      // server could not start.. terminate.
+      cerr << "Could not start listener." << endl;
+      exit(1);
+    };
 
     // set up our sender
     tcp_socket_p sock(new tcp_socket);
