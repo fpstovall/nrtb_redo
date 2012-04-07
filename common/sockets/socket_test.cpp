@@ -108,7 +108,7 @@ int main()
     while ((!test_server.listening()) and countdown)
     {
       usleep(1e3);
-      countdown++;
+      countdown--;
     };
     if (!countdown)
     {
