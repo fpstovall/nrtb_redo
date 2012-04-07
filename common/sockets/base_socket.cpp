@@ -588,16 +588,28 @@ tcp_server_socket_factory::~tcp_server_socket_factory()
 
 void tcp_server_socket_factory::start_listen()
 {
-	// take no action if the listen thread is already running.
-	if (!is_running())
-	{
-		// start it up!
-		start();
-	}
-	else
-	{
-	  throw already_running_exception();
-	};
+  // take no action if the listen thread is already running.
+  if (!is_running())
+  {
+    // start it up!
+    start();
+    int countdown = 99;
+    while (!listening() and countdown)
+    {
+      countdown--;
+      usleep(1e3);
+    }
+    if (!countdown)
+    {
+      bind_failure_exception e;
+      e.store(_address);
+      throw e;
+    };
+  }
+  else
+  {
+    throw already_running_exception();
+  };
 };
 
 void tcp_server_socket_factory::stop_listen()
