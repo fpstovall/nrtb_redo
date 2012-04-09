@@ -20,7 +20,6 @@
 #define sim_stop_header
 
 #include <sim_management.pb.h>
-#include <boost/shared_ptr.hpp>
 
 namespace nrtb_com {
 

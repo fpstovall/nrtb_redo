@@ -421,6 +421,9 @@ class tcp_server_socket_factory: private thread
 		int _last_thread_fault;
 		// Provides the listener thread.
 		void run();
+    // pointer to the listener socket
+    typedef std::shared_ptr<tcp_socket> lsock_p;
+    lsock_p listen_sock;
 		
 	protected:
 

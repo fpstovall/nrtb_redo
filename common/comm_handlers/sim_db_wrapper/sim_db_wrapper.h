@@ -25,17 +25,17 @@
 #include <sim_stop.h>
 #include <sim_termination.h>
 #include <sim_to_db_wrapper.pb.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <stdint.h>
 
 namespace nrtb_com {
 
-typedef boost::shared_ptr<com_ack> ack_p;
-typedef boost::shared_ptr<com_nak> nak_p;
-typedef boost::shared_ptr<com_tq_update> tq_update_p;
-typedef boost::shared_ptr<com_sim_setup> sim_setup_p;
-typedef boost::shared_ptr<com_sim_termination> sim_end_p;
-typedef boost::shared_ptr<com_request_sim_stop> request_stop_p;
+typedef std::unique_ptr<com_ack> ack_p;
+typedef std::unique_ptr<com_nak> nak_p;
+typedef std::unique_ptr<com_tq_update> tq_update_p;
+typedef std::unique_ptr<com_sim_setup> sim_setup_p;
+typedef std::unique_ptr<com_sim_termination> sim_end_p;
+typedef std::unique_ptr<com_request_sim_stop> request_stop_p;
     
 class com_sim_to_db
 {

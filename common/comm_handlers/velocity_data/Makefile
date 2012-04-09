@@ -24,12 +24,12 @@ lib:	velocity_data_test
 
 velocity_data_test:	velocity_data.o velocity_data_test.cpp
 	@rm -f velocity_data_test
-	g++ -c velocity_data_test.cpp -I ../../include -I ../include
-	g++ -o velocity_data_test velocity_data_test.o velocity_data.o ../obj/triplet.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread
+	g++ -c velocity_data_test.cpp -I ../../include -I ../include -std=gnu++0x
+	g++ -o velocity_data_test velocity_data_test.o velocity_data.o ../obj/triplet.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread -std=gnu++0x
 
 velocity_data.o:	velocity_data.cpp velocity_data.h Makefile
 	@rm -f velocity_data.o
-	g++ -c -O3 velocity_data.cpp -I ../include -I../../include
+	g++ -c -O3 velocity_data.cpp -I ../include -I../../include -std=gnu++0x
 
 clean:
 	@rm -vf *.o ../include/velocity_data.h ../obj/velocity_data.o velocity_data_test

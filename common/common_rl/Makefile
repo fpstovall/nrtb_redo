@@ -24,12 +24,12 @@ lib:	common_rl_test
 
 common.o:	common.h common.cpp Makefile
 	@rm -f common.o
-	g++ -c -O3 common.cpp
+	g++ -c -O3 common.cpp  -std=gnu++0x
 	
 common_rl_test:	common.o common_rl_test.cpp
 	@rm -f common_rl_test
-	g++ -c common_rl_test.cpp
-	g++ -o common_rl_test common_rl_test.o common.o
+	g++ -c common_rl_test.cpp -std=gnu++0x
+	g++ -o common_rl_test common_rl_test.o common.o -std=gnu++0x
 
 clean:
 	@rm -rvf *.o  ../include/common.h ../obj/common.o common_rl_test

@@ -24,12 +24,12 @@ lib:	tq_update_test
 
 tq_update_test:	tq_update.o tq_update_test.cpp
 	@rm -f tq_update_test
-	g++ -c tq_update_test.cpp -I ../../include -I ../include
-	g++ -o tq_update_test tq_update_test.o tq_update.o ../obj/triplet.o ../obj/location_data.o ../obj/velocity_data.o ../obj/tq_obj.o ../obj/obj_setup_info.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread
+	g++ -c tq_update_test.cpp -I ../../include -I ../include -std=gnu++0x
+	g++ -o tq_update_test tq_update_test.o tq_update.o ../obj/triplet.o ../obj/location_data.o ../obj/velocity_data.o ../obj/tq_obj.o ../obj/obj_setup_info.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread -std=gnu++0x
 
 tq_update.o:	tq_update.cpp tq_update.h Makefile
 	@rm -f tq_update.o
-	g++ -c -O3 tq_update.cpp -I ../include -I../../include
+	g++ -c -O3 tq_update.cpp -I ../include -I../../include -std=gnu++0x
 
 clean:
 	@rm -vf *.o ../include/tq_update.h ../obj/tq_update.o tq_update_test

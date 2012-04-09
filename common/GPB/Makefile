@@ -23,7 +23,7 @@ lib:	lib/nrtb_gpb.a
 
 lib/nrtb_gpb.a:
 	@protoc -I=${proto} --cpp_out=cpp_src/ ${proto}/*.proto
-	@cd obj; for file in ../cpp_src/*.cc; do g++ -c $$file; done
+	@cd obj; for file in ../cpp_src/*.cc; do g++ -c $$file -std=gnu++0x; done
 	@cp -v cpp_src/*h ../include
 	@ar -r ../lib/nrtb_gpb.a obj/*.o
 

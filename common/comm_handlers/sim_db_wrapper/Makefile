@@ -24,12 +24,12 @@ lib:	sim_db_wrapper_test
 
 sim_db_wrapper_test:	sim_db_wrapper.o sim_db_wrapper_test.cpp
 	@rm -f sim_db_wrapper_test
-	g++ -c sim_db_wrapper_test.cpp -I ../../include -I ../include
-	g++ -o sim_db_wrapper_test sim_db_wrapper_test.o sim_db_wrapper.o ../obj/ack_nak.o ../obj/obj_setup_info.o ../obj/sim_stop.o  ../obj/tq_obj.o ../obj/location_data.o ../obj/sim_setup_info.o  ../obj/sim_termination.o ../obj/tq_update.o ../obj/velocity_data.o   ../obj/triplet.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread
+	g++ -c sim_db_wrapper_test.cpp -I ../../include -I ../include -std=gnu++0x
+	g++ -o sim_db_wrapper_test sim_db_wrapper_test.o sim_db_wrapper.o ../obj/ack_nak.o ../obj/obj_setup_info.o ../obj/sim_stop.o  ../obj/tq_obj.o ../obj/location_data.o ../obj/sim_setup_info.o  ../obj/sim_termination.o ../obj/tq_update.o ../obj/velocity_data.o   ../obj/triplet.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread -std=gnu++0x
 
 sim_db_wrapper.o:	sim_db_wrapper.cpp sim_db_wrapper.h Makefile
 	@rm -f sim_db_wrapper.o
-	g++ -c -O3 sim_db_wrapper.cpp -I ../include -I ../../include
+	g++ -c -O3 sim_db_wrapper.cpp -I ../include -I ../../include -std=gnu++0x
 
 clean:
 	@rm -vf *.o ../include/sim_db_wrapper.h ../obj/sim_db_wrapper.o sim_db_wrapper_test

@@ -24,12 +24,12 @@ lib:	sim_setup_info_test
 
 sim_setup_info_test:	sim_setup_info.o sim_setup_info_test.cpp
 	@rm -f sim_setup_info_test
-	g++ -c sim_setup_info_test.cpp -I ../../include -I ../include
-	g++ -o sim_setup_info_test sim_setup_info_test.o sim_setup_info.o ../obj/triplet.o ../obj/location_data.o ../obj/velocity_data.o ../obj/obj_setup_info.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread
+	g++ -c sim_setup_info_test.cpp -I ../../include -I ../include -std=gnu++0x
+	g++ -o sim_setup_info_test sim_setup_info_test.o sim_setup_info.o ../obj/triplet.o ../obj/location_data.o ../obj/velocity_data.o ../obj/obj_setup_info.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread -std=gnu++0x
 
 sim_setup_info.o:	sim_setup_info.cpp sim_setup_info.h Makefile
 	@rm -f sim_setup_info.o
-	g++ -c -O3 sim_setup_info.cpp -I ../include -I../../include
+	g++ -c -O3 sim_setup_info.cpp -I ../include -I../../include -std=gnu++0x
 
 clean:
 	@rm -vf *.o ../include/sim_setup_info.h ../obj/sim_setup_info.o sim_setup_info_test

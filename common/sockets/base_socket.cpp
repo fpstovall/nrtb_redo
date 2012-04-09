@@ -588,16 +588,28 @@ tcp_server_socket_factory::~tcp_server_socket_factory()
 
 void tcp_server_socket_factory::start_listen()
 {
-	// take no action if the listen thread is already running.
-	if (!is_running())
-	{
-		// start it up!
-		start();
-	}
-	else
-	{
-	  throw already_running_exception();
-	};
+  // take no action if the listen thread is already running.
+  if (!is_running())
+  {
+    // start it up!
+    start();
+    int countdown = 99;
+    while (!listening() and countdown)
+    {
+      countdown--;
+      usleep(1e3);
+    }
+    if (!countdown)
+    {
+      bind_failure_exception e;
+      e.store(_address);
+      throw e;
+    };
+  }
+  else
+  {
+    throw already_running_exception();
+  };
 };
 
 void tcp_server_socket_factory::stop_listen()
@@ -608,12 +620,22 @@ void tcp_server_socket_factory::stop_listen()
     // stop the listener thread
     stop();
     join();
+    listen_sock.reset();
   };
 };
 
 bool tcp_server_socket_factory::listening()
 {
   bool running = is_running();
+  if (listen_sock)
+  {
+    running = running
+      and listen_sock->status() == tcp_socket::sock_connect;
+  }
+  else
+  {
+    running = false;
+  };
   return running;
 };
 
@@ -627,35 +649,29 @@ unsigned short int tcp_server_socket_factory::backlog()
 	return _backlog;
 };
 
-//socket closer to use with exit trap.
-void closeme(void * sock)
-{
-  std::cerr << "in thread cleanup sock closer" << std::endl;
-  int & socket = *(static_cast<int*>(sock));
-  try { ::close(socket); } catch  (...) {};
-  std::cerr << "socker closer done." << std::endl;
-};
-
 void tcp_server_socket_factory::run()
 {
   // set up the listening socket.
-  int listen_sock;
+  int sock;
   _last_thread_fault = 0;
   bool go = false;
   try
   {
-    listen_sock = socket(AF_INET,SOCK_STREAM,0);
+    sock = socket(AF_INET,SOCK_STREAM,0);
     sockaddr_in myaddr;
     myaddr = tcp_socket::str_to_sockaddr(_address);
-    int a = bind(listen_sock,(sockaddr *) &myaddr,sizeof(myaddr));
-    int b = listen(listen_sock,_backlog);
+    int a = bind(sock,(sockaddr *) &myaddr,sizeof(myaddr));
+    int b = listen(sock,_backlog);
     if (a || b)
     {
       go = false;
       if (a) _last_thread_fault += 1;
       if (b) _last_thread_fault += 2;
     }
-    else go = true;
+    else
+    {
+      go = true;
+    };
   }
   catch (...)
   {
@@ -668,13 +684,31 @@ void tcp_server_socket_factory::run()
     exit(0);
   };
   // make sure the listener is closed when we exit.
-  pthread_cleanup_push(closeme, (void*) &listen_sock);
+  // also prevides an external hook to socket.
+  listen_sock.reset(new tcp_socket(sock));
   // processing loop
-  while (go)
+  while
+  (
+    go
+    and listen_sock
+    and (listen_sock->status() == tcp_socket::sock_connect)
+  )
   {
     // accept a new connection
     bool good_connect = true;
-    int new_conn = accept(listen_sock,NULL,NULL);
+    int new_conn = accept(sock,NULL,NULL);
+    // is the listener still open?
+    if
+    (
+      (!listen_sock)
+      and (listen_sock->status() != tcp_socket::sock_connect)
+    )
+    {
+      // the listner socket is not available.. get out of here.
+      listen_sock.reset();
+      _last_thread_fault = 300;
+      exit(0);
+    };
     // validate the accept return value.
     if (new_conn == -1)
     {
@@ -730,35 +764,7 @@ void tcp_server_socket_factory::run()
       };
     };
   }; // while go;
-  pthread_cleanup_pop(0);
 };
 
 } // namespace nrtb
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

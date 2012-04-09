@@ -24,12 +24,12 @@ lib:	tq_obj_test
 
 tq_obj_test:	tq_obj.o tq_obj_test.cpp
 	@rm -f tq_obj_test
-	g++ -c tq_obj_test.cpp -I ../../include -I ../include
-	g++ -o tq_obj_test tq_obj_test.o tq_obj.o ../obj/triplet.o ../obj/location_data.o ../obj/velocity_data.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread
+	g++ -c tq_obj_test.cpp -I ../../include -I ../include -std=gnu++0x
+	g++ -o tq_obj_test tq_obj_test.o tq_obj.o ../obj/triplet.o ../obj/location_data.o ../obj/velocity_data.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread -std=gnu++0x
 
 tq_obj.o:	tq_obj.cpp tq_obj.h Makefile
 	@rm -f tq_obj.o
-	g++ -c -O3 tq_obj.cpp -I ../include -I../../include
+	g++ -c -O3 tq_obj.cpp -I ../include -I../../include -std=gnu++0x
 
 clean:
 	@rm -vf *.o ../include/tq_obj.h ../obj/tq_obj.o tq_obj_test

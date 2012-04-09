@@ -24,8 +24,8 @@ lib:	singleton_test
 
 singleton_test:	singleton_test.cpp Makefile
 	@rm -f singleton_test
-	g++ -c singleton_test.cpp -I ../include 
-	g++ -o singleton_test singleton_test.o ../obj/base_thread.o ../obj/common.o ../obj/serializer.o -lpthread
+	g++ -c singleton_test.cpp -I ../include -std=gnu++0x
+	g++ -o singleton_test singleton_test.o ../obj/base_thread.o ../obj/common.o ../obj/serializer.o -lpthread -std=gnu++0x
 
 clean:
 	@rm -rvf *.o singleton_test ../include/singleton.h

@@ -201,10 +201,6 @@ int main()
     // kick off the listener thread.
     listener server(address,5);
     server.start_listen();
-    while (!server.listening())
-    {
-      usleep(1e3);
-    };
     cout << "Listener thread is ready." << endl;
 
     // set up our sender
@@ -242,6 +238,11 @@ int main()
       cout << "good return." << endl;
     };
     usleep(1e4);
+  }
+  catch (tcp_server_socket_factory::bind_failure_exception & e)
+  {
+    cout << "Listener could not bind " << e.comment() << endl;
+    er_count.inc();
   }
   catch (...)
   {

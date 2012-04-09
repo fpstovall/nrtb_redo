@@ -104,17 +104,6 @@ int main()
   {
     // start the receiver/server
     test_server.start_listen();
-    int countdown = 99;
-    while ((!test_server.listening()) and countdown)
-    {
-      usleep(1e3);
-      countdown++;
-    };
-    if (!countdown)
-    {
-      cerr << "Could not start listener." << endl;
-      exit(1);
-    }
     cout << "test_server ready." << endl;
 
     // Send test messages

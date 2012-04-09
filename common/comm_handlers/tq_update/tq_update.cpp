@@ -17,7 +17,6 @@
  **********************************************/
 
 #include "tq_update.h"
-#include <boost/shared_ptr.hpp>
 
 
 namespace nrtb_com

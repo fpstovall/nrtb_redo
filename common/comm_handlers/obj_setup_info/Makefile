@@ -24,12 +24,12 @@ lib:	obj_setup_info_test
 
 obj_setup_info_test:	obj_setup_info.o obj_setup_info_test.cpp
 	@rm -f obj_setup_info_test
-	g++ -c obj_setup_info_test.cpp -I ../../include -I ../include
-	g++ -o obj_setup_info_test obj_setup_info_test.o obj_setup_info.o ../obj/triplet.o ../obj/location_data.o ../obj/velocity_data.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread
+	g++ -c obj_setup_info_test.cpp -I ../../include -I ../include -std=gnu++0x 
+	g++ -o obj_setup_info_test obj_setup_info_test.o obj_setup_info.o ../obj/triplet.o ../obj/location_data.o ../obj/velocity_data.o ../../lib/nrtb_common.a ../../lib/nrtb_gpb.a -lprotobuf -lpthread -std=gnu++0x 
 
 obj_setup_info.o:	obj_setup_info.cpp obj_setup_info.h Makefile
 	@rm -f obj_setup_info.o
-	g++ -c -O3 obj_setup_info.cpp -I ../include -I../..//include
+	g++ -c -O3 obj_setup_info.cpp -I ../include -I../..//include -std=gnu++0x  
 
 clean:
 	@rm -vf *.o ../include/obj_setup_info.h ../obj/obj_setup_info.o obj_setup_info_test

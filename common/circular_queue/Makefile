@@ -23,8 +23,8 @@ lib:	circular_queue_test
 
 circular_queue_test:	circular_queue.h circular_queue_test.cpp
 	@rm -f circular_queue_test
-	g++ -c circular_queue_test.cpp -I../include
-	g++ -o circular_queue_test circular_queue_test.o ../obj/common.o ../obj/base_thread.o -lpthread 
+	g++ -c circular_queue_test.cpp -I../include -std=gnu++0x
+	g++ -o circular_queue_test circular_queue_test.o ../obj/common.o ../obj/base_thread.o -lpthread  -std=gnu++0x
 
 clean:
 	@rm -rvf *.o circular_queue_test ../include/circular_queue.h *.log ../obj/circular_queue.o

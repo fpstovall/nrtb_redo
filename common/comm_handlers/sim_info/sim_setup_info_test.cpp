@@ -37,7 +37,7 @@ int main()
   {
 	nrtb_com::com_sim_setup::obj_p o(new nrtb_com::com_obj_setup());
 	o->uid = i;
-	t.items.push_back(o);
+	t.items.push_back(std::move(o));
   };
   // run the test.
   nrtb_msg::sim_setup_data gpb;

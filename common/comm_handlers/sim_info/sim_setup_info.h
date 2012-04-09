@@ -22,7 +22,7 @@
 #include <obj_setup_info.h>
 #include <sim_management.pb.h>
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace nrtb_com {
 
@@ -34,7 +34,7 @@ public:
   uint32_t quanta_ms;
   uint32_t max_quantas;
   std::string started_by;
-  typedef boost::shared_ptr<com_obj_setup> obj_p;
+  typedef std::unique_ptr<com_obj_setup> obj_p;
   typedef std::vector<obj_p> obj_list;
   obj_list items;
   

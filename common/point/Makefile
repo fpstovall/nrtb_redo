@@ -26,7 +26,7 @@ lib:	common_test Makefile
 
 common_test:	common_test.cpp triad.h Makefile ../include/common.h
 	@rm -vf common_test
-	g++ -O3 common_test.cpp -I ../include ../obj/common.o -o common_test
+	g++ -O3 common_test.cpp -I ../include ../obj/common.o -o common_test -std=gnu++0x
 
 clean:
 	@rm -vf *.o common_test ../include/triad.h
