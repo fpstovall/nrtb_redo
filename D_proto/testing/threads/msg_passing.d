@@ -8,6 +8,8 @@ import std.concurrency, std.stdio;
 // main is just like main in C++
 void main()
 {
+  writeln("D Multithreaded Message Passing Example.");
+
   // intialize some variable; the compiler can figure out the type from usage.
   auto low=0, high = 100;
 
@@ -18,16 +20,20 @@ void main()
   // low and high are assigned are assigned to i sequencially.
   foreach (i; low .. high)
   {
-    writeln("Sent ", i);
     // sends a message to receiver using it's thread id; queue management is automatic.
     rtid.send(i);
+    // report our action
+    writeln("Sent ", i);
+
   }
-  writeln("** Main is complete **");
+  writeln("** main() is complete **");
 }
 
 // receiver is a function which is run as a seperate thread by main.
 void receiver()
 {
+  writeln("** receiver() started. **");
+  
   // a variable for error checking.
   auto lastid = -1;
 
@@ -54,5 +60,5 @@ void receiver()
 
   // quick check to be sure we got them all.
   assert(lastid == 99);
-  writeln("** Normal Shutdown **");
+  writeln("** receiver() is complete. **");
 }
