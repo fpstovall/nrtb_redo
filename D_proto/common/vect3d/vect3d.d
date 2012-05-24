@@ -33,8 +33,9 @@ struct vect3d
 {
   alias double[3] vec;
   // vector
-  vec coords;
+  private vec coords;
   // constructors
+  this(ref this) { coords = coords.dup; }
   this(double[] a)
   {
     assert(a.length==3,"!! Invalid input length in vect3d.(T[] a).");
@@ -79,7 +80,10 @@ unittest
   assert((b*a)==vect3d(2,4,6));
   assert((b/a)==vect3d(1.0/2.0,2.0/2.0,3.0/2.0));
   // test vect3d by double math shifts and scales
-  assert((b+1.0)==vect3d(2,3,4));
+  assert((b+1)==vect3d(2,3,4));
+  assert((b-1)==vect3d(0,1,2));
+  assert((b*2)==vect3d(2,4,6));
+  assert((b/2.0)==vect3d(1.0/2.0,2.0/2.0,3.0/2.0));
 }
 
 void main()
