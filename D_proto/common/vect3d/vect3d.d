@@ -51,6 +51,8 @@ struct vect3d
   this(in real a) { coords[] = a;}
   /// Construct from 3 reals. They are assigned in the order presented.
   this(in real x, real y, real z) { coords[0]=x; coords[1]=y; coords[2]=z;}
+  /// returns an array containing copies of the coordinates.
+  vec values() { vec v; v = coords.dup; return v; }
   /// returns the length (the magnitude) of the vector
   real magnitude()
   {
@@ -117,6 +119,7 @@ unittest
   real[] array = [2,3,4];
   auto at = vect3d(array);
   assert(at == vect3d(2,3,4));
+  assert(at.values() == array);
   // test copying
   auto t=a;
   assert(t==vect3d(2,2,2));
@@ -145,4 +148,3 @@ unittest
   assert(approxEqual(a.normalize().magnitude(),1.0));
   assert(approxEqual(b.normalize().magnitude(),1.0));
 }
-
