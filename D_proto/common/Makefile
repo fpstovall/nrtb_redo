@@ -16,7 +16,7 @@
 #
 #***********************************************
 
-lib:
+lib: common.a
 
 common.a: common.d
 	@dmd -ofcommon_test -unittest common.d */*.d
