@@ -17,6 +17,9 @@
  **********************************************/
 
 import std.stdio;
+import std.conv;
+import std.array;
+import std.getopt;
 
 /** Reads command line and configuration file information.
 *
@@ -34,5 +37,64 @@ import std.stdio;
 
 class conf_reader
 {
+  alias string[string] mylist;
   
+  this(string[] args)
+  {
+    string c_file = "nrtb.config";
+    string c_path = ".";
+    // store off the program name before we start
+    values["__app_name"] = args[0];
+    args = args[1 .. $];
+    // get the traditional args.
+    getopt(args,
+      std.getopt.config.passThrough,
+      "config_file", &c_file,
+      "config_path", &c_path
+    );
+    // process the remaining elements
+    foreach(arg; args)
+    {
+      parse_arg(arg);
+    };
+  }
+
+  private void parse_arg(in string arg)
+  {
+    string[] tokens = split(arg,"=");
+    if (tokens.length == 1)
+    {
+      values[tokens[0]] = "1";
+    }
+    else if (tokens.length == 2)
+    {
+      auto key = tokens[0];
+      auto val = tokens[1];
+      // check for reserved words
+      if (key == "include")
+        load_file(val);
+      else
+        values[key] = val;
+    }
+  }
+
+  private void load_file(in string file_name)
+  {
+    // need to add the logic to read files here.
+  }
+
+  mylist get_list() { return values.dup; };
+
+  T get(T,E)(in string key,in E _default)
+    if (typeof(T = E) == typeof(T))
+  {
+    if ((key in values) != null)
+      return to!T(values[key]);
+    else
+      return _default;
+  }
+
+  private mylist values;
+
 }
+
