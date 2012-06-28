@@ -43,39 +43,38 @@ class conf_reader
   {
     string c_file = "nrtb.config";
     string c_path = ".";
-    // store off the program name before we start
-    values["__app_name"] = args[0];
-    args = args[1 .. $];
     // get the traditional args.
     getopt(args,
       std.getopt.config.passThrough,
       "config_file", &c_file,
       "config_path", &c_path
     );
-    // process the remaining elements
+    // store off the program name
+    values["__app_name"] = args[0];
+    args = args[1 .. $];
+    // process the includes first
+    string[] pending;
     foreach(arg; args)
     {
-      parse_arg(arg);
-    };
-  }
-
-  private void parse_arg(in string arg)
-  {
-    string[] tokens = split(arg,"=");
-    if (tokens.length == 1)
-    {
-      values[tokens[0]] = "1";
-    }
-    else if (tokens.length == 2)
-    {
-      auto key = tokens[0];
-      auto val = tokens[1];
-      // check for reserved words
-      if (key == "include")
-        load_file(val);
+      string[] tokens = split(arg,"=");
+      if (tokens[0] == "include")
+        load_file(tokens[1]);
       else
-        values[key] = val;
+        pending ~= arg;
     }
+    // process the remaining elements
+    foreach(arg; pending)
+    {
+      string[] tokens = split(arg,"=");
+      if (tokens.length == 1)
+      {
+        values[tokens[0]] = "1";
+      }
+      else if (tokens.length == 2)
+      {
+        values[tokens[0]] = tokens[1];
+      }
+    };
   }
 
   private void load_file(in string file_name)
