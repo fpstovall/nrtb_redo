@@ -20,6 +20,7 @@ import std.stdio;
 import std.conv;
 import std.array;
 import std.getopt;
+import std.string;
 
 /** Reads command line and configuration file information.
 *
@@ -80,6 +81,29 @@ class conf_reader
   private void load_file(in string file_name)
   {
     // need to add the logic to read files here.
+    auto f = File(file_name, "r");
+    scope(exit) {f.close();};
+    foreach(string line; lines(f))
+    {
+      // trim for comments
+      auto hash_index = indexOf(line,"#");
+      if (hash_index != -1)
+        line = line[0 .. hash_index];
+      // if we have anything left, parse it.
+      if (line != "")
+      {
+        // trim the string
+        line = line.strip();
+        // split on first whitespace
+        for (auto i=0; i<line.lengh; i++)
+        {
+          if ((line[i] == " ") || (line[i] == "\t"))
+        }
+        // trim both sides
+        // how do we store dups?
+      }
+    }
+
   }
 
   mylist get_list() { return values.dup; };
