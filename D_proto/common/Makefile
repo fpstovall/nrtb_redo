@@ -18,13 +18,15 @@
 
 lib: common
 
-common: Makefile common.d
-	@cd nrtb/common; dmd -lib -ofcommon.a *.d -I../../
-	@dmd common.d -unittest -Lnrtb/common/common.a
+common: Makefile common.d ${modules}
+	@echo building ${modules}
+	@cd nrtb/common; dmd -lib -of../common.a *.d -I../../
+	@dmd common.d -unittest -Lnrtb/common.a
 	@./common
 	@echo common build complete
 
 clean:
-	@rm -vf nrtb/common/*.o common nrtb/common/*.a
+	@rm -vf nrtb/common.a common *.o
 	@echo all objects and executables have been erased.
 
+modules=`find nrtb/common -type f -name \*.d`
