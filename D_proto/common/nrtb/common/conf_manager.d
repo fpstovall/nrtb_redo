@@ -95,9 +95,9 @@ class conf_reader
         // trim the string
         line = line.strip();
         // split on first whitespace
-        for (auto i=0; i<line.lengh; i++)
+        for (auto i=0; i<line.length; i++)
         {
-          if ((line[i] == " ") || (line[i] == "\t"))
+//          if ((line[i] == " ") || (line[i] == "\t"))
         }
         // trim both sides
         // how do we store dups?

@@ -16,17 +16,15 @@
 #
 #***********************************************
 
-lib: lib/common.a
+lib: common
 
-lib/common.a: bin/common_test
-	@dmd -ofmodules/common.a -Dddocs -lib */*.d
+common: Makefile common.d
+	@cd nrtb/common; dmd -lib -ofcommon.a *.d -I../../
+	@dmd common.d -unittest -Lnrtb/common/common.a
+	@./common
 	@echo common build complete
 
-bin/common_test: common.d Makefile
-	@dmd -ofbin/common_test -unittest common.d */*.d
-	@bin/common_test
-
 clean:
-	@rm -vf *.o modules/common.a bin/common_test
+	@rm -vf nrtb/common/*.o common nrtb/common/*.a
 	@echo all objects and executables have been erased.
 

@@ -17,7 +17,7 @@
 **********************************************/
 
 import std.stdio;
-import vect3d;
+import nrtb.common.vect3d;
 
 void main()
 {

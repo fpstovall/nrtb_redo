@@ -16,7 +16,7 @@
 
  **********************************************/
 
-import std.sockets;
+import std.socket;
 
 class gpb_transceiver
 {
