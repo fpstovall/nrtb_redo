@@ -1,5 +1,5 @@
 #***********************************************
-# This file is part of the NRTB project (https://launchpad.net/nrtb).
+#This file is part of the NRTB project (https://launchpad.net/nrtb).
 #
 #    NRTB is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -16,17 +16,12 @@
 #
 #***********************************************
 
-lib: common
-
-common: Makefile common.d ${modules}
-	@echo building ${modules}
-	@cd nrtb/common; dmd -lib -of../../../lib/common.a *.d -I../../
-	@dmd common.d -unittest -L../lib/common.a
-	@./common
-	@echo common build complete
+build_all: Makefile
+	@make action=lib doit
 
 clean:
-	@rm -vf ../lib/common.a common *.o
-	@echo all objects and executables have been erased.
+	@make action=clean doit
+	@rm -fv lib/* bin/*
 
-modules=`find nrtb/common -type f -name \*.d`
+doit:
+	@cd common; make ${action}
