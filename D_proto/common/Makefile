@@ -16,17 +16,20 @@
 #
 #***********************************************
 
-lib: common
+lib: ../lib/common.a
 
-common: Makefile common.d ${modules}
+../lib/common.a: test
 	@echo building ${modules}
-	@cd nrtb/common; dmd -lib -of../../../lib/common.a *.d -I../../
-	@dmd common.d -unittest -L../lib/common.a
-	@./common
-	@echo common build complete
+	@cd nrtb/common; dmd -lib -release -of../../../lib/common.a *.d -I../../
+	@echo " ********* common build complete ***********"
+
+test:	Makefile common.d ${modules}
+	@echo testing ${modules}
+	@cd nrtb/common; dmd -unittest -lib -of../../common.a *.d -I../../
+	@dmd -unittest common.a -run common.d
 
 clean:
-	@rm -vf ../lib/common.a common *.o
+	@rm -vf ../lib/common.a common *.o *.a
 	@echo all objects and executables have been erased.
 
 modules=`find nrtb/common -type f -name \*.d`
