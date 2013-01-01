@@ -17,7 +17,7 @@
 #***********************************************
 
 lib:	socket_test
-	@./msg_passing
+	@./socket_test
 	@echo build complete
 
 socket_test: socket_test.d Makefile

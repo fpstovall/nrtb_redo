@@ -15,14 +15,14 @@ void main(string[] args)
   if (args.length < 2)
   {
     writeln("Usage:");
-    writeln("      ",arg[0]," httpd_IP");
-    return 0;
+    writeln("      ",args[0]," httpd_IP");
+    return;
   } 
 
   string IP = args[1];
-  int port = 80;
+  ushort port = 80;
   
-  writeln("  Connecting to host %s:%d....",IP,port)
+  writefln("  Connecting to host %s:%d....",IP,port);
   
   // connect to the server
   Socket sock = new TcpSocket(new InternetAddress(IP, port));
