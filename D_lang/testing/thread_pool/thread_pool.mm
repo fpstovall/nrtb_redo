@@ -12,13 +12,15 @@
 <node CREATED="1357357780374" ID="ID_1278207219" MODIFIED="1357358422011" POSITION="right" TEXT="stuct {T data; tid requestor; bool done} work_packet"/>
 <node CREATED="1357357090890" ID="ID_1871103626" MODIFIED="1357358436384" POSITION="right" TEXT="tid[] available_threads"/>
 <node CREATED="1357356540428" ID="ID_948147143" MODIFIED="1357356844977" POSITION="right" TEXT="void enqueue(T) (in T data, in tid returnto)">
+<node CREATED="1357358729705" ID="ID_71779585" MODIFIED="1357358773182" TEXT="if free_threads &lt; low_water start (increment) new threads"/>
 <node CREATED="1357358260668" ID="ID_1129836507" MODIFIED="1357358320051" TEXT="assemble work_packet"/>
 <node CREATED="1357358334211" ID="ID_116198003" MODIFIED="1357358343689" TEXT="set workpacket.done false"/>
-<node CREATED="1357358344891" ID="ID_979460417" MODIFIED="1357358355928" TEXT="send work_packet to listener"/>
+<node CREATED="1357358344891" ID="ID_979460417" MODIFIED="1357412502419" TEXT="send work_packet to first available worker"/>
+<node CREATED="1357412504102" ID="ID_1155499415" MODIFIED="1357412516125" TEXT="remove worker from available queue"/>
 </node>
 <node CREATED="1357356882411" ID="ID_1556184124" MODIFIED="1357356933049" POSITION="right" TEXT="void listener()">
-<node CREATED="1357357018682" ID="ID_1539153576" MODIFIED="1357358727934" TEXT="on recept of (T), call enqueue()">
-<node CREATED="1357358729705" ID="ID_71779585" MODIFIED="1357358773182" TEXT="if free_threads &lt; low_water start (increment) new threads"/>
+<node CREATED="1357357018682" ID="ID_1539153576" MODIFIED="1357419298508" TEXT="on recept of (T)">
+<node CREATED="1357413007865" ID="ID_1301738333" MODIFIED="1357413061232" TEXT="call enqueue(T, sender_tid)"/>
 </node>
 <node CREATED="1357357290001" ID="ID_662876327" MODIFIED="1357357438590" TEXT="on recept of this.close, shutdown all threads"/>
 <node CREATED="1357357498008" ID="ID_819573878" MODIFIED="1357357542590" TEXT="on recept of this.available, list sender in available threads"/>
