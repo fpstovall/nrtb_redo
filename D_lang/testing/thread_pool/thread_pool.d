@@ -5,21 +5,97 @@ Multithreaded message passing example in D
 // import the concurrency and standard IO modules
 import std.concurrency, std.stdio;
 
-struct worker_thread
+class thread_pool(wp_t)
 {
-  private auto parent_id;
-  private int mydata;
-
-  this(in auto queue_tid)
-  {
-    
-  }
-}
-
-struct thread_pool
-{
+  // struct used to send messages in.
+  public struct in_msg{Tid sender, wp_t data};
+  // Housekeeping variables
+  private uint _low_water = 2;
+  private uint _high_water = 0;
+  private uint _increment = 2;
+  private Tid listener_tid;
+  private Tid[] all_workers
+  private Tid[] available_workers
   
-}
+  // Does nothing but start the listener and _low_water workers
+  private this()
+  {
+    listener_tid = spawn(&this.listener_thread)
+    for(auto i=0; i<_low_water; i++)
+    {
+      mk_new_worker();
+    };
+  };
+  
+  abstract void do_work(inout in_msg packet);
+
+  final:
+    private void mk_available(in Tid tid)
+    {
+      available_workers.append(tid);
+    };
+    
+    private Tid get_next_worker()
+    {
+      Tid returnme = available_workers.front()
+      available_workers.pop_front();
+      return returnme;
+    };
+    
+    private void assign_work(in in_msg packet)
+    {
+      // do we have enough workers?
+      auto c = available_workers.length();
+      if (c < _low_water)
+      {
+	if ((_high_water==0) or (all_workers.length() < _high_water))
+	{
+	  // create new workers as needed
+	  for(auto i=0; i<_increment; i++)
+	  {
+	    mk_new_worker();
+	  };
+      };
+      // message the first worker
+      Tid myworker = get_next_worker();
+      myworker.send(thisTid, packet);
+    };
+    
+    private void mk_new_worker()
+    {
+      Tid worker = spawn(&worker_thread);
+      available_workers.push_back(worker);
+      all_workers.push_back(worker);
+    };
+    
+    private void listener_thread()
+    {
+      // simple response loop
+      running = true;
+      while running
+      {
+	recieve(
+	  (in_msg p) { assign_work(p); }
+	  (OwnerTerminated e) { running = false; }
+	);
+      };
+    };
+    
+    private void worker_thread()
+    {
+      // simple response loop
+      running = true;
+      while running
+      {
+	recieve(
+	  (in_msg p) { do_work(p); }
+	  (OwnerTerminated e) { running = false; }
+	);
+      };
+    };
+  
+};
+
 
 // main is just like main in C++
 void main()
