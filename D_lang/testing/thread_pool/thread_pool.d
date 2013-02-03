@@ -7,76 +7,116 @@ import std.concurrency, std.stdio;
 
 class thread_pool(wp_t)
 {
-  // struct used to send messages in.
-  public struct in_msg{Tid sender, wp_t data};
-  // Housekeeping variables
-  private uint _low_water = 2;
-  private uint _high_water = 0;
-  private uint _increment = 2;
-  private Tid listener_tid;
-  private Tid[] all_workers
-  private Tid[] available_workers
+  public:
   
-  // Does nothing but start the listener and _low_water workers
+    // submit a work packet for processing.
+    final void submit(in wp_t wp) {
+      in_msg packet;
+      packet.sender = thisTid;
+      packet.date = wp;
+      listener_tid.send(packet);
+    };
+    
+    // get/set queue parameters
+    final uint set_ctl_params(inout uint l; inout uint h, inout uint i) {
+      set_values packet;
+      packet.low = l;
+      packet.high = h;
+      packet.inc = i;
+      packet.current = 0;
+      listener_tid.send(thisTid, packet);
+      recieve(
+	(set_values s) { packet = s; }
+      );
+      l = packet.low;
+      h = packet.high;
+      i = packet.inc;
+      return packet.current;
+    }
+    
+    // 
+  
+  // do_work is responsible for returning any responses to 
+  // the requesting thread if needed.
+  abstract private void do_work(inout in_msg packet);
+  
+  // Does nothing but start the listener.
   private this()
   {
     listener_tid = spawn(&this.listener_thread)
-    for(auto i=0; i<_low_water; i++)
-    {
-      mk_new_worker();
-    };
   };
+    
+  // struct used to send/receive messages in.
+  private struct in_msg{Tid sender; wp_t data};
+  private struct set_values{uint low; uint high; uint inc, uint current};
+  private struct shutdown(bool immediate);
+  // Housekeeping variables
+  private Tid listener_tid;
   
-  abstract void do_work(inout in_msg packet);
 
   final:
-    private void mk_available(in Tid tid)
-    {
-      available_workers.append(tid);
-    };
-    
-    private Tid get_next_worker()
-    {
-      Tid returnme = available_workers.front()
-      available_workers.pop_front();
-      return returnme;
-    };
-    
-    private void assign_work(in in_msg packet)
-    {
-      // do we have enough workers?
-      auto c = available_workers.length();
-      if (c < _low_water)
-      {
-	if ((_high_water==0) or (all_workers.length() < _high_water))
-	{
-	  // create new workers as needed
-	  for(auto i=0; i<_increment; i++)
-	  {
-	    mk_new_worker();
-	  };
-      };
-      // message the first worker
-      Tid myworker = get_next_worker();
-      myworker.send(thisTid, packet);
-    };
-    
-    private void mk_new_worker()
-    {
-      Tid worker = spawn(&worker_thread);
-      available_workers.push_back(worker);
-      all_workers.push_back(worker);
-    };
     
     private void listener_thread()
     {
+      struct thread_data{Tid thread, uint start_time, uint hits};
+      alias thread_data[Tid] tlist;
+      tlist active_threads;
+      tlist available;
+      uint low_water = 2; 
+      uint high_water = 0;
+      uint increment = 2;
+      
+      void mk_thread() {
+	thread_data t;
+	t.thread = spawn(&worker_thread);
+	t.data = 0;
+	t.hits = 0;
+	active_threads[t.thread] = t;
+	available[t.thread] = t;
+      }
+      
+      void assign_work(in in_msg p) {
+	// check to see if we have enough workers
+	if ((available.length < low_water) 
+	  and (high_water != 0) 
+	  and (available < high_water)
+	) {
+	  for (auto i=0; i<increment; i++) {
+	    mk_thread();
+	}  
+	// assign the job
+	Tid target = available.keys[0];
+	available.remove(target);
+	target.send(thisTid, p);
+	active_threads[target].hits++;
+      }
+      
+      void task_done(Tid t) {
+	available[t] = active_threads[t];
+      }
+      
+      void handle_params(in Tid caller, in set_values params) {
+	if (l > 1) { low_water = params.low; };
+	if (h > -1) { high_water = params.high; };
+	if (i > 0) { increment = params.inc; };
+	using params {
+	  low = low_water;
+	  high = high_water;
+	  inc = increment;
+	  current = active_threads.length;
+	};
+	t.send(params);
+      }
+      
       // simple response loop
       running = true;
       while running
       {
 	recieve(
-	  (in_msg p) { assign_work(p); }
-	  (OwnerTerminated e) { running = false; }
+	  (in_msg p)		{ assign_work(p); },
+	  (Tid t)    		{ task_done(t); },
+	  (Tid t, set_values s)	{ handle_params(t,s); },
+	  (OwnerTerminated e) 	{ running = false; },
 	);
       };
     };
@@ -88,7 +128,7 @@ class thread_pool(wp_t)
       while running
       {
 	recieve(
-	  (in_msg p) { do_work(p); }
+	  (Tid t, in_msg p) { do_work(p); t.send(thisTid);  }
 	  (OwnerTerminated e) { running = false; }
 	);
       };
