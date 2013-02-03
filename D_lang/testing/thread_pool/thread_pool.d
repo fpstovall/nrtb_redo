@@ -18,7 +18,7 @@ class thread_pool(wp_t)
     };
     
     // get/set queue parameters
-    final uint set_ctl_params(inout uint l; inout uint h, inout uint i) {
+    final uint set_ctl_params(inout uint l, inout uint h, inout uint i) {
       set_values packet;
       packet.low = l;
       packet.high = h;
@@ -43,13 +43,13 @@ class thread_pool(wp_t)
   // Does nothing but start the listener.
   private this()
   {
-    listener_tid = spawn(&this.listener_thread)
-  };
+    listener_tid = spawn(&this.listener_thread);
+  }
     
   // struct used to send/receive messages in.
-  private struct in_msg{Tid sender; wp_t data};
-  private struct set_values{uint low; uint high; uint inc, uint current};
-  private struct shutdown(bool immediate);
+  private struct in_msg{Tid sender; wp_t data;};
+  private struct set_values{uint low; uint high; uint inc; uint current;};
+  private struct shutdown{bool immediate;};
   // Housekeeping variables
   private Tid listener_tid;
   
@@ -58,7 +58,7 @@ class thread_pool(wp_t)
     
     private void listener_thread()
     {
-      struct thread_data{Tid thread, uint start_time, uint hits};
+      struct thread_data{Tid thread; uint start_time; uint hits;};
       alias thread_data[Tid] tlist;
       tlist active_threads;
       tlist available;
@@ -78,10 +78,10 @@ class thread_pool(wp_t)
       void assign_work(in in_msg p) {
 	// check to see if we have enough workers
 	if ((available.length < low_water) 
-	  and (high_water != 0) 
-	  and (available < high_water)
+	  && (high_water != 0) 
+	  && (available < high_water)
 	) {
-	  for (auto i=0; i<increment; i++) {
+	  for (auto i=0; i<increment; i++) 
 	    mk_thread();
 	}  
 	// assign the job
@@ -99,18 +99,16 @@ class thread_pool(wp_t)
 	if (l > 1) { low_water = params.low; };
 	if (h > -1) { high_water = params.high; };
 	if (i > 0) { increment = params.inc; };
-	using params {
-	  low = low_water;
-	  high = high_water;
-	  inc = increment;
-	  current = active_threads.length;
-	};
+	params.low = low_water;
+	param.high = high_water;
+	params.inc = increment;
+	params.current = active_threads.length;
 	t.send(params);
       }
       
       // simple response loop
-      running = true;
-      while running
+      bool running = true;
+      while (running)
       {
 	recieve(
 	  (in_msg p)		{ assign_work(p); },
@@ -121,14 +119,13 @@ class thread_pool(wp_t)
       };
     };
     
-    private void worker_thread()
-    {
+    private void worker_thread() {
       // simple response loop
-      running = true;
-      while running
+      bool running = true;
+      while (running)
       {
 	recieve(
-	  (Tid t, in_msg p) { do_work(p); t.send(thisTid);  }
+	  (Tid t, in_msg p) { do_work(p); t.send(thisTid);  },
 	  (OwnerTerminated e) { running = false; }
 	);
       };
@@ -141,56 +138,4 @@ class thread_pool(wp_t)
 void main()
 {
   writeln("D Message Driven Work Queue Example.");
-
-  // intialize some variable; the compiler can figure out the type from usage.
-  auto low=0, high = 100;
-
-  // launch a second thread using function receiver defined below.
-  auto rtid = spawn(&receiver);
-
-  // foreach iterates a range; in this case all values between
-  // low and high are assigned are assigned to i sequencially.
-  foreach (i; low .. high)
-  {
-    // sends a message to receiver using it's thread id; queue management is automatic.
-    rtid.send(i);
-    // report our action
-    writeln("Sent ", i);
-
-  }
-  writeln("** main() is complete **");
-}
-
-// receiver is a function which is run as a seperate thread by main.
-void receiver()
-{
-  writeln("** receiver() started. **");
-  
-  // a variable for error checking.
-  auto lastid = -1;
-
-  // function to handle messages
-  void int_handler(int i)
-  {
-    // just print a line and record the last id received
-    writeln(" Received ",i);
-    lastid = i;
-  }
-
-  // Loop until we the parent shuts down.
-  bool running = true;
-  while (running)
-  {
-    receive
-    (
-      // handler for int messages
-      (int msg) { int_handler(msg); },
-      // handler for "owner terminated" exception
-      (OwnerTerminated e) { running = false; }
-    );
-  }
-
-  // quick check to be sure we got them all.
-  assert(lastid == 99);
-  writeln("** receiver() is complete. **");
-}
+};
