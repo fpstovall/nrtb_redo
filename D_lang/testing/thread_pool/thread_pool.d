@@ -8,24 +8,22 @@ import std.concurrency, std.stdio;
 class thread_pool(wp_t)
 {
   public:
+    alias wp_t my_t;
   
     // submit a work packet for processing.
-    final void submit(in wp_t wp) {
-      in_msg packet;
-      packet.sender = thisTid;
-      packet.date = wp;
-      listener_tid.send(packet);
+    final void submit(in my_t wp) {
+      listener_tid.send(thisTid, wp);
     };
     
     // get/set queue parameters
-    final uint set_ctl_params(inout uint l, inout uint h, inout uint i) {
+    final uint set_ctl_params(ref uint l, ref uint h, ref uint i) {
       set_values packet;
       packet.low = l;
       packet.high = h;
       packet.inc = i;
       packet.current = 0;
       listener_tid.send(thisTid, packet);
-      recieve(
+      receive(
 	(set_values s) { packet = s; }
       );
       l = packet.low;
@@ -38,16 +36,15 @@ class thread_pool(wp_t)
   
   // do_work is responsible for returning any responses to 
   // the requesting thread if needed.
-  abstract private void do_work(inout in_msg packet);
+  abstract void do_work(in Tid requestor, in my_t data);
   
   // Does nothing but start the listener.
   private this()
   {
-    listener_tid = spawn(&this.listener_thread);
+    listener_tid = spawn(&this.listener_thread, thisTid);
   }
     
   // struct used to send/receive messages in.
-  private struct in_msg{Tid sender; wp_t data;};
   private struct set_values{uint low; uint high; uint inc; uint current;};
   private struct shutdown{bool immediate;};
   // Housekeeping variables
@@ -75,7 +72,7 @@ class thread_pool(wp_t)
 	available[t.thread] = t;
       }
       
-      void assign_work(in in_msg p) {
+      void assign_work(in Tid req, in my_t wp) {
 	// check to see if we have enough workers
 	if ((available.length < low_water) 
 	  && (high_water != 0) 
@@ -87,7 +84,7 @@ class thread_pool(wp_t)
 	// assign the job
 	Tid target = available.keys[0];
 	available.remove(target);
-	target.send(thisTid, p);
+	target.send(thisTid, req, wp);
 	active_threads[target].hits++;
       }
       
@@ -125,7 +122,7 @@ class thread_pool(wp_t)
       while (running)
       {
 	recieve(
-	  (Tid t, in_msg p) { do_work(p); t.send(thisTid);  },
+	  (Tid t, tid r, my_t p) { do_work(r,p); t.send(thisTid);  },
 	  (OwnerTerminated e) { running = false; }
 	);
       };
@@ -133,6 +130,19 @@ class thread_pool(wp_t)
   
 };
 
+class mypool: thread_pool!int {
+
+  override void do_work(in Tid requestor, in my_t data) {
+    double printme = 0.0;
+    for(auto i=0; i<data; i++) {
+      for (auto a=i; a<a+100; a++) {
+	printme += a * a;
+      }
+    }
+    writeln("worker ",thisTid," returns ",printme);
+  }
+
+}
 
 // main is just like main in C++
 void main()
