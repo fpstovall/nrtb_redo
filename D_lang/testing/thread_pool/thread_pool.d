@@ -75,7 +75,7 @@ void mytask(Tid t, int i) {
 void main()
 {
   writeln("D Message Driven Work Queue Example.");
-  auto myqueue = thread_pool!(int,mytask)("thread_pool",6);
+  auto myqueue = thread_pool!(int,mytask)("thread_pool",3);
     
   for (auto i=0; i<100; i++) {
     myqueue.submit(i);
