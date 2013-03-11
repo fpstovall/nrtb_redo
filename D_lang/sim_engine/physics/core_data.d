@@ -52,5 +52,5 @@ struct object {
 }
 
 struct world {
-  object[] objects;
+  object[uint] objects;
 }
