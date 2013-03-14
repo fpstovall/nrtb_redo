@@ -18,5 +18,20 @@ This file is part of the NRTB project (https://launchpad.net/nrtb).
 
 import std.string;
 
-pure void run_quanta(current_status c, world w) {
+pure void run_quanta(Tid, t, ref current_status c, ref world w) {
+  c.last_quanta++;
+  t = c.last_quanta * 20;
+
+  // apply movement
+  // -- apply functional changes
+  foreach(object o; w.objects) {
+    foreach(mod_func f; o.modifiers) {
+      f(o,t);
+    }
+  }
+  
+  // simple boundary sphere check for collisions.
+  
+  // Send updates the to object wrappers as appropriate.
+
 }

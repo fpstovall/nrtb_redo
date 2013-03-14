@@ -35,11 +35,12 @@ struct current_status {
   long uint msgs_out;
 }
 
-alias pure real(ref object) mod_func;
+alias pure real(ref object, long uint time) mod_func;
 
 struct object {
   uint id;
   string name;
+  string[string] attributes;
   vect3d postion;
   vect3d attitude;
   vect3d velocity;
