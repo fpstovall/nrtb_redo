@@ -28,6 +28,7 @@ struct kicker {
 // ===== internal data structures ===== //
 
 struct current_status {
+  long unit quanta;
   long uint last_quanta;
   long uint ms_used;
   long uint starttime;
@@ -45,7 +46,10 @@ struct object {
   vect3d attitude;
   vect3d velocity;
   vect3d rotation;
+  vect3d thrust;
+  vect3d torque;
   real mass;
+  real radius; // temp for initial alpha
   // message queue to send updates to.
   Tid wrapper_tid;
   // modifier functon lists
