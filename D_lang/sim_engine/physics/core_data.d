@@ -28,6 +28,7 @@ struct kicker {
 // ===== internal data structures ===== //
 
 struct current_status {
+  long unit quanta;
   long uint last_quanta;
   long uint ms_used;
   long uint starttime;
@@ -35,16 +36,20 @@ struct current_status {
   long uint msgs_out;
 }
 
-alias pure real(ref object) mod_func;
+alias pure real(ref object, long uint time) mod_func;
 
 struct object {
   uint id;
   string name;
+  string[string] attributes;
   vect3d postion;
   vect3d attitude;
   vect3d velocity;
   vect3d rotation;
+  vect3d thrust;
+  vect3d torque;
   real mass;
+  real radius; // temp for initial alpha
   // message queue to send updates to.
   Tid wrapper_tid;
   // modifier functon lists

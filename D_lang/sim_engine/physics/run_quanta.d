@@ -18,5 +18,37 @@ This file is part of the NRTB project (https://launchpad.net/nrtb).
 
 import std.string;
 
-pure void run_quanta(current_status c, world w) {
+pure void run_quanta(Tid t, ref current_status c, ref world w) {
+  c.last_quanta++;
+  real_time = c.last_quanta * c.quanta; // sim time in ms.
+  interval = c.quanta * 0.001; // convert ms to seconds.
+
+  // apply movement
+  foreach(object o; w.objects) {
+    // apply functional modifications
+    foreach(mod_func f; o.modifiers) {
+      f(o,real_time);
+    }
+    // update rates
+    o.velocity += (o.thrust * o.mass) * interval;
+    o.rotation += (o.torque * o.mass) * interval; // nota good model!!
+    // move it
+    o.position += o.velocity * interval;
+    o.attitude += o.rotation * interval;
+  }
+  
+  // simple boundary sphere check for collisions
+  l = w.objects.length;
+  for(auto i=0; i<l-1; i++) {
+    a = w.objects[i];
+    for (auto j=i+1; j<l; j++) {
+      b = w.objects[j];
+      if (a.position.range(b.position) < (a.radius + b.radius)) {
+	// these two are in contact.
+      }
+    }
+  }
+  
+  // Send updates the to object wrappers as appropriate.
+
 }
