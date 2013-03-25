@@ -35,20 +35,36 @@ pure void run_quanta(Tid t, ref current_status c, ref world w) {
     // move it
     o.position += o.velocity * interval;
     o.attitude += o.rotation * interval;
+    // send update to wrapper;
+    o.wrapper.send(o);
+    
   }
   
   // simple boundary sphere check for collisions
+  struct bumpers { object a, object b };
+  bumpers[] bumps;
   l = w.objects.length;
   for(auto i=0; i<l-1; i++) {
     a = w.objects[i];
     for (auto j=i+1; j<l; j++) {
       b = w.objects[j];
-      if (a.position.range(b.position) < (a.radius + b.radius)) {
-	// these two are in contact.
+      if (a.position.magnitude(b.position) < (a.radius + b.radius)) {
+	// add this pair to the contact list.
+	bumpers t;
+	t.a = a;
+	t.b = b;
+	bumps ~= t;
       }
     }
   }
   
-  // Send updates the to object wrappers as appropriate.
-
+  // send impact notifications.
+  foreach(auto b, bumps) {
+    impact i;
+    i.quanta = c.quanta;
+    i.impactor = b.a;
+    b.b.wrapper.send(i);
+    i.impactor = b.b;
+    b.a.wrapper.send(i);
+  }
 }
