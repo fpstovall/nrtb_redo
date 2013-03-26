@@ -35,6 +35,9 @@ pure void run_quanta(Tid t, ref current_status c, ref world w) {
     // move it
     o.position += o.velocity * interval;
     o.attitude += o.rotation * interval;
+    // send update to wrapper;
+    o.wrapper.send(o);
+    
   }
   
   // simple boundary sphere check for collisions
@@ -43,12 +46,15 @@ pure void run_quanta(Tid t, ref current_status c, ref world w) {
     a = w.objects[i];
     for (auto j=i+1; j<l; j++) {
       b = w.objects[j];
-      if (a.position.range(b.position) < (a.radius + b.radius)) {
-	// these two are in contact.
+      if (a.position.magnitude(b.position) < (a.radius + b.radius)) {
+	// notify those involved in the collision.
+	impact i;
+	i.quanta = c.quanta;
+	i.impactor = a;
+	b.wrapper.send(i);
+	i.impactor = b;
+	a.wrapper.send(i);
       }
     }
   }
-  
-  // Send updates the to object wrappers as appropriate.
-
 }

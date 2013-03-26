@@ -25,6 +25,16 @@ struct kicker {
   long uint tick;
 }
 
+struct impact {
+  object impactor;
+  long uint quanta;
+}
+
+struct core_status {
+  object o;
+  long uint quanta;
+}
+
 // ===== internal data structures ===== //
 
 struct current_status {
