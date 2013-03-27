@@ -17,6 +17,7 @@ This file is part of the NRTB project (https://launchpad.net/nrtb).
 **********************************************/
 
 import std.string;
+import core_data;
 
 pure void run_quanta(Tid t, ref current_status c, ref world w) {
   c.last_quanta++;

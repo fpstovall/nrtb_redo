@@ -21,29 +21,29 @@ import nrtb.common.vect3d;
 
 // =====  housekeeping messages ====== //
 struct kicker {
-  long uint starttime;
-  long uint tick;
+  uint starttime;
+  uint tick;
 }
 
 struct impact {
   object impactor;
-  long uint quanta;
+  uint quanta;
 }
 
 struct core_status {
   object o;
-  long uint quanta;
+  uint quanta;
 }
 
 // ===== internal data structures ===== //
 
 struct current_status {
-  long unit quanta;
-  long uint last_quanta;
-  long uint ms_used;
-  long uint starttime;
-  long uint msgs_in;
-  long uint msgs_out;
+  unit quanta;
+  uint last_quanta;
+  uint ms_used;
+  uint starttime;
+  uint msgs_in;
+  uint msgs_out;
 }
 
 alias pure real(ref object, long uint time) mod_func;
