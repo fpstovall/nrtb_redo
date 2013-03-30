@@ -46,7 +46,7 @@ struct current_status {
   uint msgs_out;
 }
 
-alias pure void mod_func(ref sim_object, uint time);
+alias pure void function(ref sim_object, uint time) mod_func;
 
 struct sim_object {
   uint id;
