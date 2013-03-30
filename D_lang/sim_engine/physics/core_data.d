@@ -16,7 +16,7 @@ This file is part of the NRTB project (https://launchpad.net/nrtb).
 
 **********************************************/
 
-import std.string;
+import std.string, std.concurrency;
 import nrtb.common.vect3d;
 
 // =====  housekeeping messages ====== //
@@ -26,19 +26,19 @@ struct kicker {
 }
 
 struct impact {
-  object impactor;
+  sim_object impactor;
   uint quanta;
 }
 
 struct core_status {
-  object o;
+  sim_object o;
   uint quanta;
 }
 
 // ===== internal data structures ===== //
 
 struct current_status {
-  unit quanta;
+  uint quanta;
   uint last_quanta;
   uint ms_used;
   uint starttime;
@@ -67,5 +67,5 @@ struct sim_object {
 }
 
 struct world {
-  object[uint] objects;
+  sim_object[uint] objects;
 }
