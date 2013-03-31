@@ -16,39 +16,100 @@ This file is part of the NRTB project (https://launchpad.net/nrtb).
 
 **********************************************/
 
-import std.string;
+import std.string, std.concurrency;
 import nrtb.common.vect3d;
 
 // =====  housekeeping messages ====== //
+
 struct kicker {
-  long uint starttime;
-  long uint tick;
+  uint starttime;
+  uint tick;
 }
+
+struct start_sim {
+  string sim_name;
+  uint quanta_ms;
+  bool allow_late_entry;
+  bool randomize_start_positions;
+}
+
+struct stop_sim {
+  string sim_name;
+  bool force_bot_disconnect;
+}
+
+struct sim_starting {
+  uint quantams;
+  sim_object you_are_here;
+  bool clock_running;
+}
+
+struct sim_ended {
+  uint quanta;
+  sim_object final_status;
+  bool prep_for_restart;
+}
+
+// Object maint messages
 
 struct impact {
-  object impactor;
-  long uint quanta;
+  sim_object impactor;
+  uint quanta;
 }
 
-struct core_status {
-  object o;
-  long uint quanta;
+struct obj_status {
+  sim_object o;
+  uint quanta;
+}
+
+struct add_obj {
+  sim_object new_obj;
+  bool allow_random_placement;
+}
+
+struct removed_obj {
+  sim_object final_status;
+  string reason;
+  bool may_restart;
+  bool errored;
+}
+
+struct apply_force {
+  uint id;
+  vect3d translation;
+  vect3d rotation;
+}
+
+struct set_attribute {
+  uint id;
+  string name;
+  string value;
+}
+
+struct unset_attribute {
+  uint id;
+  string name;
+}
+
+struct contact_list {
+  uint quanta;
+  sim_object[uint] contacts;
 }
 
 // ===== internal data structures ===== //
 
 struct current_status {
-  long unit quanta;
-  long uint last_quanta;
-  long uint ms_used;
-  long uint starttime;
-  long uint msgs_in;
-  long uint msgs_out;
+  uint quanta;
+  uint last_quanta;
+  uint ms_used;
+  uint starttime;
+  uint msgs_in;
+  uint msgs_out;
 }
 
-alias pure real(ref object, long uint time) mod_func;
+alias pure void function(ref sim_object, uint time) mod_func;
 
-struct object {
+struct sim_object {
   uint id;
   string name;
   string[string] attributes;
@@ -67,5 +128,5 @@ struct object {
 }
 
 struct world {
-  object[uint] objects;
+  sim_object[uint] objects;
 }
