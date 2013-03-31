@@ -74,6 +74,23 @@ struct removed_obj {
   bool errored;
 }
 
+struct apply_force {
+  uint id;
+  vect3d translation;
+  vect3d rotation;
+}
+
+struct set_attribute {
+  uint id;
+  string name;
+  string value;
+}
+
+struct unset_attribute {
+  uint id;
+  string name;
+}
+
 // ===== internal data structures ===== //
 
 struct current_status {
