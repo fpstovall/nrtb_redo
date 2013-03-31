@@ -91,6 +91,11 @@ struct unset_attribute {
   string name;
 }
 
+struct contact_list {
+  uint quanta;
+  sim_object[uint] contacts;
+}
+
 // ===== internal data structures ===== //
 
 struct current_status {
