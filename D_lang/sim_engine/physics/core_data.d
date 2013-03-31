@@ -20,6 +20,7 @@ import std.string, std.concurrency;
 import nrtb.common.vect3d;
 
 // =====  housekeeping messages ====== //
+
 struct kicker {
   uint starttime;
   uint tick;
@@ -30,9 +31,21 @@ struct impact {
   uint quanta;
 }
 
-struct core_status {
+struct obj_status {
   sim_object o;
   uint quanta;
+}
+
+struct add_obj {
+  sim_object new_obj;
+  bool allow_random_placement;
+}
+
+struct removed_obj {
+  sim_object final_status;
+  string reason;
+  bool may_restart;
+  bool errored;
 }
 
 // ===== internal data structures ===== //
