@@ -26,6 +26,32 @@ struct kicker {
   uint tick;
 }
 
+struct start_sim {
+  string sim_name;
+  uint quanta_ms;
+  bool allow_late_entry;
+  bool randomize_start_positions;
+}
+
+struct stop_sim {
+  string sim_name;
+  bool force_bot_disconnect;
+}
+
+struct sim_starting {
+  uint quantams;
+  sim_object you_are_here;
+  bool clock_running;
+}
+
+struct sim_ended {
+  uint quanta;
+  sim_object final_status;
+  bool prep_for_restart;
+}
+
+// Object maint messages
+
 struct impact {
   sim_object impactor;
   uint quanta;
