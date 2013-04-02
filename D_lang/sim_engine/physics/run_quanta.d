@@ -16,29 +16,31 @@ This file is part of the NRTB project (https://launchpad.net/nrtb).
 
 **********************************************/
 
-import std.string;
+import std.string, std.concurrency;
 import core_data;
 
 pure void run_quanta(Tid t, ref current_status c, ref world w) {
   c.last_quanta++;
-  real_time = c.last_quanta * c.quanta; // sim time in ms.
-  interval = c.quanta * 0.001; // convert ms to seconds.
+  uint real_time = c.last_quanta * c.quanta; // sim time in ms.
+  real interval = c.quanta * 0.001; // convert ms to seconds.
 
   // apply movement
-  foreach(object o; w.objects) {
+  foreach(sim_object o; w.objects) {
     // apply functional modifications
     foreach(mod_func f; o.modifiers) {
       f(o,real_time);
     }
     // update rates
-    o.velocity += (o.thrust * o.mass) * interval;
-    o.rotation += (o.torque * o.mass) * interval; // nota good model!!
+    o.velocity = o.velocity + ((o.thrust * o.mass) * interval);
+    o.rotation = o.rotation + ((o.torque * o.mass) * interval); // nota good model!!
     // move it
-    o.position += o.velocity * interval;
-    o.attitude += o.rotation * interval;
+    o.position = o.position + (o.velocity * interval);
+    o.attitude = o.attitude + (o.rotation * interval);
     // send update to wrapper;
-    o.wrapper.send(o);
-    
+    obj_status stat_message;
+    stat_message.o = o;
+    stat_message.quanta = c.last_quanta;
+    o.wrapper_tid.send(stat_message);
   }
   
   // simple boundary sphere check for collisions

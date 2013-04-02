@@ -113,7 +113,7 @@ struct sim_object {
   uint id;
   string name;
   string[string] attributes;
-  vect3d postion;
+  vect3d position;
   vect3d attitude;
   vect3d velocity;
   vect3d rotation;
