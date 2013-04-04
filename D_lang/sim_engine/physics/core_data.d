@@ -16,7 +16,7 @@ This file is part of the NRTB project (https://launchpad.net/nrtb).
 
 **********************************************/
 
-import std.string, std.concurrency;
+import std.string, std.concurrency, std.conv;
 import nrtb.common.vect3d;
 
 // =====  housekeeping messages ====== //
@@ -112,7 +112,7 @@ alias pure void function(ref sim_object, uint time) mod_func;
 struct sim_object {
   uint id;
   string name;
-  string[string] attributes;
+  string[] attributes;
   vect3d position;
   vect3d attitude;
   vect3d velocity;
@@ -121,12 +121,42 @@ struct sim_object {
   vect3d torque;
   real mass;
   real radius; // temp for initial alpha
-  // message queue to send updates to.
-  Tid wrapper_tid;
   // modifier functon lists
   mod_func[] modifiers;
+  
+  // make mutable from immutable.
+  this(immutable(sim_object) s) {
+    this.id = s.id;
+    this.name = s.name;
+    this.attributes = s.attributes.dup;
+    this.position = s.position;
+    this.attitude = s.attitude;
+    this.velocity = s.velocity;
+    this.rotation = s.rotation;
+    this.thrust = s.thrust;
+    this.torque = s.torque;
+    this.mass = s.mass;
+    this.radius = s.mass;
+    this.modifiers = to!(mod_func[])(s.modifiers);
+  }
+  // make immutable from mutable.
+  this(sim_object s) immutable {
+    this.id = s.id;
+    this.name = s.name;
+    this.attributes = s.attributes.idup;
+    this.position = s.position;
+    this.attitude = s.attitude;
+    this.velocity = s.velocity;
+    this.rotation = s.rotation;
+    this.thrust = s.thrust;
+    this.torque = s.torque;
+    this.mass = s.mass;
+    this.radius = s.mass;
+    this.modifiers = to!(immutable(mod_func[]))(s.modifiers);
+  }
+
 }
 
 struct world {
-  sim_object[uint] objects;
+  sim_object[Tid] objects;
 }

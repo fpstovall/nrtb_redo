@@ -19,7 +19,7 @@ This file is part of the NRTB project (https://launchpad.net/nrtb).
 import std.string, std.concurrency;
 import core_data;
 
-pure void run_quanta(Tid t, ref current_status c, ref world w) {
+void run_quanta(Tid t, ref current_status c, ref world w) {
   c.last_quanta++;
   uint real_time = c.last_quanta * c.quanta; // sim time in ms.
   real interval = c.quanta * 0.001; // convert ms to seconds.
@@ -37,26 +37,24 @@ pure void run_quanta(Tid t, ref current_status c, ref world w) {
     o.position = o.position + (o.velocity * interval);
     o.attitude = o.attitude + (o.rotation * interval);
     // send update to wrapper;
-    obj_status stat_message;
-    stat_message.o = o;
-    stat_message.quanta = c.last_quanta;
-    o.wrapper_tid.send(stat_message);
+    o.wrapper_tid.send(immutable(obj_status)(o,c.last_quanta));
   }
   
   // simple boundary sphere check for collisions
-  l = w.objects.length;
+  auto tobjs = w.objects.dup;
+  auto l = tobjs.length;
   for(auto i=0; i<l-1; i++) {
-    a = w.objects[i];
+    auto a = tobjs[i];
     for (auto j=i+1; j<l; j++) {
-      b = w.objects[j];
-      if (a.position.magnitude(b.position) < (a.radius + b.radius)) {
+      auto b = tobjs[j];
+      if (a.position.range(b.position) < (a.radius + b.radius)) {
 	// notify those involved in the collision.
-	impact i;
-	i.quanta = c.quanta;
-	i.impactor = a;
-	b.wrapper.send(i);
-	i.impactor = b;
-	a.wrapper.send(i);
+	impact ti;
+	ti.quanta = c.quanta;
+	ti.impactor = a;
+	b.wrapper_tid.send(ti);
+	ti.impactor = b;
+	a.wrapper_tid.send(ti);
       }
     }
   }
