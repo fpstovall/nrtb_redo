@@ -16,7 +16,7 @@ This file is part of the NRTB project (https://launchpad.net/nrtb).
 
 **********************************************/
 
-import std.string, std.concurrency;
+import std.string, std.concurrency, std.conv;
 import core_data;
 
 void run_quanta(Tid t, ref current_status c, ref world w) {
@@ -25,9 +25,9 @@ void run_quanta(Tid t, ref current_status c, ref world w) {
   real interval = c.quanta * 0.001; // convert ms to seconds.
 
   // apply movement
-  foreach(sim_object o; w.objects) {
+  foreach(Tid t, sim_object o; w.objects) {
     // apply functional modifications
-    foreach(mod_func f; o.modifiers) {
+    foreach(mod_func f; w.modifiers[t]) {
       f(o,real_time);
     }
     // update rates
@@ -37,9 +37,9 @@ void run_quanta(Tid t, ref current_status c, ref world w) {
     o.position = o.position + (o.velocity * interval);
     o.attitude = o.attitude + (o.rotation * interval);
     // send update to wrapper;
-    o.wrapper_tid.send(immutable(obj_status)(o,c.last_quanta));
+    t.send(o,c.last_quanta);
   }
-  
+ /* 
   // simple boundary sphere check for collisions
   auto tobjs = w.objects.dup;
   auto l = tobjs.length;
@@ -58,4 +58,5 @@ void run_quanta(Tid t, ref current_status c, ref world w) {
       }
     }
   }
-}
+*/
+  }

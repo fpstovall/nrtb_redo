@@ -57,7 +57,7 @@ struct impact {
   uint quanta;
 }
 
-immutable struct obj_status {
+struct obj_status {
   sim_object o;
   uint quanta;
 }
@@ -118,12 +118,14 @@ struct sim_object {
   vect3d rotation;
   vect3d thrust;
   vect3d torque;
-  real mass;
-  real radius; // temp for initial alpha
+  double mass;
+  double radius; // temp for initial alpha
 }
+
+alias mod_func[uint] mod_func_list;
 
 struct world {
   sim_object[Tid] objects;
-  mod_func[Tid] modifiers;
+  mod_func_list[Tid] modifiers;
   string[Tid][string] attributes;
 }
