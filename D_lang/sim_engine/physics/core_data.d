@@ -126,6 +126,6 @@ alias mod_func[uint] mod_func_list;
 
 struct world {
   sim_object[Tid] objects;
-  mod_func_list[Tid] modifiers;
-  string[Tid][string] attributes;
+  mod_func_list[uint] modifiers;
+  string[uint][string] attributes;
 }

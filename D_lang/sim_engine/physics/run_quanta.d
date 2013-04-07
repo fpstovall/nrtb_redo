@@ -27,7 +27,7 @@ void run_quanta(Tid t, ref current_status c, ref world w) {
   // apply movement
   foreach(Tid t, sim_object o; w.objects) {
     // apply functional modifications
-    foreach(mod_func f; w.modifiers[t]) {
+    foreach(mod_func f; w.modifiers[o.id]) {
       f(o,real_time);
     }
     // update rates
