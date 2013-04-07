@@ -123,9 +123,10 @@ struct sim_object {
 }
 
 alias mod_func[uint] mod_func_list;
+alias string[string] key_value_list;
 
 struct world {
   sim_object[Tid] objects;
   mod_func_list[uint] modifiers;
-  string[uint][string] attributes;
+  key_value_list[uint] attributes;
 }

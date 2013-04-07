@@ -39,24 +39,23 @@ void run_quanta(Tid t, ref current_status c, ref world w) {
     // send update to wrapper;
     t.send(o,c.last_quanta);
   }
- /* 
+ 
   // simple boundary sphere check for collisions
-  auto tobjs = w.objects.dup;
-  auto l = tobjs.length;
+  auto keys = w.objects.keys;
+  auto l = keys.length;
   for(auto i=0; i<l-1; i++) {
-    auto a = tobjs[i];
+    auto a = w.objects[keys[i]];
     for (auto j=i+1; j<l; j++) {
-      auto b = tobjs[j];
+      auto b = w.objects[keys[j]];
       if (a.position.range(b.position) < (a.radius + b.radius)) {
 	// notify those involved in the collision.
 	impact ti;
 	ti.quanta = c.quanta;
 	ti.impactor = a;
-	b.wrapper_tid.send(ti);
+	keys[j].send(ti);
 	ti.impactor = b;
-	a.wrapper_tid.send(ti);
+	keys[i].send(ti);
       }
     }
   }
-*/
-  }
+}
