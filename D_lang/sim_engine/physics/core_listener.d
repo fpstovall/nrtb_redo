@@ -35,7 +35,7 @@ public static struct sim_core_listener {
   
 }
 
-private pure void listener_thread() {
+private void listener_thread() {
 
   current_status c;
   world w;

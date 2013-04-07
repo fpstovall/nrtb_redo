@@ -16,7 +16,7 @@ This file is part of the NRTB project (https://launchpad.net/nrtb).
 
 **********************************************/
 
-import std.string, std.concurrency;
+import std.string, std.concurrency, std.conv;
 import nrtb.common.vect3d;
 
 // =====  housekeeping messages ====== //
@@ -112,21 +112,21 @@ alias pure void function(ref sim_object, uint time) mod_func;
 struct sim_object {
   uint id;
   string name;
-  string[string] attributes;
-  vect3d postion;
+  vect3d position;
   vect3d attitude;
   vect3d velocity;
   vect3d rotation;
   vect3d thrust;
   vect3d torque;
-  real mass;
-  real radius; // temp for initial alpha
-  // message queue to send updates to.
-  Tid wrapper_tid;
-  // modifier functon lists
-  mod_func[] modifiers;
+  double mass;
+  double radius; // temp for initial alpha
 }
 
+alias mod_func[uint] mod_func_list;
+alias string[string] key_value_list;
+
 struct world {
-  sim_object[uint] objects;
+  sim_object[Tid] objects;
+  mod_func_list[uint] modifiers;
+  key_value_list[uint] attributes;
 }
