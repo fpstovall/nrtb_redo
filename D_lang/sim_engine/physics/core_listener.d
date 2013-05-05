@@ -21,18 +21,13 @@ import core_listener, core_messages, run_quanta;
 
 public static struct sim_core_listener {
 
-  private listener_tid;
+  Tid listener_tid;
   
   // does nothing but start the listenr
   public this() {
     listener_tid = spawn(&listener_thread)
   }
-  
-  // generic used to send any message to the core
-  public send(msg_t)(msg_t msg) {
-    listener_tid.sent(thisTid, msg);
-  }
-  
+    
 }
 
 private void listener_thread() {
@@ -48,4 +43,15 @@ private void listener_thread() {
       (OwnerTerminated e) { running = false; }
     );
   };
+}
+
+private void kicker_thread(Tid listener, uint quantms) {
+  bool running = true;
+  uint quanta = 0;
+  
+  while (running) {
+    listener.send(kicker(0,quanta);
+    quanta++;
+    Thread.sleep(dur!("msecs")(quantams));
+  }
 }
