@@ -19,13 +19,13 @@
 #include <string>
 #include <iostream>
 #include "linear_queue.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 using namespace nrtb;
 using namespace std;
 
 typedef linear_queue<int> test_queue;
-typedef boost::shared_ptr<test_queue> queue_p;
+typedef shared_ptr<test_queue> queue_p;
 
 class consumer_task: public thread
 {
@@ -52,7 +52,7 @@ public:
   
   int get_count() { return count; };
   
-  void run()
+  void operator()()
   {
 	try
 	{
@@ -61,7 +61,7 @@ public:
 		int num = input->pop();
 		{
 		  static mutex console;
-		  scope_lock lock(console);
+		  unique_lock<mutex> lock(console);
 		  cout << name << " picked up " << num
 			<< endl;
 		};
@@ -84,7 +84,7 @@ protected:
   int lastnum;
 };
 
-typedef boost::shared_ptr<consumer_task> task_p;
+typedef shared_ptr<consumer_task> task_p;
 
 
 int main()

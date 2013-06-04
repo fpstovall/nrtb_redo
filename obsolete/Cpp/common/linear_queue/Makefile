@@ -23,7 +23,8 @@ lib:	linear_queue_test
 
 linear_queue_test:	linear_queue.h linear_queue_test.cpp
 	@rm -f linear_queue_test
-	g++ -c linear_queue_test.cpp -I../include -std=gnu++0x
+#	g++ -c linear_queue_test.cpp -I../include -std=gnu++0x
+	g++ -c linear_queue_test.cpp -I../include -std=c++11
 	g++ -o linear_queue_test linear_queue_test.o ../obj/common.o ../obj/base_thread.o -lpthread -std=gnu++0x
 
 clean:

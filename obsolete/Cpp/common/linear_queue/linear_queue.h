@@ -20,7 +20,8 @@
 #define nrtb_linear_queue_h
 
 #include <iostream>
-#include <base_thread.h>
+#include <mutex>
+#include <condition_variable>
 #include <list>
 
 namespace nrtb
@@ -48,7 +49,7 @@ template <class T>
 class linear_queue
 {
 public:
-    class queue_not_ready: public base_exception {};
+    class queue_not_ready: public std::exception {};
 
     /*********************************************
       * creates the queue with the specified
@@ -59,7 +60,7 @@ public:
     /*********************************************
       * releases all items in the queue
     *********************************************/
-    virtual ~linear_queue();
+    ~linear_queue();
 
     /*********************************************
       * Puts an item in the queue.
@@ -85,14 +86,14 @@ public:
 protected:
 
     std::list<T> buffer;
-    cond_variable buffer_lock;
-    bool ready;
+    std::mutex mylock;
+    std::condition_variable signal;
+    bool ready {true};
 };
 
 template <class T>
 linear_queue<T>::linear_queue()
 {
-    ready = true;
 };
 
 template <class T>
@@ -105,31 +106,31 @@ void linear_queue<T>::push(T item)
 {
   if (ready)
   {
-	scope_lock lock(buffer_lock);
+    std::unique_lock<std::mutex> lock(mylock);
     buffer.push_back(item);
-    buffer_lock.signal();
+    signal.notify_one();
   }
   else 
   {
-	queue_not_ready e;
-	  throw e;
+    queue_not_ready e;
+    throw e;
   }
 };
 
 template <class T>
 T linear_queue<T>::pop()
 {
-    scope_lock lock(buffer_lock);
-    while (buffer.empty() && ready)
-        buffer_lock.wait();
-    if (!ready)
-    {
-        queue_not_ready e;
-        throw e;
-    };
-	T returnme = buffer.front();
-	buffer.pop_front();
-	return returnme;
+  std::unique_lock<std::mutex> lock(mylock);
+  while (buffer.empty() && ready)
+    signal.wait(lock);
+  if (!ready)
+  {
+    queue_not_ready e;
+    throw e;
+  };
+  T returnme = buffer.front();
+  buffer.pop_front();
+  return returnme;
 };
 
 template <class T>
@@ -137,10 +138,10 @@ void linear_queue<T>::shutdown()
 {
   try
   {
-	scope_lock lock(buffer_lock);
-	ready = false;
-	buffer_lock.broadcast_signal();
-	buffer.clear();
+    std::unique_lock<std::mutex> lock(mylock);
+    ready = false;
+    buffer.clear();
+    signal.notify_all();
   }
   catch (...) {}  
 }
@@ -149,15 +150,15 @@ void linear_queue<T>::shutdown()
 template <class T>
 int linear_queue<T>::size()
 {
-    scope_lock lock(buffer_lock);
-    return buffer.size();
+  std::unique_lock<std::mutex> lock(mylock);
+  return buffer.size();
 };
 
 template <class T>
 void linear_queue<T>::clear()
 {
-    scope_lock lock(buffer_lock);
-    buffer.clear();
+  std::unique_lock<std::mutex> lock(mylock);
+  buffer.clear();
 };
 
 } // namespace nrtb
