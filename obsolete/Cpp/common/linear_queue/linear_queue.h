@@ -23,7 +23,6 @@
 #include <mutex>
 #include <condition_variable>
 #include <queue>
-#include <boost/concept_check.hpp>
 
 namespace nrtb
 {
@@ -52,7 +51,9 @@ class linear_queue
 public:
     class queue_not_ready: public std::exception {};
     
+    /// Total number of items placed in queue.
     std::atomic<int> in_count {0};
+    /// Total number of items read from queue.
     std::atomic<int> out_count {0};
 
     /*********************************************

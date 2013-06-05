@@ -16,6 +16,8 @@
 #
 #***********************************************
 
+switches=-std=gnu++11 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP
+
 lib:	linear_queue_test
 	@./linear_queue_test
 	@cp -v linear_queue.h ../include
@@ -23,9 +25,8 @@ lib:	linear_queue_test
 
 linear_queue_test:	linear_queue.h linear_queue_test.cpp
 	@rm -f linear_queue_test
-#	g++ -c linear_queue_test.cpp -I../include -std=gnu++0x
-	g++ -c linear_queue_test.cpp -I../include -std=c++11
-	g++ -o linear_queue_test linear_queue_test.o ../obj/common.o ../obj/base_thread.o -lpthread -std=gnu++0x
+	g++ -c linear_queue_test.cpp -I../include ${switches}
+	g++ -o linear_queue_test linear_queue_test.o -lpthread ${switches}
 
 clean:
 	@rm -rvf *.o linear_queue_test ../include/linear_queue.h *.log ../obj/linear_queue.o
