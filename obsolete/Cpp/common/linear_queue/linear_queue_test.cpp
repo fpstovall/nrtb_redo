@@ -20,6 +20,8 @@
 #include <iostream>
 #include "linear_queue.h"
 #include <memory>
+#include <atomic>
+#include <thread>
 
 using namespace nrtb;
 using namespace std;
@@ -27,61 +29,69 @@ using namespace std;
 typedef linear_queue<int> test_queue;
 typedef shared_ptr<test_queue> queue_p;
 
-class consumer_task: public thread
+struct mythread: thread
+{
+  using thread::thread;
+  ~mythread()
+  {
+    if (t.joinable()) t.join();
+  };
+};
+
+class consumer_task
 {
 public:
-
+  
   consumer_task(string n, queue_p buffer)
   {
-	name = n;
-	input = buffer;
-	count = 0;
+    name = n;
+    input = buffer;
   };
   
   ~consumer_task()
   {
-	cout << ">> in " << name << "::~consumer_task()" << endl;
-	try
-	{
-	  this->thread::~thread();
-	  input.reset();
-	}
-	catch (...)  {};
-	cout << "<< leaving " << name << "::~consumer_task()" << endl;
+    cout << ">> in " << name << "::~consumer_task()" << endl;
+    try
+    {
+      // disconnect from queue
+      input.reset();
+    }
+    catch (...)  {};
+    cout << "<< leaving " << name << "::~consumer_task()" << endl;
   };
   
   int get_count() { return count; };
   
   void operator()()
   {
-	try
+    try
+    {
+      while (true)
+      {
+	int num = input->pop();
 	{
-	  while (true)
-	  {
-		int num = input->pop();
-		{
-		  static mutex console;
-		  unique_lock<mutex> lock(console);
-		  cout << name << " picked up " << num
-			<< endl;
-		};
-		count++;
-		lastnum = num;
-		yield();	  
-	  }
-	}
-	catch (...) {};
+	  static mutex console;
+	  unique_lock<mutex> lock(console);
+	  cout << name << " picked up " << num
+		<< endl;
+	};
+	count++;
+	lastnum = num;
+	yield();	  
+      }
+    }
+    catch (...) {};
   };
 
 protected:
   // link to the feed queue
-  queue_p input;
+  queue_p input {nullptr};
   // a name to report 
-  string name;
-  // number of items processed
-  int count;
+  string name {"NOT_INITIALIZED"};
+  // total number of messages processed.
+  atomic<int> count {0};
   // last number caught
-  int lastnum;
+  int lastnum {0};
 };
 
 typedef shared_ptr<consumer_task> task_p;
@@ -97,7 +107,7 @@ int main()
   queue_p q1(new test_queue());
   for (int i=0; i<100; i++)
   {
-	q1->push(i);
+    q1->push(i);
   };
   // the queue should be loaded with 50-99
   // attach a thread and process it.
@@ -112,8 +122,8 @@ int main()
    ***********************************************/
   for (int i=200; i<225; i++)
   {
-	q1->push(i);
-	usleep(100);
+    q1->push(i);
+    usleep(100);
   };
   cout << "cp 2 " << p1->get_count() << endl;
   /************************************************
@@ -124,7 +134,7 @@ int main()
   p2->start();
   for (int i=300; i<325; i++)
   {
-	q1->push(i);
+    q1->push(i);
   };
   while (q1->size()) usleep(100);
   // shut it all down
@@ -141,11 +151,11 @@ int main()
   q1.reset();
   // do some reporting.
   cout << "cp 3 " 
-	<<  tot_items
-	<< " [125 + (" << p1_items
-	<< " + " << p2_items 
-	<< ")]" << endl;
-	bool passed = (tot_items == 150);
+    <<  tot_items
+    << " [125 + (" << p1_items
+    << " + " << p2_items 
+    << ")]" << endl;
+  bool passed = (tot_items == 150);
   // inverted logic needed because 0 is good for 
   // return codes.
   return !passed; 

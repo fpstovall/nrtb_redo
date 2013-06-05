@@ -19,10 +19,11 @@
 #ifndef nrtb_linear_queue_h
 #define nrtb_linear_queue_h
 
-#include <iostream>
+#include <atomic>
 #include <mutex>
 #include <condition_variable>
-#include <list>
+#include <queue>
+#include <boost/concept_check.hpp>
 
 namespace nrtb
 {
@@ -50,6 +51,9 @@ class linear_queue
 {
 public:
     class queue_not_ready: public std::exception {};
+    
+    std::atomic<int> in_count {0};
+    std::atomic<int> out_count {0};
 
     /*********************************************
       * creates the queue with the specified
@@ -85,7 +89,7 @@ public:
 
 protected:
 
-    std::list<T> buffer;
+    std::queue<T> buffer;
     std::mutex mylock;
     std::condition_variable signal;
     bool ready {true};
@@ -99,6 +103,7 @@ linear_queue<T>::linear_queue()
 template <class T>
 linear_queue<T>::~linear_queue()
 {
+  shutdown();
 };
 
 template <class T>
@@ -106,8 +111,11 @@ void linear_queue<T>::push(T item)
 {
   if (ready)
   {
-    std::unique_lock<std::mutex> lock(mylock);
-    buffer.push_back(item);
+    in_count++;
+    {
+      std::unique_lock<std::mutex> lock(mylock);
+      buffer.push(item);
+    }
     signal.notify_one();
   }
   else 
@@ -123,14 +131,18 @@ T linear_queue<T>::pop()
   std::unique_lock<std::mutex> lock(mylock);
   while (buffer.empty() && ready)
     signal.wait(lock);
-  if (!ready)
+  if (ready)
+  {
+    T returnme = buffer.front();
+    buffer.pop();
+    out_count++;
+    return returnme;
+  }
+  else
   {
     queue_not_ready e;
     throw e;
   };
-  T returnme = buffer.front();
-  buffer.pop_front();
-  return returnme;
 };
 
 template <class T>
@@ -140,12 +152,11 @@ void linear_queue<T>::shutdown()
   {
     std::unique_lock<std::mutex> lock(mylock);
     ready = false;
-    buffer.clear();
+    while (buffer.size()) { buffer.pop(); }
     signal.notify_all();
   }
   catch (...) {}  
 }
-
 
 template <class T>
 int linear_queue<T>::size()
@@ -158,7 +169,7 @@ template <class T>
 void linear_queue<T>::clear()
 {
   std::unique_lock<std::mutex> lock(mylock);
-  buffer.clear();
+  while (buffer.size()) buffer.pop();
 };
 
 } // namespace nrtb
