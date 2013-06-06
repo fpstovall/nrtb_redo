@@ -18,7 +18,8 @@
 
 #ifndef nrtb_serializer_h
 #define nrtb_serializer_h
-#include <base_thread.h>
+
+#include <atomic>
 
 namespace nrtb 
 { 
@@ -41,8 +42,7 @@ namespace nrtb
 	// functor method, returns the next value in the sequence.
 	unsigned long long operator ()();
   private:
-	nrtb::mutex lock;
-	unsigned long long int counter;
+	std::atomic<unsigned long long> counter;
   };
 
 }

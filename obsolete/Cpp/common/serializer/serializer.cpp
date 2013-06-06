@@ -17,7 +17,6 @@
  **********************************************/
  
 #include "serializer.h"
-#include <base_thread.h>
 
 using namespace nrtb;
 
@@ -38,6 +37,5 @@ serializer::~serializer()
 
 unsigned long long serializer::operator()()
 {
-  nrtb::scope_lock mylock(lock);
   return counter++;
 }
