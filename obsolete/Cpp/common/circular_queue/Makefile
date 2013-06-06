@@ -16,6 +16,8 @@
 #
 #***********************************************
 
+switches=-std=gnu++11 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP
+
 lib:	circular_queue_test
 	@./circular_queue_test
 	@cp -v circular_queue.h ../include
@@ -23,8 +25,8 @@ lib:	circular_queue_test
 
 circular_queue_test:	circular_queue.h circular_queue_test.cpp
 	@rm -f circular_queue_test
-	g++ -c circular_queue_test.cpp -I../include -std=gnu++0x
-	g++ -o circular_queue_test circular_queue_test.o ../obj/common.o ../obj/base_thread.o -lpthread  -std=gnu++0x
+	g++ -c circular_queue_test.cpp -I../include ${switches}
+	g++ -o circular_queue_test circular_queue_test.o -lpthread ${switches}
 
 clean:
 	@rm -rvf *.o circular_queue_test ../include/circular_queue.h *.log ../obj/circular_queue.o

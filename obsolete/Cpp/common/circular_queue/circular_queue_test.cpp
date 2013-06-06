@@ -18,78 +18,41 @@
  
 #include <string>
 #include <iostream>
+#include <unistd.h>
 #include "circular_queue.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
+#include <future>
 
 using namespace nrtb;
 using namespace std;
 
 typedef circular_queue<int> test_queue;
-typedef boost::shared_ptr<test_queue> queue_p;
+typedef std::shared_ptr<test_queue> queue_p;
 
-class consumer_task: public thread
+int consumer_task(string name, queue_p input)
 {
-public:
-
-  consumer_task(string n, queue_p buffer)
+  bool ready {true};
+  int count {0};
+  try
   {
-	name = n;
-	input = buffer;
-	count = 0;
-  };
-  
-  ~consumer_task()
+    while (ready)
+    {
+      int num = input->pop();
+      count++;
+      usleep(1);	  
+    }
+  }
+  catch (...) 
   {
-	cout << ">> in " << name << "::~consumer_task()" << endl;
-	try
-	{
-	  this->thread::~thread();
-	  input.reset();
-	}
-	catch (...)  {};
-	cout << "<< leaving " << name << "::~consumer_task()" << endl;
+    // exit on any exception
+    ready = false;
   };
-  
-  int get_count() { return count; };
-  
-  void run()
-  {
-	try
-	{
-	  while (true)
-	  {
-		int num = input->pop();
-		{
-		  static mutex console;
-		  scope_lock lock(console);
-		  cout << name << " picked up " << num
-			<< endl;
-		};
-		count++;
-		lastnum = num;
-		yield();	  
-	  }
-	}
-	catch (...) {};
-  };
-
-protected:
-  // link to the feed queue
-  queue_p input;
-  // a name to report 
-  string name;
-  // number of items processed
-  int count;
-  // last number caught
-  int lastnum;
+  return count;
 };
-
-typedef boost::shared_ptr<consumer_task> task_p;
-
 
 int main()
 {
-  int er_count = 0;
+  cout << "***** circular_queue unit test *****" << endl;
   /************************************************
    * Load queue and then cook it down...
    ***********************************************/
@@ -101,10 +64,11 @@ int main()
   };
   // the queue should be loaded with 50-99
   // attach a thread and process it.
-  task_p p1(new consumer_task("task 1",q1));
-  p1->start();
+  auto t1 = async(launch::async,consumer_task,"task 1",q1);
   while (q1->size()) usleep(100);
-  cout << "cp 1 " << p1->get_count() << endl;
+  cout << "cp 1 " 
+    << q1->in_count << ":"
+    << q1->out_count << endl;
   /************************************************
    * now that the preload is exhasted, shove items
    * in one at a time to make sure each is picked
@@ -112,40 +76,42 @@ int main()
    ***********************************************/
   for (int i=200; i<225; i++)
   {
-	q1->push(i);
-	usleep(100);
+    q1->push(i);
+    usleep(100);
   };
-  cout << "cp 2 " << p1->get_count() << endl;
+  cout << "cp 2 " 
+    << q1->in_count << ":"
+    << q1->out_count << endl;
   /************************************************
    * Last check; attach a second thread to the queue
    * and make sure both are servicing it.
    ***********************************************/
-  task_p p2(new consumer_task("task 2",q1));
-  p2->start();
+  auto t2 = async(launch::async,consumer_task,"task 2",q1);
   for (int i=300; i<325; i++)
   {
-	q1->push(i);
+    q1->push(i);
   };
   while (q1->size()) usleep(100);
   // shut it all down
   q1->shutdown();
-  p1->join();
-  p2->join();
   // important numbers
-  int tot_items = p1->get_count() + p2->get_count();
-  int p1_items = p1->get_count() - 75;
-  int p2_items = p2->get_count();
+  int q1_in = q1->in_count;
+  int q1_out = q1->out_count;
+  int t1_items = t1.get();
+  int t2_items = t2.get();
   // release she threads and queues.
-  p1.reset();
-  p2.reset();
   q1.reset();
   // do some reporting.
   cout << "cp 3 " 
-	<<  tot_items
-	<< " [75 + (" << p1_items
-	<< " + " << p2_items 
-	<< ")]" << endl;
-	bool passed = (tot_items == 100);
+    << q1_in << ":" << q1_out
+    << " t1=" << t1_items
+    << " t2=" << t2_items 
+    << endl;
+  bool passed = (q1_in - 50 == q1_out)
+    and (q1_out == (t1_items + t2_items));
+  cout << "***** circular_queue TEST "
+    << (passed ? "PASSED" : "FAILED")
+    << " ******" << endl;
   // inverted logic needed because 0 is good for 
   // return codes.
   return !passed; 

@@ -20,8 +20,10 @@
 #define nrtb_circular_queue_h
 
 #include <iostream>
-#include <base_thread.h>
 #include <boost/circular_buffer.hpp>
+#include <atomic>
+#include <mutex>
+#include <condition_variable>
 
 namespace nrtb
 {
@@ -31,7 +33,7 @@ namespace nrtb
  * the classic producer/consumer thread management model.
  * The producer uses circular_queue::push() to put items
  * in the queue as they become available, and the consumer
- * thread calls circular_queue::park() when it is ready
+ * thread calls circular_queue::pop() when it is ready
  * for the next item to work.
  *
  * Common uses would be for buffering outgoing or incomming
@@ -44,62 +46,63 @@ template <class T>
 class circular_queue
 {
 public:
-    class queue_not_ready: public base_exception {};
+  class queue_not_ready: public std::exception {};
+  std::atomic<int> in_count {0};
+  std::atomic<int> out_count {0};
 
-    /*********************************************
-      * creates the queue with the specified
-      * number of elements. All memory is allocated
-      * at construction to minimize delays at runtime.
-    *********************************************/
-    circular_queue(int size);
+  /*********************************************
+    * creates the queue with the specified
+    * number of elements. All memory is allocated
+    * at construction to minimize delays at runtime.
+  *********************************************/
+  circular_queue(int size);
 
-    /*********************************************
-      * releases all items in the queue
-    *********************************************/
-    virtual ~circular_queue();
+  /*********************************************
+    * releases all items in the queue
+  *********************************************/
+  virtual ~circular_queue();
 
-    /*********************************************
-      * Puts an item in the queue.
-    *********************************************/
-    void push(T item);
+  /*********************************************
+    * Puts an item in the queue.
+  *********************************************/
+  void push(T item);
 
-    /*********************************************
-      * Pops the next item off the queue, blocking
-      * if needed until an item becomes available.
-    *********************************************/
-    T pop();
+  /*********************************************
+    * Pops the next item off the queue, blocking
+    * if needed until an item becomes available.
+  *********************************************/
+  T pop();
 
-    /*********************************************
-     * puts the queue in shutdown mode.
-    *********************************************/
-    void shutdown();
+  /*********************************************
+    * puts the queue in shutdown mode.
+  *********************************************/
+  void shutdown();
 
-    // returns the number of items in the queue
-    int size();
-    // resizes the buffer, may cause data loss
-    void resize(int newsize);
-    // clears the buffer, data will be discarded.
-    void clear();
+  // returns the number of items in the queue
+  int size();
+  // resizes the buffer, may cause data loss
+  void resize(int newsize);
+  // clears the buffer, data will be discarded.
+  void clear();
 
 protected:
 
-    boost::circular_buffer<T> buffer;
-    cond_variable buffer_lock;
-    bool ready;
+  boost::circular_buffer<T> buffer;
+  std::condition_variable signal;
+  std::mutex mylock;
+  bool ready {true};
 };
 
 template <class T>
 circular_queue<T>::circular_queue(int size)
 {
-    buffer.set_capacity(size);
-    ready = true;
+  buffer.set_capacity(size);
 };
-
-// TODO: needed ... a queue stop method.
 
 template <class T>
 circular_queue<T>::~circular_queue()
 {
+  shutdown();
 };
 
 template <class T>
@@ -107,31 +110,38 @@ void circular_queue<T>::push(T item)
 {
   if (ready)
   {
-	scope_lock lock(buffer_lock);
-    buffer.push_back(item);
-    buffer_lock.signal();
+    in_count++;
+    {
+      std::unique_lock<std::mutex> lock(mylock);
+      buffer.push_back(item);
+    }
+    signal.notify_one();
   }
   else 
   {
-	queue_not_ready e;
-	  throw e;
+    queue_not_ready e;
+    throw e;
   }
 };
 
 template <class T>
 T circular_queue<T>::pop()
 {
-    scope_lock lock(buffer_lock);
-    while (buffer.empty() && ready)
-        buffer_lock.wait();
-    if (!ready)
-    {
-        queue_not_ready e;
-        throw e;
-    };
-	T returnme = buffer.front();
-	buffer.pop_front();
-	return returnme;
+  std::unique_lock<std::mutex> lock(mylock);
+  while (buffer.empty() && ready)
+      signal.wait(lock);
+  if (ready)
+  {
+    T returnme = buffer.front();
+    buffer.pop_front();
+    out_count++;
+    return returnme;    
+  }
+  else
+  {
+    queue_not_ready e;
+    throw e;
+  };
 };
 
 template <class T>
@@ -139,34 +149,33 @@ void circular_queue<T>::shutdown()
 {
   try
   {
-	scope_lock lock(buffer_lock);
-	ready = false;
-	buffer_lock.broadcast_signal();
-	buffer.clear();
+    std::unique_lock<std::mutex> lock(mylock);
+    ready = false;
+    buffer.clear();
+    signal.notify_all();
   }
   catch (...) {}  
 }
 
-
 template <class T>
 int circular_queue<T>::size()
 {
-    scope_lock lock(buffer_lock);
-    return buffer.size();
+  std::unique_lock<std::mutex> lock(mylock);
+  return buffer.size();
 };
 
 template <class T>
 void circular_queue<T>::resize(int newsize)
 {
-    scope_lock lock(buffer_lock);
-    buffer.set_capacity(newsize);
+  std::unique_lock<std::mutex> lock(mylock);
+  buffer.set_capacity(newsize);
 };
 
 template <class T>
 void circular_queue<T>::clear()
 {
-    scope_lock lock(buffer_lock);
-    buffer.clear();
+  std::unique_lock<std::mutex> lock(mylock);
+  buffer.clear();
 };
 
 } // namespace nrtb
