@@ -16,6 +16,8 @@
 #
 #***********************************************
 
+switches=-std=gnu++11 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP
+
 lib:	socket_test
 	@./socket_test
 	@cp -v base_socket.h ../include/
@@ -24,13 +26,13 @@ lib:	socket_test
 
 socket_test:	base_socket.o socket_test.cpp
 	@rm -f socket_test
-	g++ -c -O3 socket_test.cpp -I ../include -std=gnu++0x 
-	g++ -o socket_test socket_test.o base_socket.o ../obj/hires_timer.o ../obj/common.o ../obj/base_thread.o -lpthread  -std=gnu++0x
+	g++ -c -O3 socket_test.cpp -I ../include ${switches} 
+	g++ -o socket_test socket_test.o base_socket.o -lpthread ${switches}
 
 
 base_socket.o:	base_socket.cpp base_socket.h Makefile
 	@rm -f base_socket.o
-	g++ -c -O3 base_socket.cpp -I ../include -std=gnu++0x 
+	g++ -c -O3 base_socket.cpp -I ../include ${switches} 
 
 clean:
 	@rm -vf *.o ../include/base_socket.h socket_test
