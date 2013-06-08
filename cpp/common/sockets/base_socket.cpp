@@ -19,6 +19,7 @@
 // see base_socket.h for documentation
 
 #include "base_socket.h"
+#include <boost/lexical_cast.hpp>
 #include <string.h>
 #include <errno.h>
 #include <arpa/inet.h>
@@ -70,7 +71,7 @@ tcp_socket::tcp_socket(bool autoclose)
 {
   close_on_destruct = autoclose;
   mysock = socket(AF_INET,SOCK_STREAM,0);
-  _status = sock_init;
+  _status = state::sock_init;
   _last_error = 0;
 };
 
@@ -78,7 +79,7 @@ tcp_socket::tcp_socket(int existing_socket, bool autoclose)
 {
   close_on_destruct = autoclose;
   mysock = existing_socket;
-  _status = sock_connect;
+  _status = state::sock_connect;
   _last_error = 0;
 };
 
@@ -88,20 +89,22 @@ tcp_socket::~tcp_socket()
   {
     try {shutdown(mysock,SHUT_RDWR); } catch (...) {};
     try {::close(mysock); } catch (...) {};
-    _status = sock_undef;
+    _status = state::sock_undef;
   };
 };
 
 void tcp_socket::reset()
 {
   // close the old socket if we can.
-  try { close(); } catch (tcp_socket::general_exception) {};
+  try { close(); } catch (tcp_socket::general_exception) {}
   // get a new one.
   mysock = socket(AF_INET,SOCK_STREAM,0);
   // set up the default conditions;
-  _status = sock_init;
+  _status = state::sock_init;
   _last_error = 0;
 };
+
+TODO: Need to continue cleanup from here.
 
 sockaddr_in tcp_socket::str_to_sockaddr(const string & address)
 {

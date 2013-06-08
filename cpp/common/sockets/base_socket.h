@@ -40,14 +40,14 @@ class tcp_socket
 {
 public:
 
-  typedef enum {sock_undef,sock_init,sock_connect,sock_close} state;
+  enum class state {sock_undef,sock_init,sock_connect,sock_close};
   
 protected:
 
-  int mysock;
-  bool close_on_destruct;
-  state _status;
-  int _last_error;
+  int mysock {0};
+  bool close_on_destruct [true};
+  state _status {state::sock_undef};
+  int _last_error {0};
   std::vector<unsigned char> inbuff;
 
   virtual int transmit(const std::string & data);
@@ -56,7 +56,7 @@ protected:
 public:
 
   /// Use to catch all socket exceptions.
-  class general_exception: public base_exception {};
+  class general_exception: public std::exception {};
   /// Thrown by send or get* if the socket is not open for use.
   class not_open_exception: public general_exception {};
   /// Thrown by get* if more than maxlen chars are receieved.
@@ -412,12 +412,12 @@ typedef std::unique_ptr<nrtb::tcp_socket> tcp_socket_p;
  ** Descendent classes must override on_accept() to provide the necessary
  ** connection handling. See the documentation on on_accept for more details.
  **/
-class tcp_server_socket_factory: private thread
+class tcp_server_socket_factory:
 {
 
 private:
 
-  int _last_thread_fault;
+  int _last_thread_fault [0];
   // Provides the listener thread.
   void run();
   // pointer to the listener socket
