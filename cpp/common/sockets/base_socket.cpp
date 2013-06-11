@@ -24,12 +24,26 @@
 #include <errno.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <vector>
+#include <regex>
 
 // testing
 #include <iostream>
 
 using std::lexical_cast;
 using std::string;
+
+void addr_split(const string c, string & a, string & p)
+{
+  a = "";
+  p = "";
+  auto loc {string.find(":")};
+  if (loc != string::npos)
+  {
+    a = c.substr(0,loc-1);
+    b = c.substr(loc+1,c.length())
+  };
+};
 
 namespace nrtb
 {
@@ -104,8 +118,6 @@ void tcp_socket::reset()
   _last_error = 0;
 };
 
-TODO: Need to continue cleanup from here.
-
 sockaddr_in tcp_socket::str_to_sockaddr(const string & address)
 {
   sockaddr_in in_address;
@@ -114,18 +126,17 @@ sockaddr_in tcp_socket::str_to_sockaddr(const string & address)
   //in_address.sin_len = 16;
   in_address.sin_family = AF_INET;
   // seperate the IP and port addresses.
-  const int IP = 0; 
-  const int PORT = 1;
-  strlist addr;
-  addr = split(address,':');
-  if (addr.size() != 2)
+  string IP {""]; 
+  string PORT {""};
+  addr_split(address,IP,PORT);
+  if ((PORT == "") or (PORT == ""))
   {
     throw bad_address_exception();
   };
-  if (addr[IP] != "*")
+  if (IP != "*")
   {
     // first attempt name resolution
-    hostent * name = gethostbyname(addr[IP].c_str());
+    hostent * name = gethostbyname(IP.c_str());
     if ((name != 0) && (name->h_length > 0))
     {
       in_address.sin_addr = *( (in_addr *) (name->h_addr_list[0]));
@@ -135,10 +146,10 @@ sockaddr_in tcp_socket::str_to_sockaddr(const string & address)
       throw bad_address_exception();
     };
   };
-  if (addr[PORT] != "*")
+  if (PORT != "*")
   {
     // get the good port;
-    uint16_t port = lexical_cast<uint16_t>(addr[PORT]);
+    uint16_t port = lexical_cast<uint16_t>(PORT);
     in_address.sin_port = htons(port);
   };
   return in_address;
