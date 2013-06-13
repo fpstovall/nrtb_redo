@@ -16,6 +16,9 @@
 #
 #***********************************************
 
+switches=-std=gnu++11 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP
+
+
 lib:	common_rl_test
 	@./common_rl_test
 	@cp -v common.h ../include
@@ -24,12 +27,12 @@ lib:	common_rl_test
 
 common.o:	common.h common.cpp Makefile
 	@rm -f common.o
-	g++ -c -O3 common.cpp  -std=gnu++0x
+	g++ -c -O3 common.cpp ${switches}
 	
 common_rl_test:	common.o common_rl_test.cpp
 	@rm -f common_rl_test
-	g++ -c common_rl_test.cpp -std=gnu++0x
-	g++ -o common_rl_test common_rl_test.o common.o -std=gnu++0x
+	g++ -c common_rl_test.cpp  ${switches}
+	g++ -o common_rl_test common_rl_test.o common.o ${switches}
 
 clean:
 	@rm -rvf *.o  ../include/common.h ../obj/common.o common_rl_test

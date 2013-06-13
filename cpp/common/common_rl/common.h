@@ -20,10 +20,10 @@
 #ifndef __ga_common_h
 #define __ga_common_h 1
 
-//#include <stream.h>
 #include <string>
 #include <map>
 #include <vector>
+#include <chrono>
 
 namespace nrtb
 {
@@ -39,40 +39,36 @@ namespace nrtb
  ** get the time the exception was created and any text the thrower may have
  ** provided.
  **/
- class base_exception: public std::exception
- {
- 	protected:
- 		unsigned long int ctime;
- 		std::string _text;
- 	public:
- 		/** Default constructor.
- 		 ** 
- 		 ** Creates an nrtb_exception recording it's creation time but without
- 		 ** a comment string.
- 		 **/
- 		base_exception();
- 		/** Constructs with a comment string.
- 		 ** 
- 		 ** Creates an nrtb_exception recording it's creation time and storing the 
- 		 ** provided string "text" for recall later via the comment method.
- 		 ** 
- 		 ** This version takes an ISO standard C++ string.
- 		 **/
- 		base_exception(const std::string & text);
- 		/// NOP virtual distructor for safe inheritance
- 		virtual ~base_exception() throw() {};
- 		/** Stores a comment string.
- 		 **/
- 		void store(const std::string & s);
- 		/** Returns the value stored at exception creation.
- 		 **/
- 		std::string comment();
- 		/** Returns the unix time the exception was created.
- 		 **/
- 		unsigned long int creation_time();
+class base_exception: public std::exception
+{
+protected:
+  typedef std::chrono::high_resolution_clock myclock;
+  typedef std::chrono::high_resolution_clock::time_point mark;
+  typedef std::chrono::nanoseconds ns;
+  mark created {myclock::now()};
+  std::string _text;
+  
+public:
+  /// NOP virtual distructor for safe inheritance
+  virtual ~base_exception() throw() {};
+  /** Stores a comment string.
+   **/
+  void store(const std::string & s) { _text = s; };
+  /** Returns the value stored at exception creation.
+   **/
+  std::string comment() { return _text; };
+  /** Returns the time the exception was created.
+   **/
+  mark creation_time() { return created; };
+  /** Returns the age of the exception 
+   **/
+  ns age_in_ns() 
+  { 
+    return std::chrono::duration_cast<ns>(myclock::now() - created); 
+  };
 };
 
-// Thrown by gsub() in cases of unexpected error.
+// Thrown by gsub() in cases of unexpectaed error.
 class gsub_exception: public nrtb::base_exception {};
 // Thrown by split() in cases of unexpected error.
 class split_exception: public nrtb::base_exception {};
