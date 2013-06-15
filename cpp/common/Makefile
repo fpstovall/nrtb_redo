@@ -16,7 +16,8 @@
 #
 #***********************************************
 
-lib: ./lib/nrtb_common.a ./lib/nrtb_communication.a
+lib: ./lib/nrtb_common.a 
+# ./lib/nrtb_communication.a
 
 ./lib/nrtb_common.a:
 	@echo "============= building common libs ==============="
@@ -41,16 +42,16 @@ clean:
 
 doit:
 	@cd common_rl; make ${action}
-	@cd point; make ${action}
-	@cd timer; make ${action}
-	@cd threads; make ${action}
+#	@cd point; make ${action}
+#	@cd timer; make ${action}
+#	@cd threads; make ${action}
 	@cd circular_queue; make ${action}
 	@cd linear_queue; make ${action}
-	@cd sockets; make ${action}
+#	@cd sockets; make ${action}
 	@cd serializer; make ${action}
-	@cd singleton; make ${action}
-	@cd logger; make ${action}
-	@cd confreader; make ${action}
-	@cd GPB; make ${action}
-	@cd transceiver; make ${action}
+#	@cd singleton; make ${action}
+#	@cd logger; make ${action}
+#	@cd confreader; make ${action}
+#	@cd GPB; make ${action}
+#	@cd transceiver; make ${action}
 	
