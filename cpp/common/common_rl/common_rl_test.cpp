@@ -18,6 +18,7 @@
  
 #include "common.h"
 #include <iostream>
+#include <unistd.h>
 
 using namespace std;
 
@@ -95,6 +96,23 @@ int main()
   returnme += report_test(
 	  "nrtb::http_unhex()",
 	  nrtb::http_unhex("%4D%69%58%65%44%63%41%73%45") == tstr);
+  
+  try
+  {
+    nrtb::base_exception e;
+    e.store("Test code");
+    usleep(100);
+    throw e;
+  }
+  catch (nrtb::base_exception & e)
+  {
+    returnme += report_test(
+      "nrtb::base_exception::comment()",
+      e.comment() == "Test code");
+    returnme += report_test(
+      "nrtb::base_exception::age_in_ms()",
+      e.age_in_ms().count() > 100 );
+  };
   
   cout << "=== nrtb::common_rl unit test complete ===" << endl;
   return returnme;

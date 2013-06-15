@@ -44,7 +44,7 @@ class base_exception: public std::exception
 protected:
   typedef std::chrono::high_resolution_clock myclock;
   typedef std::chrono::high_resolution_clock::time_point mark;
-  typedef std::chrono::nanoseconds ns;
+  typedef std::chrono::microseconds ms;
   mark created {myclock::now()};
   std::string _text;
   
@@ -62,9 +62,9 @@ public:
   mark creation_time() { return created; };
   /** Returns the age of the exception 
    **/
-  ns age_in_ns() 
+  ms age_in_ms() 
   { 
-    return std::chrono::duration_cast<ns>(myclock::now() - created); 
+    return std::chrono::duration_cast<ms>(myclock::now() - created); 
   };
 };
 

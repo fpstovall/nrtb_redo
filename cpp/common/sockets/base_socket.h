@@ -19,6 +19,7 @@
 #ifndef base_socket_header
 #define base_socket_header
 
+#include <common.h>
 #include <memory>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -56,7 +57,7 @@ protected:
 public:
 
   /// Use to catch all socket exceptions.
-  class general_exception: public std::exception {};
+  class general_exception: public base_exception {};
   /// Thrown by send or get* if the socket is not open for use.
   class not_open_exception: public general_exception {};
   /// Thrown by get* if more than maxlen chars are receieved.
