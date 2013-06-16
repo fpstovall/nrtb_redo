@@ -17,16 +17,12 @@
 #***********************************************
 
 lib: ./lib/nrtb_common.a 
-# ./lib/nrtb_communication.a
 
 ./lib/nrtb_common.a:
 	@echo "============= building common libs ==============="
 	@make action=lib doit
 	@ar -r ./lib/nrtb_common.a ./obj/*.o
 	@echo "============= common libs complete ==============="
-
-./lib/nrtb_communication.a:
-	@cd comm_handlers; make lib
 
 modules:
 	@echo "============= building common modules ==============="
@@ -37,14 +33,11 @@ clean:
 	@echo "============= cleaning common libs ==============="
 	@make action=clean doit
 	@rm -fv ./obj/* ./lib/* ./include/*
-	@cd comm_handlers; make clean
 	@echo "========== common lib cleanup complete ==========="
 
 doit:
 	@cd common_rl; make ${action}
 #	@cd point; make ${action}
-#	@cd timer; make ${action}
-#	@cd threads; make ${action}
 	@cd circular_queue; make ${action}
 	@cd linear_queue; make ${action}
 #	@cd sockets; make ${action}
@@ -52,6 +45,10 @@ doit:
 #	@cd singleton; make ${action}
 #	@cd logger; make ${action}
 #	@cd confreader; make ${action}
+
+# --- the following are obsolete and may be removed later.
+#	@cd timer; make ${action}
+#	@cd threads; make ${action}
 #	@cd GPB; make ${action}
 #	@cd transceiver; make ${action}
 	
