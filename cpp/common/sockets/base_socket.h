@@ -21,6 +21,8 @@
 
 #include <common.h>
 #include <memory>
+#include <atomic>
+#include <circular_queue.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
@@ -375,100 +377,15 @@ public:
 /// smart pointer for use with tcp_sockets
 typedef std::unique_ptr<nrtb::tcp_socket> tcp_socket_p;
 
-/** Abstract "listener" TCP/IP socket for servers. 
+/** "listener" TCP/IP socket socket factory for servers. 
  ** 
- ** Simplifies the use of TCP/IP sockets for applications providing services.
- ** base_sock implements a free running thread that listens for connections on 
- ** the address and port specified and on connection calls the abstract method
- ** on_accept(). Upon return from on_accept the class returns to listening for
- ** the next connection.
- ** 
- ** Normal useage: This is an abstract class, so you must make a descendent 
- ** class that at a minimum overrides on_accept() to provide connection handling.
- ** That aside, a typical sequence for a descendent of this class would be: 
- ** 
- ** (1) construct the object providing the address, port and backlog; 
- ** 
- ** (2) when the application is ready to accept traffic it calls the 
- ** start_listen() method to start the listening on the socket; 
- ** 
- ** (3) as each connection is accepted, a new connect_sock* is contructed and 
- ** then on_accept() is called;
- ** 
- ** (4) on_accept() processes the connection, using connect_sock* to receive and
- ** send data. In most cases, on_accept will only place the new tcp_socket in 
- ** a queue for other threads to process so that on_accept() can return quickly;
- ** 
- ** (5) when on_accept() returns we start listening for the next connection.
- ** 
- ** (6) When the application wishes to stop accepting connections, it calls
- ** the stop_listen() method, which will return when as soon any current calls
- ** to on_accept() complete.
- ** 
- ** --NOTE--- This class is a tcp_socket_p factory in that a new one 
- ** is created for each request received. As the tcp_socket_p is a 
- ** smart pointer, the allocated socket will be closed and deallocated 
- ** when the last reference to the socket goes out of scope automatically.
- **
- ** Descendent classes must override on_accept() to provide the necessary
- ** connection handling. See the documentation on on_accept for more details.
+ ** Upon construction this class establishes a listening socket
+ ** on the specified address and port. Each incomming connection
+ ** is automatically accepted and its socket put on queue for other tasks
+ ** to process.  
  **/
 class tcp_server_socket_factory:
 {
-
-private:
-
-  int _last_thread_fault [0];
-  // Provides the listener thread.
-  void run();
-  // pointer to the listener socket
-  typedef std::shared_ptr<tcp_socket> lsock_p;
-  lsock_p listen_sock;
-    
-protected:
-
-  /// the address:port the listening socket will connect to.
-  std::string _address;
-  unsigned short int _backlog;
-  
-  /** Pointer to the socket for the current connection. This is 
-    ** only safe to use/manipulate after entry of the method on_accept(); 
-    ** at any other time this pointer may be altered without notice. 
-    ** 
-    ** At entry to on_accept() this will point to a valid tcp_socket_p
-    ** smart pointer. As with all smart pointers, the object it 
-    ** points to will be deleted automatically when the last 
-    ** reference to it goes out of scope. 
-    **/
-  tcp_socket_p connect_sock;
-
-  /** Abstract method to process connections. An on_accept() call is 
-    ** made on every connection accepted immediately after constructing a 
-    ** new base_sock socket for it (pointed to by connect_sock).
-    ** 
-    ** It is expected that a useful on_accept() method must either place
-    ** the connection information (presumably including conect_sock*) on 
-    ** a queue for the application to process later, or process the connection
-    ** itself. It is desireable for on_accept() to return quickly to minimize
-    ** connection latency, so for most applications you'll want to queue
-    ** the connection for processing by another thread.
-    ** 
-    ** on_accept() should return true to contine processing, or false 
-    ** to force a shutdown of the listener.
-    ** 
-    ** WARNING: While this class attempts to respect the integrity of any code
-    ** placed in on_accept(), you must be aware that it may be cancelled 
-    ** quite rudely if any given call to on_accept() takes more than 30 
-    ** seconds to process. on_accept() is run with the cancel_anytime attribute
-    ** set, and this can not be changed from within the method. Therefore, 
-    ** take care that on_accept() either runs within 30 seconds or at the 
-    ** very least that it does not hold any resource (mutex, etc.) locks 
-    ** by the time it's run over 20 seconds or so. Failure to follow these
-    ** guidelines could result in program deadlocks should on_accept be 
-    ** cancelled while holding a resource lock.
-    **/
-  virtual bool on_accept() = 0;
-  
 public:
 
   /// Use to catch all server_socket_factory exceptions.
@@ -477,10 +394,6 @@ public:
   class mem_exhasted_exception: public general_exception {};
   /// Thrown by start_listen() if the IP/port could not be bound.
   class bind_failure_exception: public general_exception {};
-  /** Thrown by stop_listen() if on_accept takes more than 30 seconds 
-    ** to return.
-    **/
-  class on_accept_bound_exception: public general_exception {};
   /// Thrown by by the listen thread in case of unexpected error.
   class listen_terminated_exception: public general_exception {};
   
@@ -495,9 +408,14 @@ public:
     ** allowed for this socket. The limit is operating system dependent. If
     ** the supplied value is 0 or less, the default value for the operating 
     ** system will be used.
+    ** 
+    ** queue_size: Optional; the size of the queue for connections
+    ** waiting to be serviced. Defaults to 10. If queue_size is 
+    ** exceeded, oldest connections will be discarded. 
     **/
   tcp_server_socket_factory(const std::string & address, 
-	  const unsigned short int & backlog);
+	const unsigned short int & backlog,
+	const int queue_size=10);
 
   /** Destructs a server_sock. 
     ** 
@@ -508,21 +426,7 @@ public:
     ** graceful termination of the listener thread and teardown of the port.
     **/
   virtual ~tcp_server_socket_factory();
-
-  /** Initiate listening for inbound connections.
-    ** 
-    ** This opens the port and spawns the listener thread, then returns
-    ** immediately. An exception will be thrown if a problem occurs.  
-    ** 
-    ** If the listener thread is already running this method returns
-    ** immediately without taking any action.
-    ** 
-    ** Call this method when your application is ready to start recieving
-    ** connections. Once started, the server_sock will call on_accept() 
-    ** for each connection recieved until stop_listen() is called.
-    **/
-  void start_listen();
-
+  
   /** Stop listening for inbound connections.
     ** 
     ** This shuts down the listener thread and tears down the TCP/IP port 
@@ -544,6 +448,10 @@ public:
     ** even if you are going to restart reception later. 
     **/
   void stop_listen();
+
+  /** Restart a stopped listener
+   **/
+  void restart_listener();
 
   /** Monitors listening status.
     ** 	
@@ -572,6 +480,21 @@ public:
     **/
   unsigned short int backlog();
 
+private:
+
+  std::atomic< int > _last_thread_fault [0];
+  std::atomic< bool > in_run_method [false];
+  nrtb::circular_queue<tcp_socket> pending;
+  // Provides the listener thread.
+  void run();
+  // pointer to the listener socket
+  typedef std::shared_ptr<tcp_socket> lsock_p;
+  lsock_p listen_sock;
+  /// the address:port the listening socket will connect to.
+  std::string _address;
+  unsigned short int _backlog;
+  
+  
 };
 
 } // namepace nrtb
