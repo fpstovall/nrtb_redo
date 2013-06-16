@@ -426,6 +426,23 @@ public:
     ** graceful termination of the listener thread and teardown of the port.
     **/
   virtual ~tcp_server_socket_factory();
+
+  /// Consumers call this to get a connected socket.
+  tcp_socket get_sock();
+  
+  /// returns the number of connections received.
+  int accepted() { return pending.in_count; };
+  /// returns the number of connections consumed.
+  int processed() { return pending.out_count; };
+  /// returns the number of connections waiting to be consumed.
+  int available() { return pending.size(); };
+  /// returns the number of connections dropped due to overflow.
+  int discarded() 
+  { 
+    return pending.in_count - 
+	pending.out_count - pending.size(); 
+  };
+
   
   /** Stop listening for inbound connections.
     ** 
@@ -484,7 +501,7 @@ private:
 
   std::atomic< int > _last_thread_fault [0];
   std::atomic< bool > in_run_method [false];
-  nrtb::circular_queue<tcp_socket> pending;
+  nrtb::circular_queue<tcp_socket> pending {pending(10)};
   // Provides the listener thread.
   void run();
   // pointer to the listener socket
@@ -493,7 +510,6 @@ private:
   /// the address:port the listening socket will connect to.
   std::string _address;
   unsigned short int _backlog;
-  
   
 };
 
