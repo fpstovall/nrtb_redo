@@ -19,9 +19,10 @@
 #ifndef base_socket_header
 #define base_socket_header
 
-#include <common.h>
 #include <memory>
 #include <atomic>
+#include <thread>
+#include <common.h>
 #include <circular_queue.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -397,7 +398,7 @@ public:
   /// Thrown by by the listen thread in case of unexpected error.
   class listen_terminated_exception: public general_exception {};
   
-  /** Construct a tcp_server_socket_factory. 
+  /** Construct a tcp_server_socket_factory and puts it online.
     ** 
     ** address: std::string of the format IP:port; example "255.255.255.255:91". 
     ** if you wish to accept input on any active IP address in this host, 
@@ -414,7 +415,7 @@ public:
     ** exceeded, oldest connections will be discarded. 
     **/
   tcp_server_socket_factory(const std::string & address, 
-	const unsigned short int & backlog,
+	const unsigned short int backlog,
 	const int queue_size=10);
 
   /** Destructs a server_sock. 
@@ -428,7 +429,7 @@ public:
   virtual ~tcp_server_socket_factory();
 
   /// Consumers call this to get a connected socket.
-  tcp_socket get_sock();
+  tcp_socket get_sock() { return queue.pop(); };
   
   /// returns the number of connections received.
   int accepted() { return pending.in_count; };
@@ -443,7 +444,6 @@ public:
 	pending.out_count - pending.size(); 
   };
 
-  
   /** Stop listening for inbound connections.
     ** 
     ** This shuts down the listener thread and tears down the TCP/IP port 
@@ -466,9 +466,9 @@ public:
     **/
   void stop_listen();
 
-  /** Restart a stopped listener
+  /** Starts a stopped listener
    **/
-  void restart_listener();
+  void start_listen();
 
   /** Monitors listening status.
     ** 	
@@ -499,17 +499,18 @@ public:
 
 private:
 
-  std::atomic< int > _last_thread_fault [0];
-  std::atomic< bool > in_run_method [false];
+  // the address:port the listening socket will connect to.
+  std::atomq<std::string> _address;
+  std::atomic<unsigned short int>  _backlog;
+  // stuff for the listener thread
+  std::thread work_thread;
+  std::shared_ptr<tcp_socket> listen_sock {nullptr};
+  std::atomic< int > _last_thread_fault {0};
+  std::atomic< bool > in_run_method {false};
+  // The accepted inbound connection queue
   nrtb::circular_queue<tcp_socket> pending {pending(10)};
   // Provides the listener thread.
   void run();
-  // pointer to the listener socket
-  typedef std::shared_ptr<tcp_socket> lsock_p;
-  lsock_p listen_sock;
-  /// the address:port the listening socket will connect to.
-  std::string _address;
-  unsigned short int _backlog;
   
 };
 

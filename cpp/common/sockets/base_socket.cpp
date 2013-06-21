@@ -554,16 +554,21 @@ string tcp_socket::get_remote_address()
 
 
 tcp_server_socket_factory::tcp_server_socket_factory(
-		const string & address, const unsigned short int & backlog = 5)
+		const string & address, 
+		const unsigned short int backlog = 5,
+		const int queue_size = 10);
+						    )
 {
   // does not attempt to set up the connection initially.
   _address = address;
   _backlog = backlog;
-  _last_thread_fault = 0;
+  pending.resize(queue_size);
 };
 
 tcp_server_socket_factory::~tcp_server_socket_factory()
 {
+  // Shutdown the queue and notify the workers.
+  try { pending.shutdown(); } catch (...) {};
   // make sure we've stopped doing anything.
   try { stop_listen(); } catch (...) {};
 };
@@ -571,10 +576,14 @@ tcp_server_socket_factory::~tcp_server_socket_factory()
 void tcp_server_socket_factory::start_listen()
 {
   // take no action if the listen thread is already running.
-  if (!is_running())
+  if (in_run_method or work_thread.joinable)
+  {
+    throw already_running_exception();
+  }
+  else
   {
     // start it up!
-    start();
+    work_thread = std::thread(run,std::ref(this));
     int countdown = 99;
     while (!listening() and countdown)
     {
@@ -587,10 +596,6 @@ void tcp_server_socket_factory::start_listen()
       e.store(_address);
       throw e;
     };
-  }
-  else
-  {
-    throw already_running_exception();
   };
 };
 
@@ -599,16 +604,16 @@ void tcp_server_socket_factory::stop_listen()
   // take action only if the listen thread is running.
   if (listening())
   {
-    // stop the listener thread
-    stop();
-    join();
     listen_sock.reset();
   };
+  if (work_thread.joinable()) work_thread.join();
+  // just in case.
+  in_run_method == false;
 };
 
 bool tcp_server_socket_factory::listening()
 {
-  bool running = is_running();
+  bool running = in_run_method and work_thread.joinable();
   if (listen_sock)
   {
     running = running
@@ -628,124 +633,109 @@ int tcp_server_socket_factory::last_fault()
 
 unsigned short int tcp_server_socket_factory::backlog()
 {
-	return _backlog;
+  return _backlog;
 };
 
 void tcp_server_socket_factory::run()
 {
-  // set up the listening socket.
-  int sock;
-  _last_thread_fault = 0;
-  bool go = false;
+  in_run_method = true;
   try
   {
-    sock = socket(AF_INET,SOCK_STREAM,0);
-    sockaddr_in myaddr;
-    myaddr = tcp_socket::str_to_sockaddr(_address);
-    int a = bind(sock,(sockaddr *) &myaddr,sizeof(myaddr));
-    int b = listen(sock,_backlog);
-    if (a || b)
+    // set up the listening socket.
+    int sock;
+    _last_thread_fault = 0;
+    bool go = false;
+    try
     {
-      go = false;
-      if (a) _last_thread_fault += 1;
-      if (b) _last_thread_fault += 2;
+      sock = socket(AF_INET,SOCK_STREAM,0);
+      sockaddr_in myaddr;
+      myaddr = tcp_socket::str_to_sockaddr(_address);
+      int a = bind(sock,(sockaddr *) &myaddr,sizeof(myaddr));
+      int b = listen(sock,_backlog);
+      if (a || b)
+      {
+	go = false;
+	if (a) _last_thread_fault += 1;
+	if (b) _last_thread_fault += 2;
+      }
+      else
+      {
+	go = true;
+      };
     }
-    else
+    catch (...)
     {
-      go = true;
+      _last_thread_fault = 100;
     };
-  }
-  catch (...)
-  {
-    _last_thread_fault = 100;
-  };
-  // if not in a good state, terminate the thread.
-  if (!go)
-  {
-    _last_thread_fault =+ 200;
-    exit(0);
-  };
-  // make sure the listener is closed when we exit.
-  // also prevides an external hook to socket.
-  listen_sock.reset(new tcp_socket(sock));
-  // processing loop
-  while
-  (
-    go
-    and listen_sock
-    and (listen_sock->status() == tcp_socket::sock_connect)
-  )
-  {
-    // accept a new connection
-    bool good_connect = true;
-    int new_conn = accept(sock,NULL,NULL);
-    // is the listener still open?
-    if
-    (
-      (!listen_sock)
-      and (listen_sock->status() != tcp_socket::sock_connect)
-    )
+    // if not in a good state, terminate the thread.
+    if (!go)
     {
-      // the listner socket is not available.. get out of here.
-      listen_sock.reset();
-      _last_thread_fault = 300;
+      _last_thread_fault =+ 200;
       exit(0);
     };
-    // validate the accept return value.
-    if (new_conn == -1)
+    // make sure the listener is closed when we exit.
+    // also prevides an external hook to socket.
+    listen_sock.reset(new tcp_socket(sock));
+    // processing loop
+    while
+    (
+      go
+      and listen_sock
+      and (listen_sock->status() == tcp_socket::sock_connect)
+    )
     {
-      // accept returned an error.
-      switch (errno)
+      // accept a new connection
+      bool good_connect = true;
+      int new_conn = accept(sock,NULL,NULL);
+      // is the listener still open?
+      if
+      (
+	(!listen_sock)
+	or (listen_sock->status() != tcp_socket::sock_connect)
+      )
       {
-        case EPROTO :
-        case EHOSTDOWN :
-        case EHOSTUNREACH :
-        case EAGAIN :
-        case ECONNABORTED :
-        {
-          // abandon this connection
-          good_connect = false;
-          break;
-        };
-        default :
-        {
-          // for any other error, we're going to shutdown the
-          // this listener thread.
-          go = false;
-          good_connect = false;
-          _last_thread_fault = errno;
-          break;
-        };
-      };  // switch (errno)
-    }; // error thrown by accept.
-    if (good_connect)
-    {
-      connect_sock.reset(new tcp_socket(new_conn));
-      set_cancel_anytime();
-      // call the connection handler.
-      try
-      {
-        go = on_accept();
-      }
-      catch (...)
-      {
-        go = false;
-        _last_thread_fault = 501;
+	// the listner socket is not available.. get out of here.
+	listen_sock.reset();
+	_last_thread_fault = 300;
+	good_connect = false;
+	go = false;
+	break;
       };
-      set_deferred_cancel();
-      // safety check.
-      if (connect_sock)
+      // validate the accept return value.
+      if (new_conn == -1)
       {
-        std::cerr << "WARNING: on_accept() did not take ownership of "
-          << "connect_sock.\n"
-          << "  This can lead to leaks and should be fixed."
-          << std::endl;
-        connect_sock.reset();
-        _last_thread_fault = 500;
-        go = false;
+	// accept returned an error.
+	switch (errno)
+	{
+	  case EPROTO :
+	  case EHOSTDOWN :
+	  case EHOSTUNREACH :
+	  case EAGAIN :
+	  case ECONNABORTED :
+	  {
+	    // abandon this connection
+	    good_connect = false;
+	    break;
+	  };
+	  default :
+	  {
+	    // for any other error, we're going to shutdown the
+	    // this listener thread.
+	    go = false;
+	    good_connect = false;
+	    _last_thread_fault = errno;
+	    break;
+	  };
+	};  // switch (errno)
+      }; // error thrown by accept.
+      if (good_connect)
+      {
+	queue.push(tcp_socket(new_conn));
       };
-    };
-  }; // while go;
+    }; // while go;
+  }
+  catch (...) {};
+  in_run_method = false;
 };
 
 } // namespace nrtb
