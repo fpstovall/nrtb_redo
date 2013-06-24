@@ -49,7 +49,7 @@ public:
 protected:
 
   int mysock {0};
-  bool close_on_destruct [true};
+  bool close_on_destruct {true};
   state _status {state::sock_undef};
   int _last_error {0};
   std::vector<unsigned char> inbuff;
@@ -385,7 +385,7 @@ typedef std::unique_ptr<nrtb::tcp_socket> tcp_socket_p;
  ** is automatically accepted and its socket put on queue for other tasks
  ** to process.  
  **/
-class tcp_server_socket_factory:
+class tcp_server_socket_factory
 {
 public:
 
@@ -500,7 +500,7 @@ public:
 private:
 
   // the address:port the listening socket will connect to.
-  std::atomq<std::string> _address;
+  std::atomic<std::string> _address {"*"};
   std::atomic<unsigned short int>  _backlog;
   // stuff for the listener thread
   std::thread work_thread;
