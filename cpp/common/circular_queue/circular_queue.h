@@ -24,9 +24,20 @@
 #include <atomic>
 #include <mutex>
 #include <condition_variable>
+#include <common.h>
+#include <abs_queue.h>
 
 namespace nrtb
 {
+  
+// specialize boost::circular_buffer to act like a queue.
+template <class T> 
+class base_cq : public boost::circular_buffer<T>
+{
+public:
+  void push(T elem) { this->push_back(elem); };
+  void pop() { this->pop_front(); };
+};
 
 /********************************************************
  * The circular_queue template is designed for use with
@@ -43,139 +54,14 @@ namespace nrtb
  * passing data to another set of threads.
 ********************************************************/
 template <class T>
-class circular_queue
+class circular_queue : public abs_queue<T, base_cq<T>> 
 {
-public:
-  class queue_not_ready: public std::exception {};
-  std::atomic<int> in_count {0};
-  std::atomic<int> out_count {0};
-
-  /*********************************************
-    * creates the queue with the specified
-    * number of elements. All memory is allocated
-    * at construction to minimize delays at runtime.
-  *********************************************/
-  circular_queue(int size);
-
-  /*********************************************
-    * releases all items in the queue
-  *********************************************/
-  virtual ~circular_queue();
-
-  /*********************************************
-    * Puts an item in the queue.
-  *********************************************/
-  void push(T item);
-
-  /*********************************************
-    * Pops the next item off the queue, blocking
-    * if needed until an item becomes available.
-  *********************************************/
-  T pop();
-
-  /*********************************************
-    * puts the queue in shutdown mode.
-  *********************************************/
-  void shutdown();
-
-  // returns the number of items in the queue
-  int size();
-  // resizes the buffer, may cause data loss
-  void resize(int newsize);
-  // clears the buffer, data will be discarded.
-  void clear();
-
-protected:
-
-  boost::circular_buffer<T> buffer;
-  std::condition_variable signal;
-  std::mutex mylock;
-  bool ready {true};
-};
-
-template <class T>
-circular_queue<T>::circular_queue(int size)
-{
-  buffer.set_capacity(size);
-};
-
-template <class T>
-circular_queue<T>::~circular_queue()
-{
-  shutdown();
-};
-
-template <class T>
-void circular_queue<T>::push(T item)
-{
-  if (ready)
+public:  
+  // convienence constructor because a 0 size circular_queue is useless.
+  circular_queue(int size=10) : abs_queue<T, base_cq<T>>() 
   {
-    in_count++;
-    {
-      std::unique_lock<std::mutex> lock(mylock);
-      buffer.push_back(item);
-    }
-    signal.notify_one();
-  }
-  else 
-  {
-    queue_not_ready e;
-    throw e;
-  }
-};
-
-template <class T>
-T circular_queue<T>::pop()
-{
-  std::unique_lock<std::mutex> lock(mylock);
-  while (buffer.empty() && ready)
-      signal.wait(lock);
-  if (ready)
-  {
-    T returnme = buffer.front();
-    buffer.pop_front();
-    out_count++;
-    return returnme;    
-  }
-  else
-  {
-    queue_not_ready e;
-    throw e;
+    this->resize(size);
   };
-};
-
-template <class T>
-void circular_queue<T>::shutdown()
-{
-  try
-  {
-    std::unique_lock<std::mutex> lock(mylock);
-    ready = false;
-    buffer.clear();
-    signal.notify_all();
-  }
-  catch (...) {}  
-}
-
-template <class T>
-int circular_queue<T>::size()
-{
-  std::unique_lock<std::mutex> lock(mylock);
-  return buffer.size();
-};
-
-template <class T>
-void circular_queue<T>::resize(int newsize)
-{
-  std::unique_lock<std::mutex> lock(mylock);
-  buffer.set_capacity(newsize);
-};
-
-template <class T>
-void circular_queue<T>::clear()
-{
-  std::unique_lock<std::mutex> lock(mylock);
-  buffer.clear();
 };
 
 } // namespace nrtb
