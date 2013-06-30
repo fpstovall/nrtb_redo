@@ -85,6 +85,8 @@ public:
 
     // returns the number of items in the queue
     int size();
+    // resizes the buffer, may cause data loss
+    void resize(int newsize);
     // clears the buffer, data will be discarded.
     void clear();
 
@@ -164,6 +166,13 @@ int abs_queue<T,queue_t>::size()
 {
   std::unique_lock<std::mutex> lock(mylock);
   return buffer.size();
+};
+
+template <class T, class queue_t>
+void abs_queue<T,queue_t>::resize(int newsize)
+{
+  std::unique_lock<std::mutex> lock(mylock);
+  buffer.set_capacity(newsize);
 };
 
 template <class T, class queue_t>
