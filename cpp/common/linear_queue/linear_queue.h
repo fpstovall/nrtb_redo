@@ -23,6 +23,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <queue>
+#include <abs_queue.h>
 
 namespace nrtb
 {
@@ -46,132 +47,7 @@ namespace nrtb
  * passing data to another set of threads.
 ********************************************************/
 template <class T>
-class linear_queue
-{
-public:
-    class queue_not_ready: public std::exception {};
-    
-    /// Total number of items placed in queue.
-    std::atomic<int> in_count {0};
-    /// Total number of items read from queue.
-    std::atomic<int> out_count {0};
-
-    /*********************************************
-      * creates the queue with the specified
-      * number of elements. 
-    *********************************************/
-    linear_queue();
-
-    /*********************************************
-      * releases all items in the queue
-    *********************************************/
-    ~linear_queue();
-
-    /*********************************************
-      * Puts an item in the queue.
-    *********************************************/
-    void push(T item);
-
-    /*********************************************
-      * Pops the next item off the queue, blocking
-      * if needed until an item becomes available.
-    *********************************************/
-    T pop();
-
-    /*********************************************
-     * puts the queue in shutdown mode.
-    *********************************************/
-    void shutdown();
-
-    // returns the number of items in the queue
-    int size();
-    // clears the buffer, data will be discarded.
-    void clear();
-
-protected:
-
-    std::queue<T> buffer;
-    std::mutex mylock;
-    std::condition_variable signal;
-    bool ready {true};
-};
-
-template <class T>
-linear_queue<T>::linear_queue()
-{
-};
-
-template <class T>
-linear_queue<T>::~linear_queue()
-{
-  shutdown();
-};
-
-template <class T>
-void linear_queue<T>::push(T item)
-{
-  if (ready)
-  {
-    in_count++;
-    {
-      std::unique_lock<std::mutex> lock(mylock);
-      buffer.push(item);
-    }
-    signal.notify_one();
-  }
-  else 
-  {
-    queue_not_ready e;
-    throw e;
-  }
-};
-
-template <class T>
-T linear_queue<T>::pop()
-{
-  std::unique_lock<std::mutex> lock(mylock);
-  while (buffer.empty() && ready)
-    signal.wait(lock);
-  if (ready)
-  {
-    T returnme = buffer.front();
-    buffer.pop();
-    out_count++;
-    return returnme;
-  }
-  else
-  {
-    queue_not_ready e;
-    throw e;
-  };
-};
-
-template <class T>
-void linear_queue<T>::shutdown()
-{
-  try
-  {
-    std::unique_lock<std::mutex> lock(mylock);
-    ready = false;
-    while (buffer.size()) { buffer.pop(); }
-    signal.notify_all();
-  }
-  catch (...) {}  
-}
-
-template <class T>
-int linear_queue<T>::size()
-{
-  std::unique_lock<std::mutex> lock(mylock);
-  return buffer.size();
-};
-
-template <class T>
-void linear_queue<T>::clear()
-{
-  std::unique_lock<std::mutex> lock(mylock);
-  while (buffer.size()) buffer.pop();
-};
+class linear_queue : public abs_queue<T,std::queue<T>> {};
 
 } // namespace nrtb
 
