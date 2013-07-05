@@ -63,7 +63,7 @@ private:
 protected:
   singleton() : T() {};
   virtual ~singleton() {};
-  singleton(const singleton &) {};
+  singleton(const singleton &) = delete;
 public:
   /** Used to access the object.
     ** 
