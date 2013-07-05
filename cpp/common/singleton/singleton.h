@@ -25,7 +25,9 @@
 #ifndef nrtb_singleton_h
 #define nrtb_singleton_h
 
-#include <base_thread.h>
+#include <mutex>
+#include <memory>
+#include <atomic>
 
 namespace nrtb
 {
@@ -55,68 +57,70 @@ namespace nrtb
 template <class T, int mytag=0>
 class singleton: public T
 {
-	private:
-		static mutex __mylock;
-		static singleton * __me;
-	protected:
-		singleton() : T() {};
-		virtual ~singleton() {};
-		singleton(const singleton &) {};
-	public:
-		/** Used to access the object.
-		 ** 
-		 ** Returns a reference to the instanciated singleton object. If
-		 ** the object has not been accessed before, the object will be 
-		 ** instanciated automatically.
-		 ** 
-		 ** As is usual for the method that provides access to a singleton, 
-		 ** this method is static, allowing it to be called via the class 
-		 ** name as shown. Remember you can only assign the return value to
-		 ** a reference:
-		 ** 
-		 ** 	mytype & a = mytype::get_instance();
-		 ** 
-		 ** Attempts to make a copy of the instance should throw a compiler
-		 ** error.
-		 ** 
-		 ** This method is thread safe, but that does not imply that the 
-		 ** class returned is thread-safe overall; that would depend on the 
-		 ** implementation of the class used to instaciate the template.
-		 **/
-		static singleton & get_instance()
-		{
-			// First test avoids expensive mutex cycle
-			// if the object is already allocated.
-			if (!__me)
-			{
-				scope_lock lock(__mylock);
-				// second test required in case multiple threads
-				// get past the first check.
-				if (!__me) 
-				{ 
-					__me = new singleton;
-				};
-			};
-			return *__me;
-		};
+private:
+  static std::mutex __mylock;
+  static singleton<T,mytag> * __me ;
+protected:
+  singleton() : T() {};
+  virtual ~singleton() {};
+  singleton(const singleton &) {};
+public:
+  /** Used to access the object.
+    ** 
+    ** Returns a reference to the instanciated singleton object. If
+    ** the object has not been accessed before, the object will be 
+    ** instanciated automatically.
+    ** 
+    ** As is usual for the method that provides access to a singleton, 
+    ** this method is static, allowing it to be called via the class 
+    ** name as shown. Remember you can only assign the return value to
+    ** a reference:
+    ** 
+    ** 	mytype & a = mytype::get_instance();
+    ** 
+    ** Attempts to make a copy of the instance should throw a compiler
+    ** error.
+    ** 
+    ** This method is thread safe, but that does not imply that the 
+    ** class returned is thread-safe overall; that would depend on the 
+    ** implementation of the class used to instaciate the template.
+    **/
+  static singleton & get_reference()
+  {
+    // First test avoids expensive mutex cycle
+    // if the object is already allocated.
+    if (!__me)
+    {
+      std::unique_lock<std::mutex> lock(__mylock);
+      // second test required in case multiple threads
+      // get past the first check.
+      if (!__me) 
+      { 
+	__me = new singleton;
+      };
+    };
+    return *__me;
+  };
 
-		/** Destructs and deallocates the singleton object.
-		 ** 
-		 ** After a call to this method, the singleton object will
-		 ** be destructed and deallocated from memory. However, it
-		 ** will be automatically reconstruted and allocated if
-		 ** get_instance() called at any time afterword.
-		 **/
-		void delete_me()
-		{
-			scope_lock lock(__mylock);
-			if (__me) delete __me;
-			__me = 0;
-		};
+  /** Destructs and deallocates the singleton object.
+    ** 
+    ** After a call to this method, the singleton object will
+    ** be destructed and deallocated from memory. However, it
+    ** will be automatically reconstruted and allocated if
+    ** get_instance() called at any time afterword.
+    **/
+  void delete_me()
+  {
+    std::unique_lock<std::mutex> lock(__mylock);
+    if (__me) delete __me;
+    __me = 0;
+  };
 };
 
-template <class T, int mytag> mutex singleton<T,mytag>::__mylock;
-template <class T, int mytag> singleton<T,mytag> * singleton<T,mytag>::__me = 0; 
+template <class T, int mytag> 
+  std::mutex singleton<T,mytag>::__mylock;
+template <class T, int mytag> 
+  singleton<T,mytag> * singleton<T,mytag>::__me; 
 
 } // namespace nrtb;
 

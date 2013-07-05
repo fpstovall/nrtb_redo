@@ -32,24 +32,25 @@ int main()
   
   cout << "============== singleton unit test ================" 
 	<< endl;
-  int er_count = 0;
+  int er_count {0};
   
-  sequence_type & a = sequence_type::get_instance();
+  sequence_type & a = sequence_type::get_reference();
   
   for (int i=0; i<10; i++)
   {
-	cout << a();
+    cout << a();
   };
   
-  sequence_type & b = sequence_type::get_instance();
+  sequence_type & b = sequence_type::get_reference();
   
   if ( b() != 10)
   {
-	er_count++;
+    er_count++;
   };
   
-  cout << "\n=========== singleton test " << (er_count ? "failed" : "passed")
-	<< " =============" << endl;
+  cout << "\n=========== singleton test " 
+    << (er_count ? "failed" : "passed")
+    << " =============" << endl;
 
   return er_count;
 };

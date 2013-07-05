@@ -43,7 +43,7 @@ doit:
 	@cd linear_queue; make ${action}
 #	@cd sockets; make ${action}
 	@cd serializer; make ${action}
-#	@cd singleton; make ${action}
+	@cd singleton; make ${action}
 #	@cd logger; make ${action}
 #	@cd confreader; make ${action}
 

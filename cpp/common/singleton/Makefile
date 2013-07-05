@@ -16,6 +16,7 @@
 #
 #***********************************************
 
+switches=-std=gnu++11 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP
 
 lib:	singleton_test
 	@./singleton_test
@@ -24,8 +25,8 @@ lib:	singleton_test
 
 singleton_test:	singleton_test.cpp Makefile
 	@rm -f singleton_test
-	g++ -c singleton_test.cpp -I ../include -std=gnu++0x
-	g++ -o singleton_test singleton_test.o ../obj/base_thread.o ../obj/common.o ../obj/serializer.o -lpthread -std=gnu++0x
+	g++ -c singleton_test.cpp -I ../include ${switches}
+	g++ -o singleton_test singleton_test.o ../obj/serializer.o -lpthread ${switches}
 
 clean:
 	@rm -rvf *.o singleton_test ../include/singleton.h
