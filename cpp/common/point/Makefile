@@ -16,17 +16,16 @@
 #
 #***********************************************
 
+switches=-std=gnu++11 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP
+
 lib:	common_test Makefile
 	@echo "(2,3.5,7)" | ./common_test 
 	@cp -v triad.h ../include
 	@echo nrtb::triad build complete
 
-../include/common.h:
-	@cd ../common_rl; make lib
-
-common_test:	common_test.cpp triad.h Makefile ../include/common.h
+common_test:	common_test.cpp triad.h Makefile
 	@rm -vf common_test
-	g++ -O3 common_test.cpp -I ../include ../obj/common.o -o common_test -std=gnu++0x
+	g++ -O3 common_test.cpp -I ../include ../obj/common.o -o common_test ${switches}
 
 clean:
 	@rm -vf *.o common_test ../include/triad.h

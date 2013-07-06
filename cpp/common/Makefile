@@ -37,7 +37,7 @@ clean:
 
 doit:
 	@cd common_rl; make ${action}
-#	@cd point; make ${action}
+	@cd point; make ${action}
 	@cd abs_queue; make ${action}
 	@cd circular_queue; make ${action}
 	@cd linear_queue; make ${action}
