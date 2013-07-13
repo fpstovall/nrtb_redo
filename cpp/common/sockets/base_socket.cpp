@@ -26,24 +26,13 @@
 #include <netdb.h>
 #include <vector>
 #include <regex>
+#include <common.h>
 
 // testing
 #include <iostream>
 
-using std::lexical_cast;
+using boost::lexical_cast;
 using std::string;
-
-void addr_split(const string c, string & a, string & p)
-{
-  a = "";
-  p = "";
-  auto loc {string.find(":")};
-  if (loc != string::npos)
-  {
-    a = c.substr(0,loc-1);
-    b = c.substr(loc+1,c.length())
-  };
-};
 
 namespace nrtb
 {
@@ -126,17 +115,18 @@ sockaddr_in tcp_socket::str_to_sockaddr(const string & address)
   //in_address.sin_len = 16;
   in_address.sin_family = AF_INET;
   // seperate the IP and port addresses.
-  string IP {""]; 
-  string PORT {""};
-  addr_split(address,IP,PORT);
-  if ((PORT == "") or (PORT == ""))
+  const int IP = 0; 
+  const int PORT = 1;
+  strlist addr;
+  addr = split(address,':');
+  if (addr.size() != 2)
   {
     throw bad_address_exception();
   };
-  if (IP != "*")
+  if (addr[IP] != "*")
   {
     // first attempt name resolution
-    hostent * name = gethostbyname(IP.c_str());
+    hostent * name = gethostbyname(addr[IP].c_str());
     if ((name != 0) && (name->h_length > 0))
     {
       in_address.sin_addr = *( (in_addr *) (name->h_addr_list[0]));
@@ -146,10 +136,10 @@ sockaddr_in tcp_socket::str_to_sockaddr(const string & address)
       throw bad_address_exception();
     };
   };
-  if (PORT != "*")
+  if (addr[PORT] != "*")
   {
     // get the good port;
-    uint16_t port = lexical_cast<uint16_t>(PORT);
+    uint16_t port = lexical_cast<uint16_t>(addr[PORT]);
     in_address.sin_port = htons(port);
   };
   return in_address;
@@ -205,7 +195,7 @@ void tcp_socket::connect(const string & address, int timeout)
   }
   else
   {
-    _status = sock_connect;
+    _status = state::sock_connect;
   };
 };
 
@@ -218,7 +208,7 @@ void tcp_socket::close()
   }
   else 
   {
-    _status = sock_close;
+    _status = state::sock_close;
   };
 };
 
@@ -251,7 +241,7 @@ int tcp_socket::put(string s, int timeout)
 	{
 	  done = true; 
 	  _last_error = errno;
-	  _status = sock_close;
+	  _status = state::sock_close;
 	  not_open_exception e;
 	  e.store(s);
 	  throw e;
@@ -347,7 +337,7 @@ string tcp_socket::get(int maxlen, int timeout)
 	  {
 	    done = true;
 	    _last_error = errno;
-	    _status = sock_close;
+	    _status = state::sock_close;
 	    if (returnme == "")
 	    {
 	      not_open_exception e;
@@ -533,7 +523,7 @@ string tcp_socket::get_remote_address()
     {
       case ENOTCONN :
       {
-	_status = sock_close;
+	_status = state::sock_close;
 	throw not_open_exception();
 	break;
       };
@@ -555,9 +545,8 @@ string tcp_socket::get_remote_address()
 
 tcp_server_socket_factory::tcp_server_socket_factory(
 		const string & address, 
-		const unsigned short int backlog = 5,
-		const int queue_size = 10);
-						    )
+		const unsigned short int backlog,
+		const int queue_size)
 {
   // does not attempt to set up the connection initially.
   _address = address;
@@ -576,14 +565,15 @@ tcp_server_socket_factory::~tcp_server_socket_factory()
 void tcp_server_socket_factory::start_listen()
 {
   // take no action if the listen thread is already running.
-  if (in_run_method or work_thread.joinable)
+  if (in_run_method or work_thread.joinable())
   {
     throw already_running_exception();
   }
   else
   {
     // start it up!
-    work_thread = std::thread(run,std::ref(this));
+    work_thread = 
+      std::thread(tcp_server_socket_factory::run, this);
     int countdown = 99;
     while (!listening() and countdown)
     {
@@ -616,8 +606,8 @@ bool tcp_server_socket_factory::listening()
   bool running = in_run_method and work_thread.joinable();
   if (listen_sock)
   {
-    running = running
-      and listen_sock->status() == tcp_socket::sock_connect;
+    running = running and listen_sock->status() == 
+	tcp_socket::state::sock_connect;
   }
   else
   {
@@ -636,27 +626,28 @@ unsigned short int tcp_server_socket_factory::backlog()
   return _backlog;
 };
 
-void tcp_server_socket_factory::run()
+void tcp_server_socket_factory::run(
+  tcp_server_socket_factory * server )
 {
-  in_run_method = true;
+  server->in_run_method = true;
   try
   {
     // set up the listening socket.
     int sock;
-    _last_thread_fault = 0;
+    server->_last_thread_fault = 0;
     bool go = false;
     try
     {
       sock = socket(AF_INET,SOCK_STREAM,0);
       sockaddr_in myaddr;
-      myaddr = tcp_socket::str_to_sockaddr(_address);
+      myaddr = tcp_socket::str_to_sockaddr(server->_address);
       int a = bind(sock,(sockaddr *) &myaddr,sizeof(myaddr));
-      int b = listen(sock,_backlog);
+      int b = listen(sock,server->_backlog);
       if (a || b)
       {
 	go = false;
-	if (a) _last_thread_fault += 1;
-	if (b) _last_thread_fault += 2;
+	if (a) server->_last_thread_fault += 1;
+	if (b) server->_last_thread_fault += 2;
       }
       else
       {
@@ -665,23 +656,24 @@ void tcp_server_socket_factory::run()
     }
     catch (...)
     {
-      _last_thread_fault = 100;
+      server->_last_thread_fault = 100;
     };
     // if not in a good state, terminate the thread.
     if (!go)
     {
-      _last_thread_fault =+ 200;
+      server->_last_thread_fault =+ 200;
       exit(0);
     };
     // make sure the listener is closed when we exit.
     // also prevides an external hook to socket.
-    listen_sock.reset(new tcp_socket(sock));
+    server->listen_sock.reset(new tcp_socket(sock));
     // processing loop
     while
     (
       go
-      and listen_sock
-      and (listen_sock->status() == tcp_socket::sock_connect)
+      and server->listen_sock
+      and (server->listen_sock->status() 
+	== tcp_socket::state::sock_connect)
     )
     {
       // accept a new connection
@@ -690,13 +682,14 @@ void tcp_server_socket_factory::run()
       // is the listener still open?
       if
       (
-	(!listen_sock)
-	or (listen_sock->status() != tcp_socket::sock_connect)
+	(!server->listen_sock)
+	or (server->listen_sock->status() 
+	  != tcp_socket::state::sock_connect)
       )
       {
 	// the listner socket is not available.. get out of here.
-	listen_sock.reset();
-	_last_thread_fault = 300;
+	server->listen_sock.reset();
+	server->_last_thread_fault = 300;
 	good_connect = false;
 	go = false;
 	break;
@@ -723,19 +716,19 @@ void tcp_server_socket_factory::run()
 	    // this listener thread.
 	    go = false;
 	    good_connect = false;
-	    _last_thread_fault = errno;
+	    server->_last_thread_fault = errno;
 	    break;
 	  };
 	};  // switch (errno)
       }; // error thrown by accept.
       if (good_connect)
       {
-	queue.push(tcp_socket(new_conn));
+	server->pending.push(tcp_socket(new_conn));
       };
     }; // while go;
   }
   catch (...) {};
-  in_run_method = false;
+  server->in_run_method = false;
 };
 
 } // namespace nrtb

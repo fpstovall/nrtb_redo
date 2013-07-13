@@ -391,6 +391,8 @@ public:
 
   /// Use to catch all server_socket_factory exceptions.
   class general_exception: public base_exception {};
+  /// Thrown if start_listen is called while already listening
+  class already_running_exception: public general_exception {};
   /// Thrown if we can not allocate a new connect_sock* as needed.
   class mem_exhasted_exception: public general_exception {};
   /// Thrown by start_listen() if the IP/port could not be bound.
@@ -415,7 +417,7 @@ public:
     ** exceeded, oldest connections will be discarded. 
     **/
   tcp_server_socket_factory(const std::string & address, 
-	const unsigned short int backlog,
+	const unsigned short int backlog = 5,
 	const int queue_size=10);
 
   /** Destructs a server_sock. 
@@ -429,7 +431,7 @@ public:
   virtual ~tcp_server_socket_factory();
 
   /// Consumers call this to get a connected socket.
-  tcp_socket get_sock() { return queue.pop(); };
+  tcp_socket get_sock() { return pending.pop(); };
   
   /// returns the number of connections received.
   int accepted() { return pending.in_count; };
@@ -500,17 +502,17 @@ public:
 private:
 
   // the address:port the listening socket will connect to.
-  std::atomic<std::string> _address {"*"};
-  std::atomic<unsigned short int>  _backlog;
+  std::string _address;
+  unsigned short int _backlog;
   // stuff for the listener thread
   std::thread work_thread;
   std::shared_ptr<tcp_socket> listen_sock {nullptr};
   std::atomic< int > _last_thread_fault {0};
   std::atomic< bool > in_run_method {false};
   // The accepted inbound connection queue
-  nrtb::circular_queue<tcp_socket> pending {pending(10)};
+  nrtb::circular_queue<tcp_socket> pending;
   // Provides the listener thread.
-  void run();
+  static void run(tcp_server_socket_factory * server);
   
 };
 
