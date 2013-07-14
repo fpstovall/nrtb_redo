@@ -724,7 +724,8 @@ void tcp_server_socket_factory::run(
       }; // error thrown by accept.
       if (good_connect)
       {
-	server->pending.push(new_conn);
+	tcp_socket_p storeme(new tcp_socket(new_conn));
+	server->pending.push(storeme);
       };
     }; // while go;
   }

@@ -38,8 +38,8 @@ int request_processor(tcp_server_socket_factory & server)
     {
       auto sock = server.get_sock();
       // just return what we've recieved.
-      string msg = sock.getln();
-      sock.put(msg);
+      string msg = sock->getln();
+      sock->put(msg);
       // Update our hit count.
       hits++;
     }

@@ -376,7 +376,7 @@ public:
 };
 
 /// smart pointer for use with tcp_sockets
-typedef std::unique_ptr<nrtb::tcp_socket> tcp_socket_p;
+typedef std::shared_ptr<nrtb::tcp_socket> tcp_socket_p;
 
 /** "listener" TCP/IP socket socket factory for servers. 
  ** 
@@ -400,7 +400,7 @@ public:
   /// Thrown by by the listen thread in case of unexpected error.
   class listen_terminated_exception: public general_exception {};
   /// handlers should catch this and shutdown gracefully.
-  typedef circular_queue<int>::queue_not_ready queue_not_ready;
+  typedef circular_queue<tcp_socket_p>::queue_not_ready queue_not_ready;
   
   /** Construct a tcp_server_socket_factory and puts it online.
     ** 
@@ -433,7 +433,7 @@ public:
   virtual ~tcp_server_socket_factory();
 
   /// Consumers call this to get a connected socket.
-  tcp_socket get_sock() { return tcp_socket(pending.pop()); };
+  tcp_socket_p get_sock() { return pending.pop(); };
   
   /// returns the number of connections received.
   int accepted() { return pending.in_count; };
@@ -512,7 +512,7 @@ private:
   std::atomic< int > _last_thread_fault {0};
   std::atomic< bool > in_run_method {false};
   // The accepted inbound connection queue
-  nrtb::circular_queue<int> pending;
+  nrtb::circular_queue<tcp_socket_p> pending;
   // Provides the listener thread.
   static void run(tcp_server_socket_factory * server);
   
