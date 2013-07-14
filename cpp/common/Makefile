@@ -41,7 +41,7 @@ doit:
 	@cd abs_queue; make ${action}
 	@cd circular_queue; make ${action}
 	@cd linear_queue; make ${action}
-#	@cd sockets; make ${action}
+	@cd sockets; make ${action}
 	@cd serializer; make ${action}
 	@cd singleton; make ${action}
 #	@cd logger; make ${action}

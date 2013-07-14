@@ -382,8 +382,8 @@ typedef std::unique_ptr<nrtb::tcp_socket> tcp_socket_p;
  ** 
  ** Upon construction this class establishes a listening socket
  ** on the specified address and port. Each incomming connection
- ** is automatically accepted and its socket put on queue for other tasks
- ** to process.  
+ ** is automatically accepted and its socket put on queue for other 
+ ** tasks to process.  
  **/
 class tcp_server_socket_factory
 {
@@ -399,6 +399,7 @@ public:
   class bind_failure_exception: public general_exception {};
   /// Thrown by by the listen thread in case of unexpected error.
   class listen_terminated_exception: public general_exception {};
+  /// handlers should catch this and shutdown gracefully.
   typedef circular_queue<int>::queue_not_ready queue_not_ready;
   
   /** Construct a tcp_server_socket_factory and puts it online.
