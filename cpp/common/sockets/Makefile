@@ -27,7 +27,7 @@ lib:	socket_test
 socket_test:	base_socket.o socket_test.cpp
 	@rm -f socket_test
 	g++ -c -O3 socket_test.cpp -I ../include ${switches} 
-	g++ -o socket_test socket_test.o base_socket.o -lpthread ${switches}
+	g++ -o socket_test socket_test.o base_socket.o ../obj/common.o -lpthread ${switches}
 
 
 base_socket.o:	base_socket.cpp base_socket.h Makefile

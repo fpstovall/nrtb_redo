@@ -26,7 +26,6 @@
 #include <netdb.h>
 #include <vector>
 #include <regex>
-#include <common.h>
 
 // testing
 #include <iostream>
@@ -598,6 +597,8 @@ void tcp_server_socket_factory::stop_listen()
   };
   if (work_thread.joinable()) work_thread.join();
   // just in case.
+  pending.shutdown();
+  _last_thread_fault = 0;
   in_run_method == false;
 };
 
@@ -723,7 +724,7 @@ void tcp_server_socket_factory::run(
       }; // error thrown by accept.
       if (good_connect)
       {
-	server->pending.push(tcp_socket(new_conn));
+	server->pending.push(new_conn);
       };
     }; // while go;
   }

@@ -19,57 +19,44 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <future>
+#include <typeinfo>
+#include <common.h>
 #include <boost/random.hpp>
 #include "base_socket.h"
 
 using namespace nrtb;
 using namespace std;
 
-class myserver: public tcp_server_socket_factory
+int request_processor(tcp_server_socket_factory & server)
 {
-public:
-  int hits;
-  int errors;
-
-  // constructor
-  myserver(const string & a, const unsigned short int & b)
-    : tcp_server_socket_factory(a,b)
-  {
-    // Don't need to lock here because we know the
-    // listener thread is not running.
-    hits = 0;
-    errors = 0;
-  };
-
-protected:
-
-  // on_accept() is called on each connection.
-  bool on_accept()
+  int hits {0};
+  bool done {false};
+  while (!done)
   {
     try
     {
-      tcp_socket_p sock = std::move(connect_sock);
+      auto sock = server.get_sock();
       // just return what we've recieved.
-      string msg = sock->getln();
-      sock->put(msg);
+      string msg = sock.getln();
+      sock.put(msg);
       // Update our hit count.
       hits++;
     }
-    catch (base_exception & e)
+    catch (tcp_server_socket_factory::queue_not_ready)
     {
-      errors++;
-      cerr << "server Caught " << e.what() << endl;
+      done = true;
     }
-    catch (...)
+    catch (exception & e)
     {
-      errors++;
-      cerr << "Unexpected error in on_accept()" << endl;
+      cout << "ReqProc recieved " 
+	<< typeid(e).name()
+	<< endl;
+      done = true;
     };
-    if (hits > 99)
-      return false;
-    else
-      return true;
-  };
+  }; 
+  cout << "Request processor shut down." << endl;
+  return hits;
 };
 
 string transceiver(const string address, const string sendme)
@@ -88,7 +75,11 @@ int port_base = 17000;
 
 int main()
 {
-  int er_count = 0;
+  cout << "=========== tcp_socket and server test ============="
+    << endl;
+
+  int er_count {0};
+  int hits {0};
   //set up our port and address
   boost::mt19937 rng;
   rng.seed(time(0));
@@ -98,14 +89,17 @@ int main()
   address = s.str();
   cout << "Using " << address << endl;
   
-  myserver test_server(address,5);
+  tcp_server_socket_factory test_server(address);
 
   try
   {
     // start the receiver/server
     test_server.start_listen();
     cout << "test_server ready." << endl;
-
+    auto rp_out = 
+      async(launch::async,request_processor,std::ref(test_server));
+    cout << "Request processor attached." << endl;
+    
     // Send test messages
     for (int i = 0; i < 100; i++)
     {
@@ -117,60 +111,22 @@ int main()
       {
         er_count++;
       };
-      cout << returned.substr(0,returned.size()-1) << ": "
-      << ((returned == checkme) ? "Passed" : "Failed")
-      << endl;
     };
+    test_server.stop_listen();
+    hits = rp_out.get();
   }
-  catch (myserver::bind_failure_exception)
+  catch (tcp_server_socket_factory::general_exception & e)
   {
-    cout << "Could not bind port" << endl;
-  }
-  catch (myserver::mem_exhasted_exception)
-  {
-    cout << "myserver reports out of memory." << endl;
-  }
-  catch (myserver::listen_terminated_exception)
-  {
-    cout << "Listener terminated unexpectedly." << endl;
-  }
-  catch (myserver::on_accept_bound_exception)
-  {
-    cout << "myserver::on_accept() seems bound." << endl;
-  }
-  catch (tcp_socket::bad_connect_exception & e)
-  {
-    cout << "A bad_connect_exception was thrown.\n"
-      << "  comment: " << e.comment() << endl;
-    cout << "  test_server.last_fault() = "
-      << test_server.last_fault() << endl;
-  }
-  catch (tcp_socket::not_open_exception & e)
-  {
-    cout << "A tcp not open exception was caught.\n"
-      << e.comment() << endl;
-  }
-  catch (tcp_socket::close_exception & e)
-  {
-    cout << "A close_exception was caught.\n"
-      << e.comment() << endl;
-  }
-  catch (tcp_socket::overrun_exception & e)
-  {
-    cout << "An overrun_exception was caught.\n"
-      << e.comment() << endl;
-  }
-  catch (tcp_socket::buffer_full_exception & e)
-  {
-    cout << "A buffer_full_exception was caught.\n"
-      << e.comment() << endl;
+    cout << "Server exception " 
+      << typeid(e).name() << " was caught."
+      << "\n\tComment: " << e.comment() 
+      << endl;
   }
   catch (tcp_socket::general_exception & e)
   {
-    cout << "A tcp_socket exception was caught.\n"
-      << "  comment: " << e.comment() << endl;
-    cout << "  test_server.last_fault() = "
-      << test_server.last_fault() << endl;
+    cout << "Socket exception "
+      << typeid(e).name() << " was caught.\n"
+      << "\tComment: " << e.comment() << endl;
   }
   catch (exception & e)
   {
@@ -178,15 +134,25 @@ int main()
       << " exception was caught." << endl;
   };
 
+  // test server status billboard
+  cout << "Test Server Results:"
+    << "\n\tAccepted:  " << test_server.accepted()
+    << "\n\tProcessed: " << test_server.processed()
+    << "\n\tAvailable: " << test_server.available()
+    << "\n\tDiscarded: " << test_server.discarded()
+    << "\n\tLast Fault: " << test_server.last_fault()
+    << endl;
   // final check.
-  if (test_server.hits != 100)
+  if (hits != test_server.accepted() 
+    or hits != test_server.processed()
+    or test_server.discarded() != 0  )
   {
     er_count++;
     cout << "Server does not report the proper number of hits.\n"
-      << "\tExpected 100, got " << test_server.hits
+      << "\tExpected 100, got " << hits
       << endl;
   };
-  cout << "=========== tcp_socket test complete ============="
+  cout << "=========== tcp_socket and server test complete ============="
     << endl;
   
   return er_count;

@@ -399,6 +399,7 @@ public:
   class bind_failure_exception: public general_exception {};
   /// Thrown by by the listen thread in case of unexpected error.
   class listen_terminated_exception: public general_exception {};
+  typedef circular_queue<int>::queue_not_ready queue_not_ready;
   
   /** Construct a tcp_server_socket_factory and puts it online.
     ** 
@@ -431,7 +432,7 @@ public:
   virtual ~tcp_server_socket_factory();
 
   /// Consumers call this to get a connected socket.
-  tcp_socket get_sock() { return pending.pop(); };
+  tcp_socket get_sock() { return tcp_socket(pending.pop()); };
   
   /// returns the number of connections received.
   int accepted() { return pending.in_count; };
@@ -510,7 +511,7 @@ private:
   std::atomic< int > _last_thread_fault {0};
   std::atomic< bool > in_run_method {false};
   // The accepted inbound connection queue
-  nrtb::circular_queue<tcp_socket> pending;
+  nrtb::circular_queue<int> pending;
   // Provides the listener thread.
   static void run(tcp_server_socket_factory * server);
   
