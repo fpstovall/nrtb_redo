@@ -1,5 +1,5 @@
 #***********************************************
-#This file is part of the NRTB project (https://launchpad.net/nrtb).
+# This file is part of the NRTB project (https://launchpad.net/nrtb).
 #
 #    NRTB is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -16,27 +16,25 @@
 #
 #***********************************************
 
-lib:	log_test
-	@echo "Testing..."
-	@rm -f test_output.log
-	@./log_test
-	@grep "Program run complete." test_output.log
-	@cp -fv log_setup.h ../include
-	@cp -fv log_setup.o ../obj
+switches=-std=gnu++11 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP
+
+lib:	logger_test
+	@./logger_test
+	@cp -v logger.h ../include/
+	@cp -v logger.o ../obj/
+	@echo build complete
+
+logger_test:	logger.o logger_test.cpp
+	@rm -f logger_test
+	g++ -c -O3 logger_test.cpp -I ../include ${switches} 
+	g++ -o logger_test logger_test.o logger.o ../obj/common.o -lpthread ${switches}
 
 
-log_setup.o:	log_setup.h log_setup.cpp Makefile
-	@rm -f log_setup.o
-	g++ -c log_setup.cpp -I ../include -std=gnu++0x
-
-log_test:	log_setup.o log_test.cpp Makefile
-	@rm -vf log_test
-	g++ -c log_test.cpp -I../include  -std=gnu++0x
-	g++ -o log_test log_setup.o log_test.o -lPocoFoundation -std=gnu++0x
-#	g++ -g common_test.cpp  -idirafter . -o common_test
+logger.o:	logger.cpp logger.h Makefile
+	@rm -f logger.o
+	g++ -c -O3 logger.cpp -I ../include ${switches} 
 
 clean:
-	@rm -vf *.o log_test ../include/log_setup.h ../obj/log_setup.o test_output.log
-
-
+	@rm -vf *.o ../include/logger.h logger_test
+	@echo all objects and executables have been erased.
 

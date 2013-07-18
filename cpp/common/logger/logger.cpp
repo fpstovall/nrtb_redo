@@ -15,16 +15,14 @@
  along with NRTB.  If not, see <http://www.gnu.org/licenses/>.
  
  **********************************************/
- 
-#ifndef logger_setup_h
-#define logger_setup_h
 
-#include <string>
+// see base_socket.h for documentation
+
+#include "logger.h"
 
 namespace nrtb
 {
 
-  void setup_global_logging(const std::string & logfilename);
-}
 
-#endif //logger_setup_h
+} // namespace nrtb
+
