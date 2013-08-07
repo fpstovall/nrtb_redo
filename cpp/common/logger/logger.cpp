@@ -19,10 +19,63 @@
 // see base_socket.h for documentation
 
 #include "logger.h"
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+#include <ctime>
 
 namespace nrtb
 {
 
+log_record::log_record(log_sev s, std::string c, std::string m)
+{
+  created = std::time(NULL);
+  severity = s;
+  component = c;
+  message = m;
+};
 
-} // namespace nrtb
+void log_recorder::operator()(log_sev sev, std::string msg)
+{
+  log_record tr(sev, component, msg);
+  my_queue.push(tr);
+};
+
+log_file_writer::log_file_writer(log_queue& queue, std::string filename)
+{
+  // start the writer
+  writer_process = 
+    std::thread(log_file_writer::writer_thread,queue,filename);
+};
+
+void log_file_writer::writer_thread(log_queue& q, std::string fname)
+{
+  bool done {false};
+  std::ofstream output;
+  output.open(fname);
+  while (!done)
+  {
+    try 
+    { 
+      log_record record = q.pop();
+      std::tm tm = *std::localtime(&record.created);
+      std::stringstream s;
+      s << tm.tm_year + 1900
+	<< "-" << s.width(2) << s.fill(0) << tm.tm_mon + 1
+	<< "-" << s.width(2) << s.fill(0) << tm.tm_mday
+	<< ":" << s.width(2) << s.fill(0) << tm.tm_hour
+	<< ":" << s.width(2) << s.fill(0) << tm.tm_min
+	<< ":" << s.width(2) << s.fill(0) << tm.tm_sec;
+      output << s.str()
+//	<< "\t" << record.severity
+	<< "\t" << record.component
+	<< "\t" << record.message
+	<< std::endl;
+    }
+    catch (...) { done = true; };
+  };
+  output.close();
+};
+
+} // namqespace nrtb
 

@@ -22,6 +22,7 @@
 #include <string>
 #include <chrono>
 #include <thread>
+#include <ctime>
 #include <linear_queue.h>
 
 namespace nrtb
@@ -31,10 +32,8 @@ enum class log_sev {critical,severe,warning,info,trace};
   
 struct log_record
 {
-  typedef std::chrono::high_resolution_clock myclock;
-  typedef std::chrono::high_resolution_clock::time_point mark;
-  typedef std::chrono::microseconds ms;
-  mark created {myclock::now()};
+  log_record(log_sev s, std::string c, std::string m);
+  std::time_t created; 
   log_sev severity;
   std::string component;
   std::string message;
@@ -47,7 +46,7 @@ class log_recorder
 public:
   log_recorder(std::string comp, log_queue & queue): 
     component(comp), my_queue(queue) {};
-  operator () (log_sev sev, std::string msg);
+  void operator () (log_sev sev, std::string msg);
 private:
   log_queue & my_queue;
   std::string component;
@@ -60,7 +59,7 @@ public:
   ~log_file_writer();
 private:
   std::thread writer_process;
-  static writer_thread(log_queue & q, std::string fname);
+  static void writer_thread(log_queue & q, std::string fname);
 };
 
 } // namepace nrtb
