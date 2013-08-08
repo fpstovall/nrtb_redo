@@ -29,7 +29,9 @@ namespace nrtb
 {
 
 enum class log_sev {critical,severe,warning,info,trace};
-  
+
+std::string sev2text(log_sev s);
+
 struct log_record
 {
   log_record(log_sev s, std::string c, std::string m);

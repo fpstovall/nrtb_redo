@@ -26,6 +26,21 @@
 
 namespace nrtb
 {
+  
+std::string sev2text(log_sev s)
+{
+  std::string returnme = "Undefined";
+  switch (s)
+  {
+    case log_sev::critical : returnme == "CRITICAL"; break;
+    case log_sev::severe : returnme == "SEVERE"; break;
+    case log_sev::warning :  returnme == "WARNING"; break;
+    case log_sev::info : returnme == "INFO"; break;
+    case log_sev::trace : returnme == "TRACE"; break;
+  };
+  return returnme;
+};
+
 
 log_record::log_record(log_sev s, std::string c, std::string m)
 {
@@ -45,7 +60,8 @@ log_file_writer::log_file_writer(log_queue& queue, std::string filename)
 {
   // start the writer
   writer_process = 
-    std::thread(log_file_writer::writer_thread,queue,filename);
+    std::thread(log_file_writer::writer_thread,
+		  std::ref(queue),filename);
 };
 
 void log_file_writer::writer_thread(log_queue& q, std::string fname)
@@ -65,11 +81,11 @@ void log_file_writer::writer_thread(log_queue& q, std::string fname)
 	<< "-" << s.width(2) << s.fill(0) << tm.tm_mday
 	<< ":" << s.width(2) << s.fill(0) << tm.tm_hour
 	<< ":" << s.width(2) << s.fill(0) << tm.tm_min
-	<< ":" << s.width(2) << s.fill(0) << tm.tm_sec;
-      output << s.str()
-//	<< "\t" << record.severity
+	<< ":" << s.width(2) << s.fill(0) << tm.tm_sec
+	<< "\t" << sev2text(record.severity)
 	<< "\t" << record.component
-	<< "\t" << record.message
+	<< "\t" << record.message;
+      output << s.str()
 	<< std::endl;
     }
     catch (...) { done = true; };
