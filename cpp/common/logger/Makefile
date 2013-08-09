@@ -27,7 +27,7 @@ lib:	logger_test
 logger_test:	logger.o logger_test.cpp
 	@rm -f logger_test
 	g++ -c -O3 logger_test.cpp -I ../include ${switches} 
-	g++ -o logger_test logger_test.o logger.o ../obj/common.o -lpthread ${switches}
+	g++ -o logger_test logger_test.o logger.o -lpthread ${switches}
 
 
 logger.o:	logger.cpp logger.h Makefile

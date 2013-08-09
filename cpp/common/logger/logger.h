@@ -59,7 +59,9 @@ class log_file_writer
 public:
   log_file_writer(log_queue & queue, std::string filename);
   ~log_file_writer();
+  void close();
 private:
+  log_queue & myqueue;
   std::thread writer_process;
   static void writer_thread(log_queue & q, std::string fname);
 };
