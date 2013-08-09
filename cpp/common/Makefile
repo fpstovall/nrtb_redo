@@ -44,7 +44,7 @@ doit:
 	@cd sockets; make ${action}
 	@cd serializer; make ${action}
 	@cd singleton; make ${action}
-#	@cd logger; make ${action}
+	@cd logger; make ${action}
 #	@cd confreader; make ${action}
 
 # --- the following are obsolete and may be removed later.
