@@ -43,7 +43,7 @@ int main()
   log_recorder log("Unit_Test",test_logger);
   log_file_writer writer(test_logger,"test_log.log");
   
-  log(log_sev::trace, "Starting");
+  log.trace("Starting");
   for(auto i= 0; i<10; i++)
   {
     stringstream s;
@@ -51,14 +51,14 @@ int main()
     log(log_sev::info,s.str());
   };
   
-  log(log_sev::trace,"sev2test() testing");
-  log(log_sev::info, stext_test("CRITICAL",log_sev::critical));
-  log(log_sev::info, stext_test("SEVERE",log_sev::severe));
-  log(log_sev::info, stext_test("WARNING",log_sev::warning));
-  log(log_sev::info, stext_test("INFO",log_sev::info));
-  log(log_sev::info, stext_test("TRACE",log_sev::trace));
+  log.trace("sev2test() testing");
+  log.info(stext_test("CRITICAL",log_sev::critical));
+  log.info(stext_test("SEVERE",log_sev::severe));
+  log.info(stext_test("WARNING",log_sev::warning));
+  log.info(stext_test("INFO",log_sev::info));
+  log.info(stext_test("TRACE",log_sev::trace));
   
-  log(log_sev::trace,"Shutting down");
+  log.trace("Shutting down");
   writer.close();
   
   bool good = (test_logger.in_count == test_logger.out_count);

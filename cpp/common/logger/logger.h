@@ -49,6 +49,11 @@ public:
   log_recorder(std::string comp, log_queue & queue): 
     component(comp), my_queue(queue) {};
   void operator () (log_sev sev, std::string msg);
+  void critical(std::string msg);
+  void severe(std::string msg);
+  void warning(std::string msg);
+  void info(std::string msg);
+  void trace(std::string msg);
 private:
   log_queue & my_queue;
   std::string component;

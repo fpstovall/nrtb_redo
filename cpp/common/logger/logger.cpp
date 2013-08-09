@@ -43,7 +43,6 @@ std::string sev2text(log_sev s)
   return returnme;
 };
 
-
 log_record::log_record(log_sev s, std::string c, std::string m)
 {
   created = std::time(NULL);
@@ -56,6 +55,31 @@ void log_recorder::operator()(log_sev sev, std::string msg)
 {
   log_record tr(sev, component, msg);
   my_queue.push(tr);
+};
+
+void log_recorder::critical(std::string msg)
+{
+  (*this)(log_sev::critical,msg);
+};
+
+void log_recorder::severe(std::string msg)
+{
+  (*this)(log_sev::severe, msg);
+};
+
+void log_recorder::warning(std::string msg)
+{
+  (*this)(log_sev::warning, msg);
+};
+
+void log_recorder::info(std::string msg)
+{
+  (*this)(log_sev::info, msg);
+};
+
+void log_recorder::trace(std::string msg)
+{
+  (*this)(log_sev::trace, msg);
 };
 
 log_file_writer::log_file_writer(log_queue& queue, std::string filename)
