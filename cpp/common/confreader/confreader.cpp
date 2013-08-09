@@ -28,20 +28,18 @@ using namespace nrtb;
 namespace nrtb
 {
 
-conf_reader::conf_reader(std::string name, log_queue & l)
-  : logger(name, l)
+conf_reader::conf_reader()
 {
-  logger.trace("Instaciated");
+  // nop constructor
 };
 
 conf_reader::~conf_reader() 
 {
-  logger.trace("Destructed");
+  // nop destructor
 };
 
 unsigned int conf_reader::read(const std::string & _filename, bool _clear)
 {
-  logger.info("Reading "+_filename);
   if (_filename != "") { filename = _filename; };
   if (filename != "")
   {
@@ -95,8 +93,8 @@ unsigned int conf_reader::read(const std::string & _filename, bool _clear)
     }
     catch (...)
     {
-      logger.warning("Problems reading configuration file \""
-	      + filename + "\"; data may be incomplete.");
+      cerr << "WARNING:Problems reading configuration file \""
+	<< filename <<  "\"; data may be incomplete.";
     }
   };
   return values.size();
@@ -105,7 +103,6 @@ unsigned int conf_reader::read(const std::string & _filename, bool _clear)
 unsigned int conf_reader::read(int argc, char * argv[], 
 	const string & _filename)
 {
-  logger.info("Reading from command line");
   clear();
   filename = _filename;
   value_list_type cvars;
@@ -163,9 +160,7 @@ unsigned int conf_reader::read(int argc, char * argv[],
     };
     c++;
   };
-  std::stringstream message;
-  message << "Read " << values.size() << " parameters.";
-  logger.info(message.str());
+  cout << "Read " << values.size() << " parameters.";
   return values.size();
 };
 

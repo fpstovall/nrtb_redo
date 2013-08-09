@@ -27,6 +27,7 @@
 #include <boost/lexical_cast.hpp>
 #include <common.h>
 #include <logger.h>
+#include <singleton.h>
 
 namespace nrtb 
 {
@@ -56,7 +57,7 @@ public:
   typedef std::pair<std::string,std::string> pair;
   /** No argument constructor; actually calls read() without a filename.
   **/
-  conf_reader(std::string name, log_queue & l);
+  conf_reader();
   /** NOP virtual destructor to allow safe inheritance.
   **/
   virtual ~conf_reader();
@@ -181,7 +182,6 @@ public:
     T get(const std::string & key, const T & def);
 private:
   std::string filename;
-  log_recorder logger;
 protected:
   /** Reads and parses a configuration file.
   ** 
@@ -220,6 +220,8 @@ protected:
   **/
   unsigned int read(const std::string & _filename = "", bool _clear=true);
 };
+
+typedef singleton<conf_reader> global_conf_reader;
 
 template < class T >
   typename std::vector<T> conf_reader::getall(const std::string & key)

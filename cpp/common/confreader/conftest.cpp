@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
   bool set_if_failed = false;
   log_recorder log("config_test",lq);  
   log.info("=-=-=-=-=-= conftest Init =-=-=-=-=-=-=");
-  conf_reader config("conf_reader",lq);
+  conf_reader &  config = global_conf_reader::get_reference();
 
   try
   {
