@@ -16,6 +16,8 @@
 #
 #***********************************************
 
+switches=-std=gnu++11 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP
+
 lib:	conftest
 	@rm -f conf_test.log
 	@./conftest test=1 test2-2 test2=71.837486 test3="jack danials" --doit
@@ -26,12 +28,12 @@ lib:	conftest
 
 confreader.o:	confreader.h confreader.cpp Makefile 
 	@rm -f confreader.o
-	g++ -c confreader.cpp -I../include -std=gnu++0x
+	g++ -c confreader.cpp -I../include ${switches}
 
 conftest:	confreader.o conftest.cpp
 	@rm -f conftest
-	g++ -c conftest.cpp -I../include -std=gnu++0x
-	g++ -o conftest conftest.o confreader.o ../obj/common.o ../obj/log_setup.o ../obj/base_thread.o -lpthread -lPocoFoundation -lPocoUtil -std=gnu++0x
+	g++ -c conftest.cpp -I../include ${switches} 
+	g++ -o conftest conftest.o confreader.o ../obj/common.o ../obj/logger.o -lpthread ${switches}
 
 clean:
 	@rm -rvf *.o conftest ../include/confreader.h ../obj/confreader.o conf_test.log
