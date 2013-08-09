@@ -38,6 +38,7 @@ clean:
 doit:
 	@cd common_rl; make ${action}
 	@cd point; make ${action}
+	@cd timer; make ${action}
 	@cd abs_queue; make ${action}
 	@cd circular_queue; make ${action}
 	@cd linear_queue; make ${action}
@@ -48,7 +49,6 @@ doit:
 	@cd confreader; make ${action}
 
 # --- the following are obsolete and may be removed later.
-#	@cd timer; make ${action}
 #	@cd threads; make ${action}
 #	@cd GPB; make ${action}
 #	@cd transceiver; make ${action}
