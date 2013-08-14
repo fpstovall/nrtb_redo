@@ -33,6 +33,5 @@ clean:
 	@echo "========== all targets cleanup complete ==========="
 
 doit:
-	cd common; make ${action}
-	cd sim_engine; make ${action}
+	cd cpp; make ${action}
 
