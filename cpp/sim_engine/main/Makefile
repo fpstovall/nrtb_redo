@@ -20,12 +20,12 @@ target=../bin/simengine
 
 ${target}:	simengine.o
 	@rm -f ${target}
-	g++ -o ${target} simengine.o ${args}
+	g++ -o ${target} simengine.o ${largs}
 
 
 simengine.o:	simengine.cpp Makefile
 	@rm -f simengine.o
-	g++ -c -O3 simengine.cpp ${args} 
+	g++ -c -O3 simengine.cpp ${bargs} 
 
 clean:
 	@rm -vf *.o ${target}
@@ -36,4 +36,5 @@ lib: ${target}
 switches=-std=gnu++11 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP 
 libs=../../common/lib/nrtb_common.a -lpthread
 include=-I../../common/include -I../include
-args=${switches} ${libs} ${include}
+bargs=${switches} ${include}
+largs=${switches} ${libs}

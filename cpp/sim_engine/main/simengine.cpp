@@ -17,13 +17,40 @@
  **********************************************/
 
 #include <common.h>
- 
+#include <logger.h>
+#include <confreader.h>
+
 using namespace nrtb;
 using namespace std;
 
-
-int main()
+int main(int argc, char * argv[])
 {
+  // load the global configuration
+  conf_reader config;
+  config.read(argc, argv, "simengine.conf");
+  
+  // start the system logger
+  log_queue g_log_queue;
+  log_file_writer g_log_writer(g_log_queue,
+	config.get<string>("global_log_file","simengine.log"));
+  // create our recorder
+  log_recorder g_log("main",g_log_queue);
+  
+  // Report our startup and configuration.
+  g_log.info("Start up");
+  g_log.info("Configuration Follows");
+  for (auto i : config)
+  {
+    g_log.info(i.first+" = "+i.second);
+  };
+  g_log.info("Configuration list complete");
+  
+  // Any modules called from here should be passed the 
+  // g_log_queue and config by reference. 
+  
+  
+  // say goodbye
+  g_log.info("Shut down");
 };
 
 
