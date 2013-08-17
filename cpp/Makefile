@@ -28,3 +28,4 @@ clean:
 
 doit:
 	@cd common; make ${action}
+	@cd sim_engine; make ${action}
