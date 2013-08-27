@@ -541,16 +541,13 @@ string tcp_socket::get_remote_address()
   return sockaddr_to_str(myaddr);
 };
 
-
 tcp_server_socket_factory::tcp_server_socket_factory(
 		const string & address, 
-		const unsigned short int backlog,
-		const int queue_size)
+		const unsigned short int backlog)
 {
   // does not attempt to set up the connection initially.
   _address = address;
   _backlog = backlog;
-  pending.resize(queue_size);
 };
 
 tcp_server_socket_factory::~tcp_server_socket_factory()
@@ -560,6 +557,13 @@ tcp_server_socket_factory::~tcp_server_socket_factory()
   // make sure we've stopped doing anything.
   try { stop_listen(); } catch (...) {};
 };
+
+tcp_socket_p tcp_server_socket_factory::get_sock()
+{
+  tcp_socket_p returnme = std::move(pending.pop());
+  return std::move(returnme);
+};
+
 
 void tcp_server_socket_factory::start_listen()
 {
@@ -725,7 +729,7 @@ void tcp_server_socket_factory::run(
       if (good_connect)
       {
 	tcp_socket_p storeme(new tcp_socket(new_conn));
-	server->pending.push(storeme);
+	server->pending.push(std::move(storeme));
       };
     }; // while go;
   }

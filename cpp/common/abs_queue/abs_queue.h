@@ -136,7 +136,7 @@ T abs_queue<T,queue_t>::pop()
     signal.wait(lock);
   if (ready)
   {
-    T returnme = buffer.front();
+    T returnme = std::move(buffer.front());
     buffer.pop();
     out_count++;
     return std::move(returnme);
