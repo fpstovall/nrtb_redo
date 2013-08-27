@@ -32,7 +32,7 @@ namespace nrtb
   
 class abs_ipc_record;
 
-typedef std::unique_ptr<abs_ipc_record> ipc_record_p;
+typedef abs_ipc_record* ipc_record_p;
 
 typedef linear_queue<ipc_record_p> ipc_queue;
 
@@ -45,7 +45,9 @@ typedef linear_queue<ipc_record_p> ipc_queue;
  */
 class abs_ipc_record
 {
-  ipc_queue & return_address;
+public:
+  ipc_queue & return_to;
+  abs_ipc_record(ipc_queue & q);
 };
 
 /** ipc_channel_manager provides a place to stash ipc_queues

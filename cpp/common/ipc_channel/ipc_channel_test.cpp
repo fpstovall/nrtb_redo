@@ -22,11 +22,55 @@
 using namespace nrtb;
 using namespace std;
 
+class main_msg: public abs_ipc_record
+{
+public:  
+  using abs_ipc_record::abs_ipc_record;
+  int msg_num;
+};
+
+class worker_msg: public abs_ipc_record
+{
+public:
+  using abs_ipc_record::abs_ipc_record;
+  int ret_num;
+};
+
+int worker(int limit)
+{
+  global_ipc_channel_manager & ipc 
+    = global_ipc_channel_manager::get_reference();
+  ipc_queue & in = ipc.get("worker");
+  ipc_queue & out = ipc.get("main");
+  int total(0);
+  while (total < limit)
+  {
+    main_msg & msg = static_cast<main_msg>(in.pop());
+    worker_msg_p outmsg(new worker_msg(in));
+    outmsg->ret_num = msg->msg_num;
+    out.push(outmsg);
+    total++;
+  };
+};
 
 int main()
 {
   cout << "=========== IPC Channel test ============="
     << endl;
+    
+  global_ipc_channel_manager & ipc 
+    = global_ipc_channel_manager::get_reference();
+  ipc_queue & in = ipc.get("main");
+  ipc_queue & out = ipc.get("worker");
+  int limit = 100;
+  // start the worker here.
+  
+  for (int i(0); i<limit; i++)
+  {
+    main_msg_p msg(new main_msg(in));
+    msg->msg_num = i;
+    out.push(msg);
+  };
 
   cout << "=========== IPC Channel test complete ============="
     << endl;

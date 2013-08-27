@@ -22,6 +22,25 @@
 
 namespace nrtb 
 {
+abs_ipc_record::abs_ipc_record(ipc_queue& q): 
+  return_to(q) {};
 
+ipc_queue& ipc_channel_manager::get(std::string name)
+{
+  return channels[name];
+};
+  
+ipc_channel_manager::iterator ipc_channel_manager::begin()
+{
+  return channels.begin();
+};
+
+ipc_channel_manager::iterator ipc_channel_manager::end()
+{
+  return channels.end();
+}
+
+
+  
 } // namespace nrtb
 
