@@ -35,7 +35,7 @@ template <class T>
 class base_cq : public boost::circular_buffer<T>
 {
 public:
-  void push(T elem) { this->push_back(elem); };
+  void push(T elem) { this->push_back(std::move(elem)); };
   void pop() { this->pop_front(); };
 };
 
