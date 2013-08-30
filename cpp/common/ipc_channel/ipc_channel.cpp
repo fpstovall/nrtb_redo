@@ -40,7 +40,5 @@ ipc_channel_manager::iterator ipc_channel_manager::end()
   return channels.end();
 }
 
-
-  
 } // namespace nrtb
 

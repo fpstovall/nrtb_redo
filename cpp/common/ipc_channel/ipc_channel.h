@@ -22,8 +22,6 @@
 #include <common.h>
 #include <linear_queue.h>
 #include <memory>
-#include <boost/concept_check.hpp>
-#include <serializer.h>
 #include <singleton.h>
 
 
@@ -32,7 +30,7 @@ namespace nrtb
   
 class abs_ipc_record;
 
-typedef abs_ipc_record* ipc_record_p;
+typedef std::unique_ptr<abs_ipc_record> ipc_record_p;
 
 typedef linear_queue<ipc_record_p> ipc_queue;
 

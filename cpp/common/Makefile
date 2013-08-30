@@ -47,6 +47,7 @@ doit:
 	@cd singleton; make ${action}
 	@cd logger; make ${action}
 	@cd confreader; make ${action}
+	@cd ipc_channel; make ${action}
 
 # --- the following are obsolete and may be removed later.
 #	@cd threads; make ${action}

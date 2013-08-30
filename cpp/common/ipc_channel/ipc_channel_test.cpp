@@ -18,6 +18,7 @@
 
 #include "ipc_channel.h"
 #include <iostream>
+#include <future>
 
 using namespace nrtb;
 using namespace std;
@@ -29,6 +30,8 @@ public:
   int msg_num;
 };
 
+typedef main_msg * main_msg_p;
+
 class worker_msg: public abs_ipc_record
 {
 public:
@@ -36,21 +39,27 @@ public:
   int ret_num;
 };
 
+typedef worker_msg * worker_msg_p;
+
 int worker(int limit)
 {
-  global_ipc_channel_manager & ipc 
+  cout << "worker started" << endl;
+  global_ipc_channel_manager & ipc
     = global_ipc_channel_manager::get_reference();
   ipc_queue & in = ipc.get("worker");
   ipc_queue & out = ipc.get("main");
   int total(0);
   while (total < limit)
   {
-    main_msg & msg = static_cast<main_msg>(in.pop());
+    ipc_record_p raw_msg = in.pop();
+    main_msg_p msg = static_cast<main_msg_p>(raw_msg.get());
     worker_msg_p outmsg(new worker_msg(in));
     outmsg->ret_num = msg->msg_num;
-    out.push(outmsg);
+    msg->return_to.push(ipc_record_p(outmsg));
     total++;
   };
+  cout << "worker ended" << endl;
+  return total;
 };
 
 int main()
@@ -64,17 +73,36 @@ int main()
   ipc_queue & out = ipc.get("worker");
   int limit = 100;
   // start the worker here.
+  auto worktask = async(launch::async,worker,limit);
   
   for (int i(0); i<limit; i++)
   {
     main_msg_p msg(new main_msg(in));
     msg->msg_num = i;
-    out.push(msg);
+    out.push(ipc_record_p(msg));
   };
+  
+  cout << "processed " << worktask.get() << endl;
+
+  while (in.size())
+  {
+    ipc_record_p raw = in.pop();
+    worker_msg_p reply = static_cast<worker_msg_p>(raw.get());
+  };
+  
+  auto b = ipc.begin();
+  auto e = ipc.end();
+  for (auto i = b; i != e; i++)
+  {
+    cout << i->first << ": "
+      << i->second.in_count << " | "
+      << i->second.out_count << endl;
+  }
 
   cout << "=========== IPC Channel test complete ============="
     << endl;
-  
+
+  return !(out.in_count == in.out_count);
 };
 
 
