@@ -35,6 +35,7 @@ clean:
 	@echo "========== simulation engine cleanup complete ==========="
 
 doit:
+	cd messages; make ${action}
 	cd main; make ${action}
 #	cd comm_manager; make ${action}
 

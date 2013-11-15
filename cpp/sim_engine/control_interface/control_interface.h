@@ -19,10 +19,31 @@
 #ifndef control_interface_header
 #define control_interface_header
 
+#include <ipc_channel.h>
 #include <base_socket.h>
 
 namespace nrtb
 {
+  
+enum class 
+  
+class ci_main_msg: public abs_ipc_record
+{
+public:
+  enum {start,stop,status,load,shutdown};
+  int msg;
+  std::string arg;
+};
+
+typedef ci_main_msg * ci_main_msg_p;
+
+class main_ci_msg: public abs_ipc_record
+{
+public:
+  enum {start,stop,status,load,shutdown};
+  
+  strlist lines;
+};
 
 } // namepace nrtb
 
