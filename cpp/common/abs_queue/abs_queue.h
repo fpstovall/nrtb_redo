@@ -117,7 +117,7 @@ void abs_queue<T,queue_t>::push(T item)
     in_count++;
     {
       std::unique_lock<std::mutex> lock(mylock);
-      buffer.push(item);
+      buffer.push(std::move(item));
     }
     signal.notify_one();
   }
@@ -136,10 +136,10 @@ T abs_queue<T,queue_t>::pop()
     signal.wait(lock);
   if (ready)
   {
-    T returnme = buffer.front();
+    T returnme = std::move(buffer.front());
     buffer.pop();
     out_count++;
-    return returnme;
+    return std::move(returnme);
   }
   else
   {

@@ -21,9 +21,6 @@ lib: ./bin/nrtb_simulation
 ./bin/nrtb_simulation: ../common/nrtb_common.a
 	@echo "============= building simulation engine ==============="
 	@make action=lib doit
-	#temp target
-	touch ./bin/nrtb_simulation
-	@echo temp target created.
 	@echo "============= simulation engine complete ==============="
 
 modules:
@@ -38,7 +35,9 @@ clean:
 	@echo "========== simulation engine cleanup complete ==========="
 
 doit:
-	cd comm_manager; make ${action}
+	cd messages; make ${action}
+	cd main; make ${action}
+#	cd comm_manager; make ${action}
 
 ../common/nrtb_common.a:
 	@cd ../common; make 

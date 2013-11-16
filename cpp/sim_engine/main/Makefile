@@ -1,5 +1,5 @@
 #***********************************************
-#This file is part of the NRTB project (https://launchpad.net/nrtb).
+# This file is part of the NRTB project (https://launchpad.net/nrtb).
 #
 #    NRTB is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -16,22 +16,25 @@
 #
 #***********************************************
 
-all:
-	@echo "============= building all targets ==============="
-	@make action=lib doit
-	@echo "============= all targets complete ==============="
+target=../bin/simengine
 
-modules:
-	@echo "============= building all targets ==============="
-	@make doit
-	@echo "============= completed all targets =============="
+${target}:	simengine.o
+	@rm -f ${target}
+	g++ -o ${target} simengine.o ${largs}
+
+
+simengine.o:	simengine.cpp Makefile
+	@rm -f simengine.o
+	g++ -c -O3 simengine.cpp ${bargs} 
 
 clean:
-	@echo "============= cleaning all targets ==============="
-	@make action=clean doit
-	@rm -fv ./bin/*
-	@echo "========== all targets cleanup complete ==========="
+	@rm -vf *.o ${target}
+	@echo all objects and executables have been erased.
 
-doit:
-	cd cpp; make ${action}
+lib: ${target}
 
+switches=-std=gnu++11 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP 
+libs=../../common/lib/nrtb_common.a -lpthread
+include=-I../../common/include -I../include
+bargs=${switches} ${include}
+largs=${switches} ${libs}

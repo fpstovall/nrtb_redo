@@ -16,30 +16,16 @@
 #
 #***********************************************
 
-lib: ../lib/nrtb_physics.a
-
-../lib/nrtb_physics.a: ../../commmon/lib.nrtb_common.a
-	@echo "============= building physics ==============="
+lib:
+	@echo "============= building C++ code ==============="
 	@make action=lib doit
-	@ar -r ../lib/nrtb_physics.a ./obj/*.o
-	@cp -v ./include/* ../include
-	@echo "============= physics complete ==============="
-
-../../commmon/lib.nrtb_common.a:
-	@cd ../../common; make
-
-modules:
-	@echo "============= building physics modules ==============="
-	@make doit
-	@echo "============= completed physics modules =============="
+	@echo "============= C++ build complete ==============="
 
 clean:
-	@echo "============= cleaning physics ==============="
-	@cd include; for file in *; do rm -fv ../include/$$file; done
+	@echo "============= cleaning common libs ==============="
 	@make action=clean doit
-	@rm -fv ./obj/* ./lib/* ./include/*
-	@echo "========== physics cleanup complete ==========="
+	@echo "========== common lib cleanup complete ==========="
 
 doit:
-#	@cd abstract_effector; make ${action}
-#	@cd point_mass; make ${action}
+	@cd common; make ${action}
+	@cd sim_engine; make ${action}
