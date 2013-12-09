@@ -21,12 +21,11 @@
 
 #include <triad.h>
 #include <list>
+#include <memory.h>
 
 namespace nrtb
 {
   
-class base_object;
-
 typedef triad<float> triplet;
 
 struct sphere
@@ -35,18 +34,23 @@ struct sphere
   float radius;
 };
 
-class abs_adjustor
+struct base_object;
+typedef std::unique_ptr<base_object> object_p;
+typedef std::list<object_p> object_list;
+
+struct abs_adjustor
 {
-public:
+  std::string handle;
   virtual bool tick(base_object & o, int time) = 0;
 };
   
-typedef list<abs_adjustor> adjuster_list;
+typedef std::shared_ptr<abs_adjustor> adjustor_p;
+typedef std::list<adjustor_p> adjustor_list;
 
-class abs_object
+struct base_object
 {
-public:
   // data
+  std::string handle;
   triplet location;
   triplet attitude;
   triplet velocity;
@@ -55,13 +59,13 @@ public:
   triplet torque;
   float mass;
   sphere bounding_sphere;
-  adjuster_list pre_attribs;
-  adjuster_list post_attribs;
-  list<abs_object> components;
-  // methods
-  void tick(int time);
-  void apply(int time);
-  bool check_collision(sphere s);
+  adjustor_list pre_attribs;
+  adjustor_list post_attribs;
+  object_list components;
+  // sim methods
+  virtual void tick(int time);
+  virtual void apply(int time);
+  virtual bool check_collision(sphere s);
 };
 
 } // namepace nrtb

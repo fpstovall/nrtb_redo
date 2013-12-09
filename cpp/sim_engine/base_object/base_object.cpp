@@ -23,3 +23,18 @@
 
 using namespace nrtb;
 
+void base_object::tick(int time)
+{
+
+};
+
+void base_object::apply(int time)
+{
+
+};
+
+bool base_object::check_collision(sphere s)
+{
+
+};
+
