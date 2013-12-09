@@ -19,11 +19,50 @@
 #ifndef base_object_header
 #define base_object_header
 
+#include <triad.h>
+#include <list>
 
 namespace nrtb
 {
+  
+class base_object;
 
+typedef triad<float> triplet;
 
+struct sphere
+{
+  triplet center;
+  float radius;
+};
+
+class abs_adjustor
+{
+public:
+  virtual bool tick(base_object & o, int time) = 0;
+};
+  
+typedef list<abs_adjustor> adjuster_list;
+
+class abs_object
+{
+public:
+  // data
+  triplet location;
+  triplet attitude;
+  triplet velocity;
+  triplet rotation;
+  triplet force;
+  triplet torque;
+  float mass;
+  sphere bounding_sphere;
+  adjuster_list pre_attribs;
+  adjuster_list post_attribs;
+  list<abs_object> components;
+  // methods
+  void tick(int time);
+  void apply(int time);
+  bool check_collision(sphere s);
+};
 
 } // namepace nrtb
 
