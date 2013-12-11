@@ -23,18 +23,38 @@
 
 using namespace nrtb;
 
-void base_object::tick(int time)
+bool base_object::tick(int time)
 {
-
+  force = 0;
+  torque = 0;
+  mass_mod = 0;
+  bool killme (false);
+  for (auto e : pre_attribs)
+    if (e.second->tick(*this, time))
+      killme = true;
+  return killme;
 };
 
-void base_object::apply(int time)
+bool base_object::apply(int time, float quanta)
 {
-
+  // move acording to forces
+  float tmass = mass + mass_mod;
+  triplet a = force / tmass;
+  triplet ra = torque / (tmass * 0.5); // not accurate!!
+  velocity += (a * quanta) * accel_mod;
+  rotation += (ra * quanta) * torque_mod;
+  location += velocity * quanta;
+  attitude += rotation * quanta;
+  // apply post-effectors
+  bool killme (false);
+  for (auto e : post_attribs)
+    if (e.second->tick(*this, time))
+      killme = true;
+  return killme;
 };
 
 bool base_object::check_collision(sphere s)
 {
-
+  float r = s.radius + bounding_sphere.radius;
+  return r <= s.center.range(bounding_sphere.center);
 };
-

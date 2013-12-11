@@ -23,33 +23,39 @@
 using namespace nrtb;
 using namespace std;
 
-typedef shared_ptr<string> string_p;
+struct gravity : public abs_effector
+{
+  gravity()
+  {
+    handle = "gravity";
+  };
+  
+  bool tick(base_object & o, int time)
+  {
+    o.accel_mod += triplet(9.82,0,0);
+    return false;
+  };
+};
+
+struct rocket : public abs_effector
+{
+  triplet impulse = triplet(1000.0,0.0,0.0);
+  int burn_time = 3;
+  
+  bool tick(base_object & o, int time)
+  {
+    if (time <= burn_time)
+      o.force += impulse;
+    return false;
+  };  
+};
 
 int main()
 {
+  bool failed = false;
   cout << "=========== sim messages test ============="
     << endl;
 
-  ipc_queue queue;
-    
-  void_p s(new string("this is a test"));
-  
-  queue.push(ipc_record_p(new gp_sim_message(queue, 1, 1, 0)));
-  queue.push(ipc_record_p(new gp_sim_message(queue, 2, 1, 1, s)));
-  
-  ipc_record_p raw(queue.pop());
-  gp_sim_message_p msg = static_cast<gp_sim_message_p>(raw.get());
-  cout << msg->as_str() << endl;
-  bool failed = (msg->as_str() != "1:1:0:0");
-  
-  raw = queue.pop();
-  msg = static_cast<gp_sim_message_p>(raw.get());
-  cout << msg->as_str() << endl;
-  failed = failed
-    or (msg->msg_type() != 2)
-    or (msg->noun() != 1)
-    or (msg->verb() != 1)
-    or (msg->data<string>() != "this is a test");
 
   cout << "=========== sim_messages test complete ============="
     << endl;

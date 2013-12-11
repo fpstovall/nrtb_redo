@@ -20,8 +20,9 @@
 #define base_object_header
 
 #include <triad.h>
-#include <list>
-#include <memory.h>
+#include <serializer.h>
+#include <map>
+#include <memory>
 
 namespace nrtb
 {
@@ -35,21 +36,25 @@ struct sphere
 };
 
 struct base_object;
-typedef std::unique_ptr<base_object> object_p;
-typedef std::list<object_p> object_list;
+typedef std::shared_ptr<base_object> object_p;
+typedef std::map<unsigned long long, object_p> object_list;
 
-struct abs_adjustor
+struct abs_effector
 {
+  static serializer effector_num;
+  unsigned long long id = effector_num();
   std::string handle;
   virtual bool tick(base_object & o, int time) = 0;
 };
   
-typedef std::shared_ptr<abs_adjustor> adjustor_p;
-typedef std::list<adjustor_p> adjustor_list;
+typedef std::shared_ptr<abs_effector> effector_p;
+typedef std::map<unsigned long long, effector_p> effector_list;
 
 struct base_object
 {
+  static serializer object_num;
   // data
+  unsigned long long id = object_num();
   std::string handle;
   triplet location;
   triplet attitude;
@@ -57,14 +62,16 @@ struct base_object
   triplet rotation;
   triplet force;
   triplet torque;
+  triplet accel_mod;
+  triplet torque_mod;
   float mass;
+  float mass_mod;
   sphere bounding_sphere;
-  adjustor_list pre_attribs;
-  adjustor_list post_attribs;
-  object_list components;
+  effector_list pre_attribs;
+  effector_list post_attribs;
   // sim methods
-  virtual void tick(int time);
-  virtual void apply(int time);
+  virtual bool tick(int time);
+  virtual bool apply(int time, float quanta);
   virtual bool check_collision(sphere s);
 };
 
