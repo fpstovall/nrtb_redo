@@ -23,6 +23,31 @@
 
 using namespace nrtb;
 
+std::string base_object::as_str()
+{
+  std::stringstream returnme;
+  returnme << "ID=" << id
+    << ":loc=" << location
+    << ":att=" << attitude
+    << ":vel=" << velocity
+    << ":rot=" << rotation
+    << ":f=" << force
+    << ":t=" << torque
+    << ":acc_mod=" << accel_mod
+    << ":t_mod=" << torque_mod
+    << ":mass=" << mass
+    << ":mass_mod=" << mass_mod
+    << ":b_sphere=" << bounding_sphere.center
+    << "," << bounding_sphere.radius
+    << ":pre=";
+  for(auto a : pre_attribs)
+    returnme << a.second->as_str() << ";";
+  returnme << ":posts=";
+  for(auto a : post_attribs)
+    returnme << a.second->as_str() << ";";
+  return returnme.str();
+};
+
 bool base_object::tick(int time)
 {
   force = 0;
@@ -56,5 +81,26 @@ bool base_object::apply(int time, float quanta)
 bool base_object::check_collision(sphere s)
 {
   float r = s.radius + bounding_sphere.radius;
-  return r <= s.center.range(bounding_sphere.center);
+  return r <= 
+    s.center.range(bounding_sphere.center+location);
+};
+
+void base_object::add_pre(abs_effector* e)
+{
+  pre_attribs[e->id] = effector_p(e);
+};
+
+abs_effector& base_object::get_pre(long long unsigned int i)
+{
+  return *pre_attribs[i];
+};
+
+void base_object::add_post(abs_effector* e)
+{
+  post_attribs[e->id] = effector_p(e);
+};
+
+abs_effector& base_object::get_post(long long unsigned int i)
+{
+  return *post_attribs[i];
 };

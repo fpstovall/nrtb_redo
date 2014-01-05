@@ -44,6 +44,7 @@ struct abs_effector
   static serializer effector_num;
   unsigned long long id = effector_num();
   std::string handle;
+  virtual std::string as_str() = 0;
   virtual bool tick(base_object & o, int time) = 0;
 };
   
@@ -67,12 +68,20 @@ struct base_object
   float mass;
   float mass_mod;
   sphere bounding_sphere;
-  effector_list pre_attribs;
-  effector_list post_attribs;
+  // reporting
+  virtual std::string as_str();
+  // effector management
+  virtual void add_pre(abs_effector * e);
+  virtual abs_effector & get_pre(unsigned long long i);
+  virtual void add_post(abs_effector * e);
+  virtual abs_effector & get_post(unsigned long long i);
   // sim methods
   virtual bool tick(int time);
   virtual bool apply(int time, float quanta);
   virtual bool check_collision(sphere s);
+protected:
+  effector_list pre_attribs;
+  effector_list post_attribs;    
 };
 
 } // namepace nrtb
