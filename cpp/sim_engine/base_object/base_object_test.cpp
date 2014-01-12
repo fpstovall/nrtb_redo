@@ -25,27 +25,49 @@ using namespace std;
 
 struct gravity : public abs_effector
 {
+  triplet g = triplet(0,-9.81,0);
+  
   gravity()
   {
     handle = "gravity";
   };
   
+  std::string as_str()
+  {
+    std::stringstream returnme;
+    returnme << handle << "_" << id << "=" << g;
+    return returnme.str();
+  };
+  
   bool tick(base_object & o, int time)
   {
-    o.accel_mod += triplet(9.82,0,0);
+    o.accel_mod += g;
     return false;
   };
 };
 
 struct rocket : public abs_effector
 {
-  triplet impulse = triplet(1000.0,0.0,0.0);
+  triplet impulse = triplet(0.0,10000.0,0.0);
   int burn_time = 3;
+  
+  std::string as_str()
+  {
+    std::stringstream returnme;
+    returnme << "rocket_" << id << "=" << impulse;
+    return returnme.str();
+  };
   
   bool tick(base_object & o, int time)
   {
     if (time <= burn_time)
+    {
       o.force += impulse;
+    }
+    else
+    {
+      impulse = 0;
+    };
     return false;
   };  
 };
@@ -56,6 +78,49 @@ int main()
   cout << "=========== sim messages test ============="
     << endl;
 
+  base_object rocket_ball;
+  rocket_ball.mass = 100;
+  rocket_ball.bounding_sphere.center = triplet(0);
+  rocket_ball.bounding_sphere.radius = 0.5;
+  cout << rocket_ball.as_str() << endl;
+  
+  rocket_ball.add_pre(new gravity);
+  cout << rocket_ball.as_str() << endl;
+  
+  rocket_ball.add_pre(new rocket);
+  cout << rocket_ball.as_str() << endl;
+  
+  int time = 0;
+  // initial burn.
+  for (time; time<5; time++)
+  {
+    cout << time*0.02 << endl;
+    rocket_ball.tick(time);
+    rocket_ball.apply(time,0.02);
+    cout << rocket_ball.as_str() << endl;
+  };
+  
+  // coast to peak altitude
+  while (rocket_ball.velocity.y > 0.0)
+  {
+    time++;
+    rocket_ball.tick(time);
+    rocket_ball.apply(time,0.02);    
+  };
+  cout << "Peak:" << time*0.02 << endl;
+  cout << rocket_ball.as_str() << endl;
+  failed = failed or (time != 41);
+
+  // Fall back down.
+  while (rocket_ball.location.y > 0.0)
+  {
+    time++;
+    rocket_ball.tick(time);
+    rocket_ball.apply(time,0.02);    
+  };
+  cout << "Impact:" << time*0.02 << endl;
+  cout << rocket_ball.as_str() << endl;
+  failed = failed or (time != 80);
 
   cout << "=========== sim_messages test complete ============="
     << endl;

@@ -23,6 +23,9 @@
 
 using namespace nrtb;
 
+serializer abs_effector::effector_num;
+serializer base_object::object_num;
+
 std::string base_object::as_str()
 {
   std::stringstream returnme;
@@ -66,10 +69,14 @@ bool base_object::apply(int time, float quanta)
   float tmass = mass + mass_mod;
   triplet a = force / tmass;
   triplet ra = torque / (tmass * 0.5); // not accurate!!
-  velocity += (a * quanta) * accel_mod;
-  rotation += (ra * quanta) * torque_mod;
+  velocity += (a * quanta) + (accel_mod * quanta);
+  rotation += (ra * quanta) + (torque_mod * quanta);
   location += velocity * quanta;
   attitude += rotation * quanta;
+  // clean up for next pass
+  accel_mod = 0;
+  torque_mod = 0;
+  mass_mod = 0;
   // apply post-effectors
   bool killme (false);
   for (auto e : post_attribs)
