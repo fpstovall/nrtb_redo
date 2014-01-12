@@ -53,6 +53,9 @@ std::string base_object::as_str()
 
 bool base_object::tick(int time)
 {
+  // clean up for next pass
+  accel_mod = 0;
+  torque_mod = 0;
   force = 0;
   torque = 0;
   mass_mod = 0;
@@ -73,10 +76,6 @@ bool base_object::apply(int time, float quanta)
   rotation += (ra * quanta) + (torque_mod * quanta);
   location += velocity * quanta;
   attitude += rotation * quanta;
-  // clean up for next pass
-  accel_mod = 0;
-  torque_mod = 0;
-  mass_mod = 0;
   // apply post-effectors
   bool killme (false);
   for (auto e : post_attribs)
