@@ -78,6 +78,7 @@ int main()
   cout << "=========== sim messages test ============="
     << endl;
 
+  cout << "Object setup:" << endl;
   base_object rocket_ball;
   rocket_ball.mass = 100;
   rocket_ball.bounding_sphere.center = triplet(0);
@@ -88,13 +89,14 @@ int main()
   cout << rocket_ball.as_str() << endl;
   
   rocket_ball.add_pre(new rocket);
-  cout << rocket_ball.as_str() << endl;
+  cout << rocket_ball.as_str() << endl;  
   
+  cout << "Launch:" << endl;
   int time = 0;
   // initial burn.
   for (time; time<5; time++)
   {
-    cout << time*0.02 << endl;
+    cout << time*0.02 << " sec."<< endl;
     rocket_ball.tick(time);
     rocket_ball.apply(time,0.02);
     cout << rocket_ball.as_str() << endl;
@@ -107,7 +109,7 @@ int main()
     rocket_ball.tick(time);
     rocket_ball.apply(time,0.02);    
   };
-  cout << "Peak:" << time*0.02 << endl;
+  cout << "Peak:" << time*0.02 << " sec."<< endl;
   cout << rocket_ball.as_str() << endl;
   failed = failed or (time != 41);
 
@@ -118,7 +120,7 @@ int main()
     rocket_ball.tick(time);
     rocket_ball.apply(time,0.02);    
   };
-  cout << "Impact:" << time*0.02 << endl;
+  cout << "Impact:" << time*0.02<< " sec." << endl;
   cout << rocket_ball.as_str() << endl;
   failed = failed or (time != 80);
 
