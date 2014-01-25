@@ -72,6 +72,14 @@ struct rocket : public abs_effector
   };  
 };
 
+class my_object : public base_object
+{
+  bool apply_collision(object_p o) 
+  {
+    return false;
+  };
+};
+
 int main()
 {
   bool failed = false;
@@ -79,7 +87,7 @@ int main()
     << endl;
 
   cout << "Object setup:" << endl;
-  base_object rocket_ball;
+  my_object rocket_ball;
   rocket_ball.mass = 100;
   rocket_ball.bounding_sphere.center = triplet(0);
   rocket_ball.bounding_sphere.radius = 0.5;

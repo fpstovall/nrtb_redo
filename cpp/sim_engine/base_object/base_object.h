@@ -76,9 +76,12 @@ struct base_object
   virtual void add_post(abs_effector * e);
   virtual abs_effector & get_post(unsigned long long i);
   // sim methods
+  // returns true if a collision is detected.
+  virtual bool check_collision(sphere s);
+  // the following return true if the object is destroyed.
   virtual bool tick(int time);
   virtual bool apply(int time, float quanta);
-  virtual bool check_collision(sphere s);
+  virtual bool apply_collision(object_p o) = 0;
 protected:
   effector_list pre_attribs;
   effector_list post_attribs;    
