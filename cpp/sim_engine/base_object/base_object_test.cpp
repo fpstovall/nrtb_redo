@@ -72,6 +72,14 @@ struct rocket : public abs_effector
   };  
 };
 
+class my_object : public base_object
+{
+  bool apply_collision(object_p o) 
+  {
+    return false;
+  };
+};
+
 int main()
 {
   bool failed = false;
@@ -79,7 +87,7 @@ int main()
     << endl;
 
   cout << "Object setup:" << endl;
-  base_object rocket_ball;
+  my_object rocket_ball;
   rocket_ball.mass = 100;
   rocket_ball.bounding_sphere.center = triplet(0);
   rocket_ball.bounding_sphere.radius = 0.5;
@@ -123,7 +131,43 @@ int main()
   cout << "Impact:" << time*0.02<< " sec." << endl;
   cout << rocket_ball.as_str() << endl;
   failed = failed or (time != 80);
+  
+  cout << "\n** Flight Test: " << (failed ? "Failed" : "Passed") << endl;
+  
+  // collision tests.
+  my_object fixed = rocket_ball;
+  fixed.location = 0;
+  object_p mobile(new my_object);
+  mobile->bounding_sphere = fixed.bounding_sphere;
+  stringstream results;
+  
+  // check at various distances.
+  mobile->location = triplet(0,2,0);
+  bool t = fixed.check_collision(mobile);
+  results << fixed.location.range(mobile->location)
+    << "=" << t << ",";
+  
+  mobile->location = triplet(0,1.01,0);
+  t = fixed.check_collision(mobile);
+  results << fixed.location.range(mobile->location)
+    << "=" << t << ",";
 
+  mobile->location = triplet(0,1,0);
+  t = fixed.check_collision(mobile);
+  results << fixed.location.range(mobile->location)
+    << "=" << t << ",";
+
+  mobile->location = triplet(0);
+  t = fixed.check_collision(mobile);
+  results << fixed.location.range(mobile->location)
+    << "=" << t;
+  
+  bool c = results.str() != "2=0,1.01=0,1=1,0=1";
+  cout << results.str() << endl;
+  cout << "** Collision Test: " << (c ? "Failed" : "Passed") << endl;
+  
+  failed = failed or c;
+  
   cout << "=========== sim_messages test complete ============="
     << endl;
   
