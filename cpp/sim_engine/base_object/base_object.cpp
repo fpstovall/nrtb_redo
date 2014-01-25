@@ -89,7 +89,7 @@ bool base_object::check_collision(object_p o)
   float r = o->bounding_sphere.radius + bounding_sphere.radius;
   triplet adjusted = o->bounding_sphere.center;
   adjusted += o->location;
-  return r <= adjusted.range(bounding_sphere.center+location);
+  return (r >= adjusted.range(bounding_sphere.center+location));
 };
 
 void base_object::add_pre(abs_effector* e)
