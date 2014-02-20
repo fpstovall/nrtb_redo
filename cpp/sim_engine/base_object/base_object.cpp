@@ -72,10 +72,15 @@ bool base_object::apply(int time, float quanta)
   float tmass = mass + mass_mod;
   triplet a = force / tmass;
   triplet ra = torque / (tmass * 0.5); // not accurate!!
+  // compute quanta effective Vs
+  triplet ev = velocity + (((a + accel_mod)/2) * quanta);
+  triplet er = rotation + (((ra + torque_mod)/2) * quanta);
+  // compute final velocities for the quanta
   velocity += (a  + accel_mod) * quanta;
   rotation += (ra + torque_mod) * quanta;
-  location += velocity * quanta;
-  attitude += rotation * quanta;
+  // update position, attitude
+  location += ev * quanta;
+  attitude += er * quanta;
   // apply post-effectors
   bool killme (false);
   for (auto e : post_attribs)
