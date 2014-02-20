@@ -83,7 +83,7 @@ class my_object : public base_object
 int main()
 {
   bool failed = false;
-  cout << "=========== sim messages test ============="
+  cout << "========== base_object test ============="
     << endl;
 
   cout << "Object setup:" << endl;
@@ -168,7 +168,7 @@ int main()
   
   failed = failed or c;
   
-  cout << "=========== sim_messages test complete ============="
+  cout << "=========== base_object test complete ============="
     << endl;
   
   return failed;
