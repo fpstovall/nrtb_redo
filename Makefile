@@ -18,6 +18,7 @@
 
 all:
 	@echo "============= building all targets ==============="
+	@mkdir -p ./bin
 	@make action=lib doit
 	@echo "============= all targets complete ==============="
 
@@ -29,7 +30,7 @@ modules:
 clean:
 	@echo "============= cleaning all targets ==============="
 	@make action=clean doit
-	@rm -fv ./bin/*
+	@rm -rf ./bin
 	@echo "========== all targets cleanup complete ==========="
 
 doit:

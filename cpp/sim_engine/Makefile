@@ -20,6 +20,7 @@ lib: ./bin/nrtb_simulation
     
 ./bin/nrtb_simulation: ../common/nrtb_common.a
 	@echo "============= building simulation engine ==============="
+	@mkdir -p ./obj ./lib ./include ./bin
 	@make action=lib doit
 	@echo "============= simulation engine complete ==============="
 
@@ -31,7 +32,7 @@ modules:
 clean:
 	@echo "============= cleaning simulation engine ==============="
 	@make action=clean doit
-	@rm -fv .obj/* ./lib/* ./include/* ./bin/*
+	@rm -rf ./obj ./lib ./include ./bin
 	@echo "========== simulation engine cleanup complete ==========="
 
 doit:

@@ -20,6 +20,7 @@ lib: ./lib/nrtb_common.a
 
 ./lib/nrtb_common.a:
 	@echo "============= building common libs ==============="
+	@mkdir -p ./lib ./obj ./include
 	@make action=lib doit
 	@ar -r ./lib/nrtb_common.a ./obj/*.o
 	@echo "============= common libs complete ==============="
@@ -32,7 +33,7 @@ modules:
 clean:
 	@echo "============= cleaning common libs ==============="
 	@make action=clean doit
-	@rm -fv ./obj/* ./lib/* ./include/*
+	@rm -rf ./obj ./lib ./include
 	@echo "========== common lib cleanup complete ==========="
 
 doit:

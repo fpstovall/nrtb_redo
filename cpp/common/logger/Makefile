@@ -35,6 +35,6 @@ logger.o:	logger.cpp logger.h Makefile
 	g++ -c -O3 logger.cpp -I ../include ${switches} 
 
 clean:
-	@rm -vf *.o ../include/logger.h logger_test
+	@rm -vf *.o ../include/logger.h logger_test *.log
 	@echo all objects and executables have been erased.
 
