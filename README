@@ -1,26 +1,13 @@
-Enter the command "make" at the top level to build everything. 
+NRTB is a reboot of the old "Real-Time Battle" a programming game where 
+programmers developed control programs for combat robots armed with cannon in
+a 2D arena. This version will use 3D physics, more or less accurate, as well 
+as allow the control programes to interface wia a simplished ASCII TCP/IP interface.
 
-What the directories are for:
+Nothing is complete yet. Current development is focused on created a useful
+alphe level simulation engine.
 
-|-- GPB_proto
-|-- bin : final executables and build products.
-|   `-- plugins 
-|-- common : C++ components shared between two or more modules.
-|   |-- include
-|   |-- obj
-|   `-- (...)
-|-- data_broker : Data broker code
-|-- database : Database scripts, queries
-|   '-- docs : Database schema documentation
-|-- docs 
-|   |-- ProgrammingReferences
-|   `-- UML
-|-- plugins : Source code for the various plugins
-|   |-- chassis
-|   |-- power
-|   |-- propulsion
-|   |-- sensor
-|   `-- weapon
-`-- sim_engine : Source code for the sim-engine.
+Currenly all development is focused in the cpp directory. Most of the rest are
+considered obsolete and maintained for purely histerical purposes.
+
 
 
