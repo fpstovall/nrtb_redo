@@ -27,6 +27,7 @@
 #include <serializer.h>
 #include <singleton.h>
 #include <base_object.h>
+#include <messages.h>
 
 namespace nrtb
 {
@@ -49,6 +50,8 @@ public:
   void stop_sim();
   void add_object(object_p obj);
   object_p remove_obj(unsigned long long oid);
+  gp_sim_message_p next_out_message();
+  void put_message(gp_sim_message_p m);
   /**************************************
    * Reporting methods.
    *************************************/
@@ -56,6 +59,7 @@ public:
   object_list get_obj_copies();
   
 private:
+  ipc_queue messages;
   std::atomic<bool> is_running;
   std::atomic<unsigned long long> quanta;
   object_list all_objects;
