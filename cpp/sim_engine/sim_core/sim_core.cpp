@@ -89,3 +89,15 @@ void sim_core::turn_init(quanta)
    TODO: much more here, but need the messaging
     first.
 };
+
+void sim_core::put_message(gp_sim_message_p m)
+{
+  ipc_record_p t(static_cast<ipc_record_p>(m));
+  messages.push(t);
+};
+
+gp_sim_message_p sim_core::next_out_message()
+{
+  ipc_record_p t(messages.pop());
+  return static_cast<gp_sim_message_p>(t);
+};
