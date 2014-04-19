@@ -46,7 +46,7 @@ private:
   void_p _data;
 };
 
-typedef gp_sim_message * gp_sim_message_p;
+typedef std::unique_ptr<gp_sim_message> gp_sim_message_p;
 
 
 template <class T>
