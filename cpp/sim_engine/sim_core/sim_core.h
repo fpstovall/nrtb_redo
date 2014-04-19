@@ -49,7 +49,8 @@ public:
   void start_sim();
   void stop_sim();
   void add_object(object_p obj);
-  object_p remove_obj(unsigned long long oid);
+  void remove_obj(unsigned long long oid);
+  // general purpose work thread interface.
   gp_sim_message_p next_out_message();
   void put_message(gp_sim_message_p m);
   /**************************************

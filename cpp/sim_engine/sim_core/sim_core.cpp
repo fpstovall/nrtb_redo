@@ -102,3 +102,31 @@ gp_sim_message_p sim_core::next_out_message()
   gp_sim_message_p g(static_cast<gp_sim_message *>(t.release()));
   return std::move(g);
 };
+
+void sim_core::add_object(object_p obj)
+{
+  // assemble the message.
+  void_p d(new object_p(obj));
+  gp_sim_message_p g(new gp_sim_message(messages,0,1,1,d));
+  // queue the message.
+  put_message(std::move(g));
+};
+
+void sim_core::remove_obj(long long unsigned int oid)
+{
+  // assemble the message
+  void_p d(new unsigned long long(oid));
+  gp_sim_message_p g(new gp_sim_message(messages,0,1,2,d));
+  // queue the message.
+  put_message(std::move(g));
+};
+
+void sim_core::stop_sim()
+{
+  // assemble the message
+  gp_sim_message_p g(new gp_sim_message(messages,0,2,1));
+  // queue the message.
+  put_message(std::move(g));
+};
+
+
