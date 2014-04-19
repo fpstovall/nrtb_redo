@@ -92,12 +92,13 @@ void sim_core::turn_init(unsigned long long quanta)
 
 void sim_core::put_message(gp_sim_message_p m)
 {
-  ipc_record_p t(static_cast<ipc_record_p>(m));
+  ipc_record_p t(static_cast<abs_ipc_record *>(m.release()));
   messages.push(std::move(t));
 };
 
 gp_sim_message_p sim_core::next_out_message()
 {
   ipc_record_p t(messages.pop());
-  return static_cast<gp_sim_message_p>(t.release());
+  gp_sim_message_p g(static_cast<gp_sim_message *>(t.release()));
+  return std::move(g);
 };
