@@ -41,7 +41,7 @@ struct clsn_rec
 class sim_core
 {
 public:
-  sim_core(unsigned long long quanta_microsec);
+  sim_core(float time_slice);
   /***************************************
    * control methods.
    **************************************/
@@ -62,11 +62,12 @@ private:
   ipc_queue messages;
   std::atomic<bool> is_running;
   std::atomic<unsigned long long> quanta;
+  float quanta_duration;
   object_list all_objects;
   std::vector<clsn_rec> collisions;
   std::vector<unsigned long long> deletions;
   object_p deep_copy(object_p);
-  void turn_init(quanta);
+  void turn_init(unsigned long long quanta);
   void tick(unsigned long long quanta);
   void collision_check();
   static void run_sim(sim_core & world);

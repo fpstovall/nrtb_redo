@@ -31,10 +31,10 @@ void sim_core::tick(unsigned long long quanta)
     // have to use this method to make sure the apply step is not
     // optimized out by the compiler in some conditions.
     bool killme = a.second->tick(quanta);
-    bool killme2 = a.second->apply(quanta);
+    bool killme2 = a.second->apply(quanta, quanta_duration);
     // mark the object for deletion if appropriate.
     if (killme or killme2)
-      deletions.append(a.first);
+      deletions.push_back(a.first);
   };
   // at the end of this method, all objects are either
   // at their final state ignorning collisions or deleted.
@@ -58,7 +58,7 @@ void sim_core::collision_check()
         clsn_rec crec;
         crec.a = c->first;
         crec.b = b->first;
-        collisions.append(crec);
+        collisions.push_back(crec);
       };
       b++;
     };
@@ -68,7 +68,7 @@ void sim_core::collision_check()
 };
 
 
-void sim_core::turn_init(quanta)
+void sim_core::turn_init(unsigned long long quanta)
 {
   /* conduct all cleanup needed to ensure the sim
      is a proper state for the next turn. */
@@ -86,18 +86,18 @@ void sim_core::turn_init(quanta)
   /*********************
    * Still need to add message handling.
    * *******************/
-   TODO: much more here, but need the messaging
-    first.
+   //TODO: much more here, but need the messaging
+   // first.
 };
 
 void sim_core::put_message(gp_sim_message_p m)
 {
   ipc_record_p t(static_cast<ipc_record_p>(m));
-  messages.push(t);
+  messages.push(std::move(t));
 };
 
 gp_sim_message_p sim_core::next_out_message()
 {
   ipc_record_p t(messages.pop());
-  return static_cast<gp_sim_message_p>(t);
+  return static_cast<gp_sim_message_p>(t.release());
 };
