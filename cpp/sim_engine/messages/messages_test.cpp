@@ -38,12 +38,12 @@ int main()
   queue.push(ipc_record_p(new gp_sim_message(queue, 2, 1, 1, s)));
   
   ipc_record_p raw(queue.pop());
-  gp_sim_message_p msg = static_cast<gp_sim_message_p>(raw.get());
+  gp_sim_message_p msg(static_cast<gp_sim_message *>(raw.release()));
   cout << msg->as_str() << endl;
   bool failed = (msg->as_str() != "1:1:0:0");
   
   raw = queue.pop();
-  msg = static_cast<gp_sim_message_p>(raw.get());
+  msg.reset(static_cast<gp_sim_message *>(raw.release()));
   cout << msg->as_str() << endl;
   failed = failed
     or (msg->msg_type() != 2)
