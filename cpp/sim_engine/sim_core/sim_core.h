@@ -61,6 +61,7 @@ public:
   
 private:
   ipc_queue messages;
+  std::atomic<bool> end_run;
   std::atomic<bool> is_running;
   std::atomic<unsigned long long> quanta;
   float quanta_duration;
