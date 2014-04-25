@@ -82,7 +82,7 @@ void sim_core::turn_init(unsigned long long quanta)
       // We'll treat this as a hard error.
       stringstream s;
       s << "bad msg in sim_core::turn_init(): "
-	<< msg->as_str();
+	      << msg->as_str();
       base_exception e;
       e.store(s.str());
       throw e;
@@ -93,74 +93,74 @@ void sim_core::turn_init(unsigned long long quanta)
     {
       case noun_obj:
       {
-	const int verb_add(1);
-	const int verb_rm(2);
-	switch (msg->verb())
-	{
-	  case verb_add:
-	  {
-	    // Add new object to list.
-	    // TODO: We may want to check for unique id.
-	    auto new_obj= msg->data<object_p>();
-	    all_objects[new_obj->id] = new_obj;
-	    break;
-	  }
-	  case verb_rm:
-	  {
-	    // maark object for deletion.
-	    auto did=msg->data<unsigned long long>();
-	    deletions.push_back(did);
-	    break;
-	  }
-	  default:
-	  {
-	    // unhandled message
-	    stringstream s;
-	    s << "Unhanded object verb in sim_core::turn_init: "
-	      << msg->as_str();
-	    base_exception e;
-	    e.store(s.str());
-	    throw e;
-	    break;
-	  };
-	};
-	break;
+      	const int verb_add(1);
+      	const int verb_rm(2);
+      	switch (msg->verb())
+      	{
+      	  case verb_add:
+      	  {
+      	    // Add new object to list.
+      	    // TODO: We may want to check for unique id.
+      	    auto new_obj= msg->data<object_p>();
+      	    all_objects[new_obj->id] = new_obj;
+      	    break;
+      	  }
+      	  case verb_rm:
+      	  {
+      	    // maark object for deletion.
+      	    auto did=msg->data<unsigned long long>();
+      	    deletions.push_back(did);
+      	    break;
+      	  }
+      	  default:
+      	  {
+      	    // unhandled message
+      	    stringstream s;
+      	    s << "Unhanded object verb in sim_core::turn_init: "
+      	      << msg->as_str();
+      	    base_exception e;
+      	    e.store(s.str());
+      	    throw e;
+      	    break;
+      	  };
+      	};
+      	break;
       }
       case noun_ctl:
       {
-	const int verb_stop(1);
-	switch (msg->verb())
-	{
-	  case verb_stop:
-	  {
-	      // TODO: make sure this flag is checked in caller.
-	      // TODO: (it's not written yet.)
-	      end_run = true;
-	    break;
-	  }
-	  default:
-	  {
-	    // unhandled message
-	    stringstream s;
-	    s << "Unhanded control verb in sim_core::turn_init: "
-	      << msg->as_str();
-	    base_exception e;
-	    e.store(s.str());
-	    throw e;	
-	    break;
-	  }
-	}
+      	const int verb_stop(1);
+      	switch (msg->verb())
+      	{
+      	  case verb_stop:
+      	  {
+      	      // TODO: make sure this flag is checked in caller.
+      	      // TODO: (it's not written yet.)
+      	      end_run = true;
+      	    break;
+      	  }
+      	  default:
+      	  {
+      	    // unhandled message
+      	    stringstream s;
+      	    s << "Unhanded control verb in sim_core::turn_init: "
+      	      << msg->as_str();
+      	    base_exception e;
+      	    e.store(s.str());
+      	    throw e;	
+      	    break;
+      	  }
+      	}
       }
       default:
       {
-	// unhandled noun; treat as a hard error.
-	stringstream s;
-	s << "bad noun in sim_core::turn_init(): "
-	  << msg->as_str();
-	base_exception e;
-	e.store(s.str());
-	throw e;
-	break;
+      	// unhandled noun; treat as a hard error.
+      	stringstream s;
+      	s << "bad noun in sim_core::turn_init(): "
+      	  << msg->as_str();
+      	base_exception e;
+      	e.store(s.str());
+      	throw e;
+      	break;
       }
     };
   };
