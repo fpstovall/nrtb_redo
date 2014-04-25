@@ -24,6 +24,14 @@
 using namespace std;
 using namespace nrtb;
 
+sim_core::sim_core(float time_slice)
+  : quanta(0), 
+    quanta_duration(time_slice),
+    end_run(false),
+    is_running(false)
+{};
+
+
 void sim_core::tick(unsigned long long quanta)
 {
   // call the local tick and apply for each object in the simulation.
@@ -133,9 +141,9 @@ void sim_core::turn_init(unsigned long long quanta)
       	{
       	  case verb_stop:
       	  {
-      	      // TODO: make sure this flag is checked in caller.
-      	      // TODO: (it's not written yet.)
-      	      end_run = true;
+            // TODO: make sure this flag is checked in caller.
+            // TODO: (it's not written yet.)
+            end_run = true;
       	    break;
       	  }
       	  default:
