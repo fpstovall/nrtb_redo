@@ -31,7 +31,6 @@ sim_core::sim_core(float time_slice)
     is_running(false)
 {};
 
-
 void sim_core::tick(unsigned long long quanta)
 {
   // call the local tick and apply for each object in the simulation.
@@ -223,6 +222,22 @@ void sim_core::stop_sim()
   gp_sim_message_p g(new gp_sim_message(messages,0,2,1));
   // queue the message.
   put_message(std::move(g));
+};
+
+void sim_core::run_sim(sim_core& world)
+{
+  world.is_running = true;
+  try
+  {
+    while (!world.end_run)
+    {
+      
+    };
+  }
+  // unconsditoinal error trap.
+  catch (...)
+  {};
+  world.is_running = false;
 };
 
 
