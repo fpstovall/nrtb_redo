@@ -19,6 +19,7 @@
 // see base_socket.h for documentation
 
 #include "sim_core.h"
+#include <ipc_channel.h>
 #include <sstream>
 
 using namespace std;
@@ -229,6 +230,13 @@ void sim_core::run_sim(sim_core& world)
   world.is_running = true;
   try
   {
+    // establish output links.
+    ipc_channel_manager& ipc
+      = global_ipc_channel_manager::get_reference();
+    ipc_queue & log = ipc.get("sim_log");
+    ipc_queue & output = ipc.get("sim_output");
+    // output starting messages.  
+    
     while (!world.end_run)
     {
       
