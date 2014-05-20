@@ -16,7 +16,7 @@
  
  **********************************************/
 
-#include "messages.h"
+#include "common_log.h"
 #include <iostream>
 #include <string>
 
@@ -25,10 +25,12 @@ using namespace std;
 
 int main()
 {
-  cout << "=========== sim messages test ============="
+  cout << "=========== common log test ============="
     << endl;
 
-  cout << "=========== sim_messages test complete ============="
+  log_recorder get_common_log_recorder("Unit_test");
+    
+  cout << "=========== common log test complete ============="
     << endl;
   
   return failed;

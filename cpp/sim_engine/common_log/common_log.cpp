@@ -18,8 +18,18 @@
 
 // see base_socket.h for documentation
 
-#include "messages.h"
+#include "common_log.h"
+#include <memory>
 #include <sstream>
 
 using namespace nrtb;
-  
+
+log_queue clq;
+
+log_file_writer common_Log_writer(clq,"sim_engine.log");
+
+log_recorder get_common_log_recorder(std::string s)
+{
+  return log_recorder(s,clq);
+};
+

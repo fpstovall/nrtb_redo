@@ -16,14 +16,16 @@
  
  **********************************************/
  
-#ifndef sim_messages_header
-#define sim_messages_header
+#ifndef sim_common_log_header
+#define sim_common_log_header
 
 #include <logger.h>
 
 namespace nrtb
 {
 
-} // namepace nrtb
+log_recorder get_common_log_recorder(std::string s);
+  
+} // namespace nrtb
 
-#endif // sim_messages_header
+#endif // sim_common_log_header
