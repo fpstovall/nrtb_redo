@@ -1,8 +1,3 @@
-cpp/sim_engine/comm_manager/manager/sim_db_channel.h:#include <boost/shared_ptr.hpp>
-cpp/sim_engine/comm_manager/manager/sim_db_channel.h:  typedef boost::shared_ptr<thread> thread_p;
-cpp/sim_engine/comm_manager/manager/sim_db_channel.h:  typedef boost::shared_ptr<io_t> io_p;
-cpp/sim_engine/comm_manager/manager/sim_db_channel.h:  typedef boost::shared_ptr<msg_t> msg_p;
-cpp/sim_engine/comm_manager/manager/sim_db_channel.h:  typedef boost::shared_ptr<msg_buff> msg_buff_p;
 cpp/common/logger/logger_test.cpp:#include <boost/concept_check.hpp>
 cpp/common/confreader/confreader.h:#include <boost/lexical_cast.hpp>
 cpp/common/confreader/confreader.h:	returnme.push_back(boost::lexical_cast<T>(tvals[i]));	
