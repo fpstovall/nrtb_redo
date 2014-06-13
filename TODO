@@ -1,12 +1,3 @@
-cpp/common/logger/logger_test.cpp:#include <boost/concept_check.hpp>
 cpp/common/confreader/confreader.h:#include <boost/lexical_cast.hpp>
 cpp/common/confreader/confreader.h:	returnme.push_back(boost::lexical_cast<T>(tvals[i]));	
 cpp/common/confreader/confreader.h:      returnme = boost::lexical_cast<T>(tval);
-cpp/common/circular_queue/circular_queue.h:#include <boost/circular_buffer.hpp>
-cpp/common/circular_queue/circular_queue.h:// specialize boost::circular_buffer to act like a queue.
-cpp/common/circular_queue/circular_queue.h:class base_cq : public boost::circular_buffer<T>
-cpp/common/sockets/socket_test.cpp:#include <boost/random.hpp>
-cpp/common/sockets/socket_test.cpp:  boost::mt19937 rng;
-cpp/common/sockets/socket_test.cpp:  boost::uniform_int<> r(0,1000);
-cpp/common/sockets/base_socket.cpp:#include <boost/lexical_cast.hpp>
-cpp/common/sockets/base_socket.cpp:using boost::lexical_cast;
