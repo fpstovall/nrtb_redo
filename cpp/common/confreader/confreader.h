@@ -30,6 +30,8 @@
 #include <logger.h>
 #include <singleton.h>
 
+#include <iostream> // for testing
+
 namespace nrtb 
 {
 
@@ -221,12 +223,13 @@ protected:
   **/
   unsigned int read(const std::string & _filename = "", bool _clear=true);
 
-  template<typename Target, typename Source>
-    Target lexical_cast(const Source& arg)
+  template<typename Target>
+    Target lexical_cast(std::string arg)
   {
-    std::stringstream transmorgraphier;
+    std::istringstream transmorgraphier(arg);
     Target returnme;
-    transmorgraphier << std::setprecision(10) << arg;
+    transmorgraphier.precision(20);
+    transmorgraphier.width(40);
     transmorgraphier >> returnme;
     return returnme;
   };
@@ -267,24 +270,7 @@ template < class T >
 {
   conf_reader & me = *this;
   std::string tval = me[key];
-  T returnme;
-  // initialize the return value to nulls
-  // Needed for the numeric types, but bad for strings.
-  if (typeid(T) != typeid(std::string))
-  {
-    // null out the working area (death for strings!)
-    memset(&returnme,0,sizeof(T));
-  };
-  // This does appear to work for all the standard types.
-  if (tval != "")
-  {
-    try
-    {
-      returnme = lexical_cast<T>(tval);
-    }
-    catch (...) {};
-  };
-  return returnme;
+  return lexical_cast<T>(tval);
 };
 
 template < class T >
