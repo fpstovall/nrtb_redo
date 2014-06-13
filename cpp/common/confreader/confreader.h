@@ -23,8 +23,9 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <sstream>
+#include <iomanip>
 #include <fstream>
-#include <boost/lexical_cast.hpp>
 #include <common.h>
 #include <logger.h>
 #include <singleton.h>
@@ -219,6 +220,17 @@ protected:
   **    the new file to be read.
   **/
   unsigned int read(const std::string & _filename = "", bool _clear=true);
+
+  template<typename Target, typename Source>
+    Target lexical_cast(const Source& arg)
+  {
+    std::stringstream transmorgraphier;
+    Target returnme;
+    transmorgraphier << std::setprecision(10) << arg;
+    transmorgraphier >> returnme;
+    return returnme;
+  };
+
 };
 
 typedef singleton<conf_reader> global_conf_reader;
@@ -242,7 +254,7 @@ template < class T >
     {
       try
       {
-	returnme.push_back(boost::lexical_cast<T>(tvals[i]));	
+	returnme.push_back(lexical_cast<T>(tvals[i]));	
       }
       catch (...) {};
     };
@@ -268,7 +280,7 @@ template < class T >
   {
     try
     {
-      returnme = boost::lexical_cast<T>(tval);
+      returnme = lexical_cast<T>(tval);
     }
     catch (...) {};
   };
