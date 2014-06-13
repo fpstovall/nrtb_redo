@@ -19,7 +19,6 @@
 #include "logger.h"
 #include <sstream>
 #include <iostream>
-#include <boost/concept_check.hpp>
 
 using namespace nrtb;
 using namespace std;
