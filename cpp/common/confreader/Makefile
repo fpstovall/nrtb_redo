@@ -20,7 +20,7 @@ switches=-std=gnu++11 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP
 
 lib:	conftest
 	@rm -f conf_test.log
-	@./conftest test=1 test2-2 test2=71.837486 test3="jack-danials" --doit
+	@./conftest test=1 test2-2 test2=71.837486 test3="jack danials" --doit
 	@grep "Run Complete" conf_test.log
 	@cp -v confreader.h ../include
 	@cp -v confreader.o ../obj

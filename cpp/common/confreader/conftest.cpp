@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
   if ( 
     (test != 1) 
     or (test2 != 71)
-    or (test3 != "jack-danials")
+    or (test3 != "jack")
     or (test4 != 1.0)
     or (test5 != 71.837486)
   )
@@ -93,6 +93,13 @@ int main(int argc, char* argv[])
     set_if_failed = true;
     cerr << "** Template test failed." << endl;
     log.severe("** Template test failed.");
+  };
+  // direct access test
+  cout << "config[\"test3\"] = \"" << config["test3"] << "\"" << endl;
+  if (config["test3"] != "jack danials")
+  {
+    cerr << "** Direct access test failed." << endl;
+    log.severe("** Direct access test failed.");
   };
   // exists test.
   cout << "?var \"--doit\" exists? " 
@@ -104,6 +111,7 @@ int main(int argc, char* argv[])
     cerr << "exists() test failed." << endl;
     log.severe("exists() test failed.");
   };
+  // strlist getall<string> test
   strlist strings = config.getall<string>("test");
   cout << "valid string \"test\" values:" << endl;
   for (unsigned int i=0; i < strings.size(); i++)
@@ -116,6 +124,7 @@ int main(int argc, char* argv[])
     cerr << "getall<string>() did not find 3 parameters." << endl;
     log.severe("getall<string>() did not find 3 parameters.");
   };
+  // Final report
   if (set_if_failed) 
   {
     cerr << "** ntrb::conf_reader UNIT TEST FAILED. **" << endl;
