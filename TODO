@@ -1,3 +1,0 @@
-cpp/common/confreader/confreader.h:#include <boost/lexical_cast.hpp>
-cpp/common/confreader/confreader.h:	returnme.push_back(boost::lexical_cast<T>(tvals[i]));	
-cpp/common/confreader/confreader.h:      returnme = boost::lexical_cast<T>(tval);
