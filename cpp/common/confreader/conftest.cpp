@@ -29,6 +29,7 @@ log_file_writer writer(lq, "conf_test.log");
 
 int main(int argc, char* argv[])
 {
+  cout.precision(10);
   bool set_if_failed = false;
   log_recorder log("config_test",lq);  
   log.info("=-=-=-=-=-= conftest Init =-=-=-=-=-=-=");
@@ -68,7 +69,7 @@ int main(int argc, char* argv[])
     set_if_failed = true;
     cerr << "Iterator test failed." << endl;
     log.severe("Iterator test failed.");
-};
+  };
   // template test.
   int test = config.get<int>("test",-1);
   int test2 = config.get<int>("test2",-1);
@@ -82,14 +83,23 @@ int main(int argc, char* argv[])
     << "\n(double) test2 = " << test5 
     << endl;
   if ( 
-    (test != 1) or (test2 != 0)
-    or (test3 != "jack danials")
-    or (test4 != 1.0) or (test5 != 71.837486)
+    (test != 1) 
+    or (test2 != 71)
+    or (test3 != "jack")
+    or (test4 != 1.0)
+    or (test5 != 71.837486)
   )
   {
     set_if_failed = true;
     cerr << "** Template test failed." << endl;
     log.severe("** Template test failed.");
+  };
+  // direct access test
+  cout << "config[\"test3\"] = \"" << config["test3"] << "\"" << endl;
+  if (config["test3"] != "jack danials")
+  {
+    cerr << "** Direct access test failed." << endl;
+    log.severe("** Direct access test failed.");
   };
   // exists test.
   cout << "?var \"--doit\" exists? " 
@@ -101,18 +111,7 @@ int main(int argc, char* argv[])
     cerr << "exists() test failed." << endl;
     log.severe("exists() test failed.");
   };
-  vector<int> intlist = config.getall<int>("test");
-  cout << "valid int \"test\" values:" << endl;
-  for (unsigned int i=0; i < intlist.size(); i++)
-  {
-    cout << "\t" << i << ": " << intlist[i] << endl;
-  };
-  if (intlist.size() != 2)
-  {
-    set_if_failed = true;
-    cerr << "getall<int>() did not find 2 parameters." << endl;
-    log.severe("getall<int>() did not find 2 parameters.");
-  };
+  // strlist getall<string> test
   strlist strings = config.getall<string>("test");
   cout << "valid string \"test\" values:" << endl;
   for (unsigned int i=0; i < strings.size(); i++)
@@ -125,6 +124,7 @@ int main(int argc, char* argv[])
     cerr << "getall<string>() did not find 3 parameters." << endl;
     log.severe("getall<string>() did not find 3 parameters.");
   };
+  // Final report
   if (set_if_failed) 
   {
     cerr << "** ntrb::conf_reader UNIT TEST FAILED. **" << endl;
