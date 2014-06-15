@@ -19,7 +19,6 @@
 #include "logger.h"
 #include <sstream>
 #include <iostream>
-#include <boost/concept_check.hpp>
 
 using namespace nrtb;
 using namespace std;
@@ -71,7 +70,7 @@ int main()
     << endl;
   if (!good)
     cout << "Errors reported.. check log file." << endl;
-  cout << "=========== tcp_socket and server test complete ============="
+  cout << "=========== logger unit test complete ============="
     << endl;
   
   return !good; // return code has reversed values.

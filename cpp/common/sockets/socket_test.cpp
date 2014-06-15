@@ -22,8 +22,9 @@
 #include <future>
 #include <typeinfo>
 #include <common.h>
-#include <boost/random.hpp>
 #include "base_socket.h"
+#include <sys/time.h>
+#include <time.h>
 
 using namespace nrtb;
 using namespace std;
@@ -80,12 +81,11 @@ int main()
 
   int er_count {0};
   int hits {0};
-  //set up our port and address
-  boost::mt19937 rng;
-  rng.seed(time(0));
-  boost::uniform_int<> r(0,1000);
+  timeval startt;
+  gettimeofday(&startt,0);
+  int offset = startt.tv_usec % 1000;
   stringstream s;
-  s << address << port_base + r(rng);
+  s << address << port_base + offset;
   address = s.str();
   cout << "Using " << address << endl;
   

@@ -19,19 +19,28 @@
 // see base_socket.h for documentation
 
 #include "base_socket.h"
-#include <boost/lexical_cast.hpp>
 #include <string.h>
 #include <errno.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <vector>
 #include <regex>
+#include <unistd.h>
 
 // testing
 #include <iostream>
 
-using boost::lexical_cast;
 using std::string;
+
+template<typename Target, typename Source>
+  Target lexical_cast(const Source& arg)
+{
+  std::stringstream transmorgraphier;
+  Target returnme;
+  transmorgraphier << arg;
+  transmorgraphier >> returnme;
+  return returnme;
+};
 
 namespace nrtb
 {

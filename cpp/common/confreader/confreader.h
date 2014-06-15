@@ -23,11 +23,14 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <sstream>
+#include <iomanip>
 #include <fstream>
-#include <boost/lexical_cast.hpp>
 #include <common.h>
 #include <logger.h>
 #include <singleton.h>
+
+#include <iostream> // for testing
 
 namespace nrtb 
 {
@@ -219,6 +222,18 @@ protected:
   **    the new file to be read.
   **/
   unsigned int read(const std::string & _filename = "", bool _clear=true);
+
+  template<typename Target>
+    Target lexical_cast(std::string arg)
+  {
+    std::istringstream transmorgraphier(arg);
+    Target returnme;
+    transmorgraphier.precision(20);
+    transmorgraphier.width(40);
+    transmorgraphier >> returnme;
+    return returnme;
+  };
+
 };
 
 typedef singleton<conf_reader> global_conf_reader;
@@ -242,7 +257,7 @@ template < class T >
     {
       try
       {
-	returnme.push_back(boost::lexical_cast<T>(tvals[i]));	
+	returnme.push_back(lexical_cast<T>(tvals[i]));	
       }
       catch (...) {};
     };
@@ -255,24 +270,7 @@ template < class T >
 {
   conf_reader & me = *this;
   std::string tval = me[key];
-  T returnme;
-  // initialize the return value to nulls
-  // Needed for the numeric types, but bad for strings.
-  if (typeid(T) != typeid(std::string))
-  {
-    // null out the working area (death for strings!)
-    memset(&returnme,0,sizeof(T));
-  };
-  // This does appear to work for all the standard types.
-  if (tval != "")
-  {
-    try
-    {
-      returnme = boost::lexical_cast<T>(tval);
-    }
-    catch (...) {};
-  };
-  return returnme;
+  return lexical_cast<T>(tval);
 };
 
 template < class T >
