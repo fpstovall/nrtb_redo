@@ -20,6 +20,7 @@ target=common_log
 
 lib:	${target}_test
 	@./${target}_test
+	@grep "Unit test complete" sim_engine.log
 	@cp -v ${target}.h ../include/
 	@cp -v ${target}.o ../obj/
 	@echo build complete
@@ -35,7 +36,7 @@ ${target}.o:	${target}.cpp ${target}.h Makefile
 	g++ -c -O3 ${target}.cpp -I ../include ${bargs} 
 
 clean:
-	@rm -vf *.o ../include/${target}.h ../obj/${target}.o ${target}_test
+	@rm -vf *.o *.log ../include/${target}.h ../obj/${target}.o ${target}_test
 	@echo all objects and executables have been erased.
 
 switches=-std=gnu++11 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP 

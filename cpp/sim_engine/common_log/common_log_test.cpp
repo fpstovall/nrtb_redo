@@ -25,11 +25,22 @@ using namespace std;
 
 int main()
 {
-  cout << "=========== common log test ============="
+  bool failed = true;
+  cout << "================ common log test ================="
     << endl;
 
-  log_recorder get_common_log_recorder("Unit_test");
-    
+  try 
+  {
+    log_recorder mylog(common_log::get_reference()("Unit_test"));
+    mylog.trace("Unit test start");
+    mylog.trace("Unit test complete");
+    failed = false;
+  }
+  catch (...) 
+  {
+    cerr << " ** An exception was caught **" << endl;
+  };    
+
   cout << "=========== common log test complete ============="
     << endl;
   

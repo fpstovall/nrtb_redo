@@ -26,10 +26,10 @@ using namespace nrtb;
 
 log_queue clq;
 
-log_file_writer common_Log_writer(clq,"sim_engine.log");
+log_file_writer writer(clq, "sim_engine.log");
 
-log_recorder get_common_log_recorder(std::string s)
+log_recorder log_factory::operator () (std::string s)
 {
-  return log_recorder(s,clq);
+  log_recorder returnme(s,clq);
+  return returnme;
 };
-
