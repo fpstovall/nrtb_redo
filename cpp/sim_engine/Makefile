@@ -39,7 +39,6 @@ doit:
 	cd messages; make ${action}
 	cd main; make ${action}
 	cd base_object; make ${action}
-#	cd comm_manager; make ${action}
 
 ../common/nrtb_common.a:
 	@cd ../common; make 
