@@ -16,15 +16,35 @@
  
  **********************************************/
  
-#ifndef logger_setup_h
-#define logger_setup_h
+#ifndef sim_common_log_header
+#define sim_common_log_header
 
-#include <string>
+#include <logger.h>
+#include <singleton.h>
 
+/***************************************
+ * Provides easy access to log recorders 
+ * for modules using the global sim_engine
+ * log. To get a log_recorder for your 
+ * module us the following syntax:
+ * 
+ * log_recorder mylog(common_log::get_reference()("moduleName"));
+ * 
+ * See the unit test in common/logger for
+ * more information on using the log facility.
+ **************************************/
+ 
 namespace nrtb
 {
 
-  void setup_global_logging(const std::string & logfilename);
-}
+class log_factory
+{
+public:
+  log_recorder operator () (std::string s);
+};
 
-#endif //logger_setup_h
+typedef singleton<log_factory> common_log;
+
+} // namespace nrtb
+
+#endif // sim_common_log_header

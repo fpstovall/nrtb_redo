@@ -15,32 +15,21 @@
  along with NRTB.  If not, see <http://www.gnu.org/licenses/>.
  
  **********************************************/
- 
-#include "log_setup.h"
 
-#include <string>
-#include <iostream>
-#include <Poco/Logger.h>
-#include "Poco/LogStream.h"
+// see base_socket.h for documentation
 
-using namespace std;
+#include "common_log.h"
+#include <memory>
+#include <sstream>
 
-int main()
+using namespace nrtb;
+
+log_queue clq;
+
+log_file_writer writer(clq, "sim_engine.log");
+
+log_recorder log_factory::operator () (std::string s)
 {
-  bool set_if_failed = false;
-  try
-  {
-	nrtb::setup_global_logging("test_output.log");
-	Poco::Logger & logger = Poco::Logger::get("log_test");
-	logger.notice("Logging should be set up now.");
-	Poco::LogStream log(logger);
-	log << "This message used the stream interface" << endl;
-	logger.notice("Program run complete.");
-  }
-  catch (...)
-  {
-	set_if_failed = true;
-	cout << "** UNIT TEST FAILED **" << endl;
-  };
-  return set_if_failed;
-}
+  log_recorder returnme(s,clq);
+  return returnme;
+};
