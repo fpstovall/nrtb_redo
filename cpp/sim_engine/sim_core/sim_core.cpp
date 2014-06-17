@@ -20,6 +20,7 @@
 
 #include "sim_core.h"
 #include <ipc_channel.h>
+#include <common_log.h>
 #include <sstream>
 
 using namespace std;
@@ -231,12 +232,19 @@ void sim_core::run_sim(sim_core& world)
   try
   {
     // establish output links.
+    // -- sim engine general log
+    log_recorder glog(common_log::get_reference()("sim_core::run"));
+    glog.trace("Starting");
+    // -- sim_core output channel
     ipc_channel_manager& ipc
       = global_ipc_channel_manager::get_reference();
-    ipc_queue & log = ipc.get("sim_log");
     ipc_queue & output = ipc.get("sim_output");
-    // output starting messages.  
-    
+    // output initial state
+    glog.trace("Storing inital model state");
+    // TODO: put initial state to the output channel.
+    // world parameters
+    // object states
+    glog.trace("Entering game cycle");
     while (!world.end_run)
     {
       
