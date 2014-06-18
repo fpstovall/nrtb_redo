@@ -19,6 +19,7 @@
 // see base_socket.h for documentation
 
 #include "sim_core.h"
+#include <hires_timer.h>
 #include <ipc_channel.h>
 #include <common_log.h>
 #include <sstream>
@@ -245,14 +246,47 @@ void sim_core::run_sim(sim_core& world)
     // world parameters
     // object states
     glog.trace("Entering game cycle");
+    // start wall-clock timer.
+    hirez_timer wallclock();
+    hirez_timer turnclock();
+    quanta=0;
     while (!world.end_run)
     {
-      
+      // reset turn timer.
+      turnclock.reset();
+      turn_init()
+      quanta++;
+      turn_init(quanta);
+      tick();
+      collision_check();
+      // resolve collisions
+      // output turn status
+      // get turn elapsed
+      elapsed = turnclock.stop_as_usec();
+      // check for overrun
+      if I=(elapsed >= 20000)
+      {
+	base_exception e;
+        stringstream s;
+        s << "Quanta " << quanta << " Overrun: " << elapsed << "usec";
+	e.store(s.str());
+        throw e;
+      }; 
+      // sleep until the next turn
+      usleep(20000 - elapsed);
     };
+  };
+  // unconditional error trap.
+  catch (base_exception &e)
+  {
+    glog.critical(e.comment());
+    glog.critical("Run termimnated abnormally.");
   }
-  // unconsditoinal error trap.
-  catch (...)
-  {};
+  catch (std::Exception &e)
+  {
+    glog.critical(e.what());
+    glog.critical("Run terminated abnormally.");
+  };
   world.is_running = false;
 };
 
