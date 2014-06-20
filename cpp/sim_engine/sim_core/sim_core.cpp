@@ -247,24 +247,26 @@ void sim_core::run_sim(sim_core& world)
     // object states
     glog.trace("Entering game cycle");
     // start wall-clock timer.
-    hirez_timer wallclock();
-    hirez_timer turnclock();
+    hirez_timer wallclock(); // governs the overall turn time
+    hirez_timer turnclock(); // measures the actual gonculation time.
     quanta=0;
+    unsigned long long ticks = floor(quanta_duration * 1e6);
+    unsigned long long nexttime = ticks;
     while (!world.end_run)
     {
       // reset turn timer.
       turnclock.reset();
-      turn_init()
       quanta++;
       turn_init(quanta);
-      tick();
+      tick(quanta);
       collision_check();
       // resolve collisions
       // output turn status
+      // -- output 
       // get turn elapsed
-      elapsed = turnclock.stop_as_usec();
+      long long elapsed = turnclock.interval_as_usec();
       // check for overrun
-      if I=(elapsed >= 20000)
+      if (elapsed >= ticks)
       {
 	base_exception e;
         stringstream s;
@@ -272,8 +274,9 @@ void sim_core::run_sim(sim_core& world)
 	e.store(s.str());
         throw e;
       }; 
-      // sleep until the next turn
-      usleep(20000 - elapsed);
+      // sleep until the next turn by the wall clock
+      usleep(nexttime - wallclock.interval_as_usec());
+      nexttime += ticks;
     };
   };
   // unconditional error trap.
