@@ -45,8 +45,15 @@ strlist sim_core::obj_status()
   return returnme;
 };
 
-object_list sim_core::get_obj_copies()
+const object_list sim_core::get_obj_copies()
 {
+  object_list returnme;
+  for(auto o: all_objects)
+  {
+     const object_p t = o.second;
+     returnme[o.first] = t;
+  };
+  return returnme;
 };
 
 void sim_core::tick(unsigned long long quanta)

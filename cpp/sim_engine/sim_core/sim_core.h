@@ -57,7 +57,11 @@ public:
    * Reporting methods.
    *************************************/
   strlist obj_status();
-  object_list get_obj_copies();
+  // this is very dangerous as it exposes the 
+  // listed objects to possible external 
+  // manipulation. We mway want to get rid 
+  // of this when we leave alpha.
+  const object_list get_obj_copies();
   
 private:
   ipc_queue messages;
