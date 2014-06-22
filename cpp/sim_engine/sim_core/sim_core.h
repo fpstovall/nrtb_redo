@@ -72,7 +72,7 @@ private:
   void turn_init(unsigned long long quanta);
   void tick(unsigned long long quanta);
   void collision_check();
-  static void run_sim(sim_core & world);
+  void run_sim(sim_core & world);
 };
 
 typedef singleton<sim_core> global_sim_core;

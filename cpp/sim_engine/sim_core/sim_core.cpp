@@ -19,6 +19,7 @@
 // see base_socket.h for documentation
 
 #include "sim_core.h"
+#include <unistd.h>
 #include <hires_timer.h>
 #include <ipc_channel.h>
 #include <common_log.h>
@@ -230,12 +231,12 @@ void sim_core::stop_sim()
 void sim_core::run_sim(sim_core& world)
 {
   world.is_running = true;
+  // link to sim engine general log
+  log_recorder glog(common_log::get_reference()("sim_core::run"));
+  glog.trace("Starting");
   try
   {
     // establish output links.
-    // -- sim engine general log
-    log_recorder glog(common_log::get_reference()("sim_core::run"));
-    glog.trace("Starting");
     // -- sim_core output channel
     ipc_channel_manager& ipc
       = global_ipc_channel_manager::get_reference();
@@ -247,8 +248,8 @@ void sim_core::run_sim(sim_core& world)
     // object states
     glog.trace("Entering game cycle");
     // start wall-clock timer.
-    hirez_timer wallclock(); // governs the overall turn time
-    hirez_timer turnclock(); // measures the actual gonculation time.
+    hirez_timer wallclock; // governs the overall turn time
+    hirez_timer turnclock; // measures the actual gonculation time.
     quanta=0;
     unsigned long long ticks = floor(quanta_duration * 1e6);
     unsigned long long nexttime = ticks;
@@ -278,18 +279,28 @@ void sim_core::run_sim(sim_core& world)
       usleep(nexttime - wallclock.interval_as_usec());
       nexttime += ticks;
     };
-  };
-  // unconditional error trap.
+  }
+  // Catch most errors in our code..
   catch (base_exception &e)
   {
+    glog.critical(e.what());
     glog.critical(e.comment());
     glog.critical("Run termimnated abnormally.");
   }
-  catch (std::Exception &e)
+  // catch most errors in library code...
+  catch (std::exception &e)
   {
     glog.critical(e.what());
     glog.critical("Run terminated abnormally.");
+  }
+  // unconditionally catch any other errors.
+  catch (...)
+  {
+    glog.critical("Undefined exception");
+    glog.critical("Run terminated abnormally.");
   };
+  // close out nicely.
+  glog.trace("complete");
   world.is_running = false;
 };
 
