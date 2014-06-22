@@ -35,6 +35,20 @@ sim_core::sim_core(float time_slice)
     is_running(false)
 {};
 
+strlist sim_core::obj_status()
+{
+  strlist returnme;
+  for(auto o: all_objects)
+  {
+    returnme.push_back(o.second->as_str());
+  };
+  return returnme;
+};
+
+object_list sim_core::get_obj_copies()
+{
+};
+
 void sim_core::tick(unsigned long long quanta)
 {
   // call the local tick and apply for each object in the simulation.
