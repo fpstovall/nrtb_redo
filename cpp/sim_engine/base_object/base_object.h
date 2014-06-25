@@ -42,6 +42,9 @@ typedef std::map<unsigned long long, object_p> object_list;
 struct abs_effector
 {
   static serializer effector_num;
+  virtual ~abs_effector() {};
+  // polymorphic copier
+  virtual abs_effector * clone() const = 0;
   unsigned long long id = effector_num();
   std::string handle;
   virtual std::string as_str() = 0;
@@ -54,6 +57,9 @@ typedef std::map<unsigned long long, effector_p> effector_list;
 struct base_object
 {
   static serializer object_num;
+  virtual ~base_object() {};
+  // polymophic copier
+  virtual base_object * clone() const = 0;
   // data
   unsigned long long id = object_num();
   std::string handle;

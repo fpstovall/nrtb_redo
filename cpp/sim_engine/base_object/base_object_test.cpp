@@ -26,6 +26,11 @@ using namespace std;
 struct gravity : public abs_effector
 {
   triplet g = triplet(0,-9.81,0);
+
+  virtual gravity * clone() const
+  {
+    return new gravity(*this);
+  };
   
   gravity()
   {
@@ -48,6 +53,11 @@ struct gravity : public abs_effector
 
 struct rocket : public abs_effector
 {
+  virtual rocket * clone() const
+  {
+    return new rocket(*this);
+  };
+
   triplet impulse = triplet(0.0,10000.0,0.0);
   int burn_time = 3;
   
@@ -74,6 +84,11 @@ struct rocket : public abs_effector
 
 class my_object : public base_object
 {
+  my_object * clone() const
+  {
+    return new my_object(*this);
+  };
+
   bool apply_collision(object_p o) 
   {
     return false;
