@@ -57,10 +57,6 @@ public:
    * Reporting methods.
    *************************************/
   strlist obj_status();
-  // this is very dangerous as it exposes the 
-  // listed objects to possible external 
-  // manipulation. We mway want to get rid 
-  // of this when we leave alpha.
   const object_list get_obj_copies();
   
 private:
@@ -72,7 +68,6 @@ private:
   object_list all_objects;
   std::vector<clsn_rec> collisions;
   std::vector<unsigned long long> deletions;
-  object_p deep_copy(object_p);
   void turn_init(unsigned long long quanta);
   void tick(unsigned long long quanta);
   void collision_check();
