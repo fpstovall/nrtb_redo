@@ -27,7 +27,7 @@ struct gravity : public abs_effector
 {
   triplet g = triplet(0,-9.81,0);
 
-  virtual gravity * clone() const
+  virtual gravity * clone()
   {
     return new gravity(*this);
   };
@@ -53,7 +53,7 @@ struct gravity : public abs_effector
 
 struct rocket : public abs_effector
 {
-  virtual rocket * clone() const
+  virtual rocket * clone()
   {
     return new rocket(*this);
   };
@@ -82,11 +82,14 @@ struct rocket : public abs_effector
   };  
 };
 
-class my_object : public base_object
+struct my_object : public base_object
 {
-  my_object * clone() const
+  my_object * clone() 
   {
-    return new my_object(*this);
+    my_object * returnme = new my_object(*this);
+    returnme->pre_attribs = get_pre_attribs_copy();
+    returnme->post_attribs = get_post_attribs_copy();
+    return returnme;
   };
 
   bool apply_collision(object_p o) 
@@ -152,7 +155,7 @@ int main()
   // collision tests.
   my_object fixed = rocket_ball;
   fixed.location = 0;
-  object_p mobile(new my_object);
+  object_p mobile(rocket_ball.clone());
   mobile->bounding_sphere = fixed.bounding_sphere;
   stringstream results;
   
@@ -181,7 +184,10 @@ int main()
   cout << results.str() << endl;
   cout << "** Collision Test: " << (c ? "Failed" : "Passed") << endl;
   
-  failed = failed or c;
+  bool cl = mobile->as_str() != "ID=0:loc=(0,0,0):att=(0,0,0):vel=(0,-7.69599,0):rot=(0,0,0):f=(0,0,0):t=(0,0,0):acc_mod=(0,-9.81,0):t_mod=(0,0,0):mass=100:mass_mod=0:b_sphere=(0,0,0),0.5:pre=gravity_0=(0,-9.81,0);rocket_1=(0,0,0);:posts=";
+  cout << "** clone() test: " << (cl ? "Failed" : "Passed") << endl;
+
+  failed = failed or c or cl;
   
   cout << "=========== base_object test complete ============="
     << endl;
