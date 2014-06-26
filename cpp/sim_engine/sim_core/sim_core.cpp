@@ -48,19 +48,9 @@ strlist sim_core::obj_status()
 const object_list sim_core::get_obj_copies()
 {
   object_list returnme;
-  /*****************************
- * WARNING: as implemented this is
- * a very bad thing... the caller 
- * can use the provided array to 
- * alter the simulation during run.
- * If we can not find a way to do
- * a real deep copy, we need to 
- * remove this functionality from
- * the class.
-  *****************************/
   for(auto o: all_objects)
   {
-     const object_p t = o.second;
+     object_p t(o.second->clone());
      returnme[o.first] = t;
   };
   return returnme;
