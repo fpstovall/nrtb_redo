@@ -35,6 +35,15 @@ sim_core::sim_core(float time_slice)
     is_running(false)
 {};
 
+sim_core::report sim_core::get_report(unsigned long long ticks)
+{
+  report returnme;
+  returnme.quanta = quanta;
+  returnme.duration = ticks;
+  returnme.objects = get_obj_copies();
+  return returnme;
+};
+
 strlist sim_core::obj_status()
 {
   strlist returnme;
@@ -45,7 +54,7 @@ strlist sim_core::obj_status()
   return returnme;
 };
 
-const object_list sim_core::get_obj_copies()
+object_list sim_core::get_obj_copies()
 {
   object_list returnme;
   for(auto o: all_objects)

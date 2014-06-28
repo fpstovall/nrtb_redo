@@ -56,8 +56,16 @@ public:
   /**************************************
    * Reporting methods.
    *************************************/
+  // -- reporting record
+  struct report
+  {
+    unsigned long long quanta;
+    unsigned long long duration;
+    object_list objects;
+  };
+  report get_report(unsigned long long ticks);
   strlist obj_status();
-  const object_list get_obj_copies();
+  object_list get_obj_copies();
   
 private:
   ipc_queue messages;
