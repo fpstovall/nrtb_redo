@@ -98,8 +98,8 @@ void sim_core::collision_check()
       {
         // a collision has been found.
         clsn_rec crec;
-        crec.a = c->first;
-        crec.b = b->first;
+        crec.a = c->second;
+        crec.b = b->second;
         collisions.push_back(crec);
       };
       b++;
@@ -219,6 +219,26 @@ void sim_core::turn_init(unsigned long long quanta)
   deletions.clear();
 };
 
+void sim_core::resolve_collisions()
+{
+  for (auto crec : collisions)
+  {
+    // call each object's collision routine
+    bool killa = crec.a->apply_collision(crec.b);
+    bool killb = crec.b->apply_collision(crec.a);
+    // move out of conflict if alive and intersecting.
+    if (!(killa or killb))
+    {
+      double dist = crec.a->bounding_sphere.radius 
+        + crec.b->bounding_sphere.radius;
+      // TODO: move the objects if needed.
+    };
+    // kill objects as needed.
+    if (killa) { remove_obj(crec.a->id); };
+    if (killb) { remove_obj(crec.b->id); }; 
+  };
+};
+
 void sim_core::put_message(gp_sim_message_p m)
 {
   ipc_record_p t(static_cast<abs_ipc_record *>(m.release()));
@@ -291,13 +311,11 @@ void sim_core::run_sim(sim_core& world)
       turn_init(quanta);
       tick(quanta);
       collision_check();
-      // resolve collisions
+      resolve_collisions();
       // output turn status
-      // -- output 
-      // get turn elapsed
       unsigned long long elapsed = turnclock.interval_as_usec();
       void_p r(new report(get_report(elapsed)));
-      // for output, type 1, noun 1, verb 0 carries a report struct.
+      // -- for output, type 1, noun 1, verb 0 carries a report struct.
       output.push(ipc_record_p(new gp_sim_message(output, 1, 1, 0, r)));
       // check for overrun
       if (elapsed >= ticks)

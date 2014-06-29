@@ -34,8 +34,8 @@ namespace nrtb
   
 struct clsn_rec
 {
-  unsigned long long a;
-  unsigned long long b;
+  object_p a;
+  object_p b;
 };
   
 class sim_core
@@ -79,6 +79,7 @@ private:
   void turn_init(unsigned long long quanta);
   void tick(unsigned long long quanta);
   void collision_check();
+  void resolve_collisions();
   void run_sim(sim_core & world);
 };
 
