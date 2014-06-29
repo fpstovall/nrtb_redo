@@ -16,7 +16,7 @@
  
  **********************************************/
 
-// see base_socket.h for documentation
+// see sim_core.h for documentation
 
 #include "sim_core.h"
 #include <unistd.h>
@@ -273,9 +273,9 @@ void sim_core::run_sim(sim_core& world)
     ipc_queue & output = ipc.get("sim_output");
     // output initial state
     glog.trace("Storing inital model state");
-    // TODO: put initial state to the output channel.
-    // world parameters
-    // object states
+    void_p r(new report(get_report(0)));
+    // -- for init, type 1, noun 0, verb 0 carries a report struct.
+    output.push(ipc_record_p(new gp_sim_message(output, 1, 0, 0, r)));
     glog.trace("Entering game cycle");
     // start wall-clock timer.
     hirez_timer wallclock; // governs the overall turn time
@@ -295,7 +295,10 @@ void sim_core::run_sim(sim_core& world)
       // output turn status
       // -- output 
       // get turn elapsed
-      long long elapsed = turnclock.interval_as_usec();
+      unsigned long long elapsed = turnclock.interval_as_usec();
+      void_p r(new report(get_report(elapsed)));
+      // for output, type 1, noun 1, verb 0 carries a report struct.
+      output.push(ipc_record_p(new gp_sim_message(output, 1, 1, 0, r)));
       // check for overrun
       if (elapsed >= ticks)
       {
