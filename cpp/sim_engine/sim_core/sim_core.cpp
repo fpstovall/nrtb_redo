@@ -246,9 +246,9 @@ void sim_core::resolve_collisions()
          b.location -= vec * adj;
       };
     };
-    // kill objects as needed.
+    // kill or adjust objects as needed.
     if (killa) { remove_obj(crec.a->id); };
-    if (killb) { remove_obj(crec.b->id); }; 
+    if (killb) { remove_obj(crec.b->id); };
   };
 };
 
@@ -291,9 +291,9 @@ void sim_core::stop_sim()
   put_message(std::move(g));
 };
 
-void sim_core::run_sim(sim_core& world)
+void sim_core::run_sim()
 {
-  world.is_running = true;
+  is_running = true;
   // link to sim engine general log
   log_recorder glog(common_log::get_reference()("sim_core::run"));
   glog.trace("Starting");
@@ -316,9 +316,8 @@ void sim_core::run_sim(sim_core& world)
     quanta=0;
     unsigned long long ticks = floor(quanta_duration * 1e6);
     unsigned long long nexttime = ticks;
-    while (!world.end_run)
+    while (!end_run)
     {
-      // reset turn timer.
       turnclock.reset();
       quanta++;
       turn_init(quanta);
@@ -365,7 +364,7 @@ void sim_core::run_sim(sim_core& world)
   };
   // close out nicely.
   glog.trace("complete");
-  world.is_running = false;
+  is_running = false;
 };
 
 

@@ -80,7 +80,7 @@ private:
   void tick(unsigned long long quanta);
   void collision_check();
   void resolve_collisions();
-  void run_sim(sim_core & world);
+  void run_sim();
 };
 
 typedef singleton<sim_core> global_sim_core;
