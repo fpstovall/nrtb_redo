@@ -229,9 +229,22 @@ void sim_core::resolve_collisions()
     // move out of conflict if alive and intersecting.
     if (!(killa or killb))
     {
-      double dist = crec.a->bounding_sphere.radius 
-        + crec.b->bounding_sphere.radius;
-      // TODO: move the objects if needed.
+      base_object & a = *(crec.a);
+      base_object & b = *(crec.b);
+      double min_dist = a.bounding_sphere.radius 
+        + b.bounding_sphere.radius; 
+      double adj = min_dist - a.location.range(b.location);
+      // is a move still needed?
+      if (adj > 0.0)
+      {  
+         // TODO: this too naive to be allowed to live
+         // overlong. Needs to be replaced by a version
+         // which produces more realistic offsets..
+         adj /= 2;
+         triplet vec = (a.location-b.location).normalize();
+         a.location += vec * adj;
+         b.location -= vec * adj;
+      };
     };
     // kill objects as needed.
     if (killa) { remove_obj(crec.a->id); };
