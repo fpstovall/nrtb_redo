@@ -65,7 +65,7 @@ object_list sim_core::get_obj_copies()
   return returnme;
 };
 
-void sim_core::tick(unsigned long long quanta)
+void sim_core::tick()
 {
   // call the local tick and apply for each object in the simulation.
   for(auto & a: all_objects)
@@ -110,7 +110,7 @@ void sim_core::collision_check()
 };
 
 
-void sim_core::turn_init(unsigned long long quanta)
+void sim_core::turn_init()
 {
   // Process all the messages in queue at this point.
   for(int i=messages.size();i>0;i--)
@@ -320,8 +320,8 @@ void sim_core::run_sim()
     {
       turnclock.reset();
       quanta++;
-      turn_init(quanta);
-      tick(quanta);
+      turn_init();
+      tick();
       collision_check();
       resolve_collisions();
       // output turn status
@@ -329,7 +329,7 @@ void sim_core::run_sim()
       void_p r(new report(get_report(elapsed)));
       // -- for output, type 1, noun 1, verb 0 carries a report struct.
       output.push(ipc_record_p(new gp_sim_message(output, 1, 1, 0, r)));
-      // check for overrun
+      // check for overrun and report as needed.
       if (elapsed >= ticks)
       {
 	base_exception e;

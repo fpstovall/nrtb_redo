@@ -76,8 +76,8 @@ private:
   object_list all_objects;
   std::vector<clsn_rec> collisions;
   std::vector<unsigned long long> deletions;
-  void turn_init(unsigned long long quanta);
-  void tick(unsigned long long quanta);
+  void turn_init();
+  void tick();
   void collision_check();
   void resolve_collisions();
   void run_sim();
