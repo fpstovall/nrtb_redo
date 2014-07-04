@@ -80,7 +80,7 @@ private:
   void tick();
   void collision_check();
   void resolve_collisions();
-  void run_sim();
+  static void run_sim(sim_core & w);
 };
 
 typedef singleton<sim_core> global_sim_core;

@@ -20,6 +20,7 @@
 
 #include "sim_core.h"
 #include <unistd.h>
+#include <future>
 #include <hires_timer.h>
 #include <ipc_channel.h>
 #include <common_log.h>
@@ -291,9 +292,26 @@ void sim_core::stop_sim()
   put_message(std::move(g));
 };
 
-void sim_core::run_sim()
+void sim_core::start_sim()
 {
-  is_running = true;
+  // are we already running?
+  if (is_running)
+  {
+    // Report the error.
+    base_exception e;
+    e.store("Already running in sim_core::start_sim().");
+    throw e; 
+  }
+  else
+  {
+    // launch the run_sim() method.
+    async(launch::async,sim_core::run_sim,std::ref(*this));
+  };
+};
+
+void sim_core::run_sim(sim_core & w)
+{
+  w.is_running = true;
   // link to sim engine general log
   log_recorder glog(common_log::get_reference()("sim_core::run"));
   glog.trace("Starting");
@@ -306,27 +324,27 @@ void sim_core::run_sim()
     ipc_queue & output = ipc.get("sim_output");
     // output initial state
     glog.trace("Storing inital model state");
-    void_p r(new report(get_report(0)));
+    void_p r(new report(w.get_report(0)));
     // -- for init, type 1, noun 0, verb 0 carries a report struct.
     output.push(ipc_record_p(new gp_sim_message(output, 1, 0, 0, r)));
     glog.trace("Entering game cycle");
     // start wall-clock timer.
     hirez_timer wallclock; // governs the overall turn time
     hirez_timer turnclock; // measures the actual gonculation time.
-    quanta=0;
-    unsigned long long ticks = floor(quanta_duration * 1e6);
+    w.quanta=0;
+    unsigned long long ticks = floor(w.quanta_duration * 1e6);
     unsigned long long nexttime = ticks;
-    while (!end_run)
+    while (!w.end_run)
     {
       turnclock.reset();
-      quanta++;
-      turn_init();
-      tick();
-      collision_check();
-      resolve_collisions();
+      w.quanta++;
+      w.turn_init();
+      w.tick();
+      w.collision_check();
+      w.resolve_collisions();
       // output turn status
       unsigned long long elapsed = turnclock.interval_as_usec();
-      void_p r(new report(get_report(elapsed)));
+      void_p r(new report(w.get_report(elapsed)));
       // -- for output, type 1, noun 1, verb 0 carries a report struct.
       output.push(ipc_record_p(new gp_sim_message(output, 1, 1, 0, r)));
       // check for overrun and report as needed.
@@ -334,7 +352,7 @@ void sim_core::run_sim()
       {
 	base_exception e;
         stringstream s;
-        s << "Quanta " << quanta << " Overrun: " << elapsed << "usec";
+        s << "Quanta " << w.quanta << " Overrun: " << elapsed << "usec";
 	e.store(s.str());
         throw e;
       }; 
@@ -364,7 +382,7 @@ void sim_core::run_sim()
   };
   // close out nicely.
   glog.trace("complete");
-  is_running = false;
+  w.is_running = false;
 };
 
 
