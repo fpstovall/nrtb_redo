@@ -178,6 +178,7 @@ void sim_core::turn_init()
             // TODO: make sure this flag is checked in caller.
             // TODO: (it's not written yet.)
             end_run = true;
+cerr << "Stop message received." << endl;
       	    break;
       	  }
       	  default:
@@ -268,20 +269,34 @@ gp_sim_message_p sim_core::next_out_message()
 
 void sim_core::add_object(object_p obj)
 {
-  // assemble the message.
-  void_p d(new object_p(obj));
-  gp_sim_message_p g(new gp_sim_message(messages,0,1,1,d));
-  // queue the message.
-  put_message(std::move(g));
+  if (is_running)
+  {
+    // assemble the message.
+    void_p d(new object_p(obj));
+    gp_sim_message_p g(new gp_sim_message(messages,0,1,1,d));
+    // queue the message.
+    put_message(std::move(g));
+  }
+  else 
+  {
+    all_objects[obj->id] = obj;
+  };
 };
 
 void sim_core::remove_obj(long long unsigned int oid)
 {
-  // assemble the message
-  void_p d(new unsigned long long(oid));
-  gp_sim_message_p g(new gp_sim_message(messages,0,1,2,d));
-  // queue the message.
-  put_message(std::move(g));
+  if (is_running)
+  {
+    // assemble the message
+    void_p d(new unsigned long long(oid));
+    gp_sim_message_p g(new gp_sim_message(messages,0,1,2,d));
+    // queue the message.
+    put_message(std::move(g));
+  }
+  else
+  {
+    all_objects.erase(oid);
+  };
 };
 
 void sim_core::stop_sim()
@@ -290,6 +305,7 @@ void sim_core::stop_sim()
   gp_sim_message_p g(new gp_sim_message(messages,0,2,1));
   // queue the message.
   put_message(std::move(g));
+cerr << "Stop message sent." << endl;
 };
 
 void sim_core::start_sim()
@@ -332,11 +348,12 @@ void sim_core::run_sim(sim_core & w)
     hirez_timer wallclock; // governs the overall turn time
     hirez_timer turnclock; // measures the actual gonculation time.
     w.quanta=0;
-    unsigned long long ticks = floor(w.quanta_duration * 1e6);
+    unsigned long long ticks = round(w.quanta_duration * 1e6);
     unsigned long long nexttime = ticks;
     while (!w.end_run)
     {
       turnclock.reset();
+      turnclock.start();
       w.quanta++;
       w.turn_init();
       w.tick();
@@ -350,14 +367,20 @@ void sim_core::run_sim(sim_core & w)
       // check for overrun and report as needed.
       if (elapsed >= ticks)
       {
-	base_exception e;
+        base_exception e;
         stringstream s;
-        s << "Quanta " << w.quanta << " Overrun: " << elapsed << "usec";
-	e.store(s.str());
+        s << "Quanta " << w.quanta << " Overrun: " 
+          << elapsed << " usec expected "
+          << ticks;
+        e.store(s.str());
         throw e;
       }; 
+if (!(w.quanta % 50))
+  cerr << "run_sim heartbeat " << w.quanta 
+    << " (" << wallclock.interval() << ")" << endl;
       // sleep until the next turn by the wall clock
-      usleep(nexttime - wallclock.interval_as_usec());
+      unsigned long long tosleep = nexttime - wallclock.interval_as_usec();
+      usleep(tosleep);
       nexttime += ticks;
     };
   }
