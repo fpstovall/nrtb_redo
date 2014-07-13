@@ -26,22 +26,23 @@ lib:	${target}_test
 
 ${target}_test:	${target}.o ${target}_test.cpp
 	@rm -f ${target}_test
-	g++ -c -O3 ${target}_test.cpp -I ../include ${bargs} 
+	g++ -c -O3 ${target}_test.cpp ${bargs} 
 	g++ -o ${target}_test ${target}_test.o ${target}.o ${largs}
 
 
 ${target}.o:	${target}.cpp ${target}.h Makefile
 	@rm -f ${target}.o
-	g++ -c -O3 ${target}.cpp -I ../include ${bargs} 
+	g++ -c -O3 ${target}.cpp ${bargs} 
 
 clean:
-	@rm -vf *.o ../include/${target}.h ../obj/${target}.o ${target}_test
+	@rm -vf *.o *.log ../include/${target}.h ../obj/${target}.o ${target}_test
 	@echo all objects and executables have been erased.
 
 switches=-std=gnu++11 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP 
+objs=../obj/base_object.o ../obj/common_log.o ../obj/messages.o
 libs=../../common/lib/nrtb_common.a -lpthread
 include=-I../../common/include -I../include
 bargs=${switches} ${include}
-largs=${switches} ${libs}
+largs=${switches} ${objs} ${libs}
 
 
