@@ -63,7 +63,6 @@ public:
     unsigned long long duration;
     object_list objects;
   };
-  report get_report(unsigned long long ticks);
   strlist obj_status();
   object_list get_obj_copies();
   
@@ -80,6 +79,7 @@ private:
   void tick();
   void collision_check();
   void resolve_collisions();
+  report get_report(unsigned long long ticks);
   static void run_sim(sim_core & w);
 };
 
