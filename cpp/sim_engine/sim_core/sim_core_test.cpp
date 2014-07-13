@@ -17,8 +17,12 @@
  **********************************************/
 
 #include "sim_core.h"
+#include "messages.h"
+#include "common_log.h"
+#include "base_object.h"
 #include <iostream>
 #include <string>
+#include <unistd.h>
 
 using namespace nrtb;
 using namespace std;
@@ -51,16 +55,44 @@ struct gravity : public abs_effector
   };
 };
 
+struct impactor : public abs_effector
+{
+  abs_effector * clone()
+  {
+    return new impactor(*this);
+  };
+  
+  std::string as_str()
+  {
+    std::stringstream returnme;
+    returnme << "floor_impactor_" << id;
+    return returnme.str();
+  };
+  
+  bool tick(base_object & o, int time)
+  {
+    if ((o.location.y <= 0.0) 
+      and (o.velocity.y < 0.0))
+    {
+      return true;
+    }
+    else
+    {
+      return false;
+    };
+  };  
+  
+};
+
 struct rocket : public abs_effector
 {
   triplet impulse = triplet(0.0,10000.0,0.0);
-  int burn_time = 3;
+  float burn_time = 3.0;
   bool active = false;
   
   rocket(float duration)
   {
-    // assumes a 50 hz time quanta
-    burn_time = floor(duration/(1/50.0));
+    burn_time = duration;
   };
   
   abs_effector * clone()
@@ -77,9 +109,11 @@ struct rocket : public abs_effector
   
   bool tick(base_object & o, int time)
   {
-    if (time <= burn_time)
+    if ((burn_time > 0.0) and active)
     {
+      // assumes a 50hz cycle.
       o.force += impulse;
+      burn_time -= (1/50.0);
     }
     else
     {
@@ -112,24 +146,72 @@ struct rocket_ball : public my_object
     mass = 100;
     bounding_sphere.center = triplet(0);
     bounding_sphere.radius = 0.5;
+    // add gravity effects
     add_pre(new gravity);
-    // add a rocket with a 3 second impulse
-    add_pre(new rocket(3));
+    // add an active rocket with a 3 second impulse
+    rocket * r = new rocket(3);
+    r->active = true;
+    add_pre(r);
+    // die when we hit the floor.
+    add_post(new impactor);
   };
+};
+
+bool log_test(log_recorder & l, string s, bool failed)
+{
+  if (failed)
+  {
+    cout << " ** " << s << " FAILED" << endl;
+    l.critical(s+" FAILED");
+  }
+  else
+  {
+    l.info(s+" passed");
+  };
+  return failed;
 };
 
 int main()
 {
   bool failed = false;
+  log_recorder log(common_log::get_reference()("sim_core_test"));
+  log.trace("Starting");
   cout << "=========== sim core test ============="
     << endl;
 
-  sim_core world(1/50); // set a 50 hz run cycle.
+  sim_core world(1/50.0); // set a 50 hz run cycle.
+  // test static insert of two objects
+  world.add_object(object_p(new rocket_ball));
+  world.add_object(object_p(new my_object));
+  bool t = log_test(log,"Static object add",
+                (world.obj_status().size() != 2));
+  failed = failed or t;
+  // test static removal of one object
+  world.remove_obj(1);
+  t = log_test(log,"Static object remove",
+                (world.obj_status().size() != 1));
+  failed = failed or t; 
   
+  for (auto s : world.obj_status())
+    cout << s << endl;
+  
+  world.start_sim();
+  t = log_test(log,"sim_core::start_sim() returned",true);
+  failed = failed or t; 
+  sleep(3);
+  world.stop_sim();
+  t = log_test(log,"sim_core::stop_sim() returned",true);
+  failed = failed or t; 
+  
+
+  for (auto s : world.obj_status())
+    cout << s << endl;
+  
+  log_test(log,"Unit Test",failed);
   
   cout << "=========== sim_core test complete ============="
     << endl;
-  
+  log.trace("Run Complete");
   return failed;
 };
 
