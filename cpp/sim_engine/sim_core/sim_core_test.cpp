@@ -32,6 +32,11 @@ struct gravity : public abs_effector
     handle = "gravity";
   };
   
+  abs_effector * clone()
+  {
+    return new gravity(*this);
+  };
+  
   std::string as_str()
   {
     std::stringstream returnme;
@@ -50,6 +55,18 @@ struct rocket : public abs_effector
 {
   triplet impulse = triplet(0.0,10000.0,0.0);
   int burn_time = 3;
+  bool active = false;
+  
+  rocket(float duration)
+  {
+    // assumes a 50 hz time quanta
+    burn_time = floor(duration/(1/50.0));
+  };
+  
+  abs_effector * clone()
+  {
+    return new rocket(*this);
+  };
   
   std::string as_str()
   {
@@ -72,11 +89,32 @@ struct rocket : public abs_effector
   };  
 };
 
-class my_object : public base_object
+struct my_object : public base_object
 {
   bool apply_collision(object_p o) 
   {
     return false;
+  };
+  
+  base_object * clone()
+  {
+    my_object * returnme = new my_object(*this);
+    returnme->pre_attribs = get_pre_attribs_copy();
+    returnme->post_attribs = get_post_attribs_copy();
+    return returnme;
+  };
+};
+
+struct rocket_ball : public my_object
+{
+  rocket_ball()
+  {
+    mass = 100;
+    bounding_sphere.center = triplet(0);
+    bounding_sphere.radius = 0.5;
+    add_pre(new gravity);
+    // add a rocket with a 3 second impulse
+    add_pre(new rocket(3));
   };
 };
 
@@ -86,6 +124,8 @@ int main()
   cout << "=========== sim core test ============="
     << endl;
 
+  sim_core world(1/50); // set a 50 hz run cycle.
+  
   
   cout << "=========== sim_core test complete ============="
     << endl;
