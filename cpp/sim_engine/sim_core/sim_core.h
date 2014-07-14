@@ -46,7 +46,7 @@ public:
    * control methods.
    **************************************/
   bool running();
-  void start_sim();
+  std::thread start_sim();
   void stop_sim();
   void add_object(object_p obj);
   void remove_obj(unsigned long long oid);

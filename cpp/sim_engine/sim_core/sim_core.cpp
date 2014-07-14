@@ -21,6 +21,7 @@
 #include "sim_core.h"
 #include <unistd.h>
 #include <future>
+#include <thread>
 #include <hires_timer.h>
 #include <ipc_channel.h>
 #include <common_log.h>
@@ -178,7 +179,6 @@ void sim_core::turn_init()
             // TODO: make sure this flag is checked in caller.
             // TODO: (it's not written yet.)
             end_run = true;
-cerr << "Stop message received." << endl;
       	    break;
       	  }
       	  default:
@@ -301,14 +301,10 @@ void sim_core::remove_obj(long long unsigned int oid)
 
 void sim_core::stop_sim()
 {
-  // assemble the message
-  gp_sim_message_p g(new gp_sim_message(messages,0,2,1));
-  // queue the message.
-  put_message(std::move(g));
-cerr << "Stop message sent." << endl;
+  end_run = true;
 };
 
-void sim_core::start_sim()
+std::thread sim_core::start_sim()
 {
   // are we already running?
   if (is_running)
@@ -317,13 +313,16 @@ void sim_core::start_sim()
     base_exception e;
     e.store("Already running in sim_core::start_sim().");
     throw e; 
-  }
-  else
-  {
-    // launch the run_sim() method.
-    async(launch::async,sim_core::run_sim,std::ref(*this));
   };
+  // launch the run_sim() method.
+  return std::thread(sim_core::run_sim,std::ref(*this));
 };
+
+bool sim_core::running()
+{
+  return is_running;
+};
+
 
 void sim_core::run_sim(sim_core & w)
 {
@@ -375,9 +374,6 @@ void sim_core::run_sim(sim_core & w)
         e.store(s.str());
         throw e;
       }; 
-if (!(w.quanta % 50))
-  cerr << "run_sim heartbeat " << w.quanta 
-    << " (" << wallclock.interval() << ")" << endl;
       // sleep until the next turn by the wall clock
       unsigned long long tosleep = nexttime - wallclock.interval_as_usec();
       usleep(tosleep);

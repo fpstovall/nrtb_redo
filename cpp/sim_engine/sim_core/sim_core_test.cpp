@@ -195,15 +195,23 @@ int main()
   for (auto s : world.obj_status())
     cout << s << endl;
   
-  world.start_sim();
-  t = log_test(log,"sim_core::start_sim() returned",true);
-  failed = failed or t; 
+  // engine start test.
+  auto engine = world.start_sim();
+  t = log_test(log,"sim_core::start_sim() returned",false);
+  failed = failed or t;
+  // run 3 and running test.
   sleep(3);
-  world.stop_sim();
-  t = log_test(log,"sim_core::stop_sim() returned",true);
+  t = log_test(log,"sim_run() running",!world.running());
   failed = failed or t; 
-  
+  // stop test.
+  world.stop_sim();
+  t = log_test(log,"sim_core::stop_sim() returned",false);
+  failed = failed or t; 
+  engine.join();
+  t = log_test(log,"sim_run() stopped",world.running());
+  failed = failed or t; 
 
+  
   for (auto s : world.obj_status())
     cout << s << endl;
   
