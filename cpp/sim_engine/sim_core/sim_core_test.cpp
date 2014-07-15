@@ -57,6 +57,8 @@ struct gravity : public abs_effector
 
 struct impactor : public abs_effector
 {
+  bool peak = false;
+
   abs_effector * clone()
   {
     return new impactor(*this);
@@ -74,14 +76,21 @@ struct impactor : public abs_effector
     if ((o.location.y <= 0.0) 
       and (o.velocity.y < 0.0))
     {
+      // impact!!
+      cout << "(" << time << ") IMPACT " << o.as_str() << endl;
       return true;
     }
     else
     {
+      // apogee test..
+      if ((o.location.y > 0.1) and (o.velocity.y <= 0.0) and (!peak))
+      {
+        cout << "(" << time << ") APPOGEE " << o.as_str() << endl;
+        peak = true;
+      };
       return false;
     };
   };  
-  
 };
 
 struct rocket : public abs_effector
@@ -149,7 +158,7 @@ struct rocket_ball : public my_object
     // add gravity effects
     add_pre(new gravity);
     // add an active rocket with a 3 second impulse
-    rocket * r = new rocket(3);
+    rocket * r = new rocket(0.13);
     r->active = true;
     add_pre(r);
     // die when we hit the floor.
@@ -161,12 +170,12 @@ bool log_test(log_recorder & l, string s, bool failed)
 {
   if (failed)
   {
-    cout << " ** " << s << " FAILED" << endl;
+    cout << " ** " << s << ": FAILED" << endl;
     l.critical(s+" FAILED");
   }
   else
   {
-    l.info(s+" passed");
+    l.info(s+": passed");
   };
   return failed;
 };
@@ -211,7 +220,10 @@ int main()
   t = log_test(log,"sim_run() stopped",world.running());
   failed = failed or t; 
 
-  
+  // object remove test (one died during the above run)
+  t = log_test(log,"Dynamic object remove",world.obj_status().size());
+  failed = failed or t;  
+
   for (auto s : world.obj_status())
     cout << s << endl;
   
