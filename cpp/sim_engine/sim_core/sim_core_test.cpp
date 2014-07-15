@@ -234,6 +234,15 @@ int main()
   cout << c << " output records found." << endl;
   t = log_test(log,"Output record count", ((c < 150) or (c>155)));
   failed = failed or t;
+  // list the results
+  while (output.size())
+  {
+    ipc_record_p raw(output.pop());
+    gp_sim_message_p msg(static_cast<gp_sim_message *>(raw.release()));
+    sim_core::report qr = msg->data<sim_core::report>(); 
+    cout << qr.quanta << ":" << qr.duration
+      << "," << qr.wallclock << "," << qr.objects.size() << endl;
+  };
 
   for (auto s : world.obj_status())
     cout << s << endl;
