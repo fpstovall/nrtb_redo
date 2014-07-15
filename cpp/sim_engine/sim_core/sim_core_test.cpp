@@ -136,6 +136,7 @@ struct my_object : public base_object
 {
   bool apply_collision(object_p o) 
   {
+    cout << "** BUMP (" << id << "," << o->id << ")" << endl;
     return false;
   };
   
@@ -222,7 +223,17 @@ int main()
 
   // object remove test (one died during the above run)
   t = log_test(log,"Dynamic object remove",world.obj_status().size());
-  failed = failed or t;  
+  failed = failed or t; 
+
+  // get the results for the first run.
+  ipc_channel_manager& ipc
+    = global_ipc_channel_manager::get_reference();
+  ipc_queue & output = ipc.get("sim_output");
+  // verify the expected number of records.
+  int c = output.size();
+  cout << c << " output records found." << endl;
+  t = log_test(log,"Output record count", ((c < 150) or (c>155)));
+  failed = failed or t;
 
   for (auto s : world.obj_status())
     cout << s << endl;

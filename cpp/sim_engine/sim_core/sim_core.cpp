@@ -37,11 +37,12 @@ sim_core::sim_core(float time_slice)
     is_running(false)
 {};
 
-sim_core::report sim_core::get_report(unsigned long long ticks)
+sim_core::report sim_core::get_report(unsigned long long ticks, double wt)
 {
   report returnme;
   returnme.quanta = quanta;
   returnme.duration = ticks;
+  returnme.wallclock = wt;
   returnme.objects = get_obj_copies();
   return returnme;
 };
@@ -176,8 +177,6 @@ void sim_core::turn_init()
       	{
       	  case verb_stop:
       	  {
-            // TODO: make sure this flag is checked in caller.
-            // TODO: (it's not written yet.)
             end_run = true;
       	    break;
       	  }
@@ -339,7 +338,7 @@ void sim_core::run_sim(sim_core & w)
     ipc_queue & output = ipc.get("sim_output");
     // output initial state
     glog.trace("Storing inital model state");
-    void_p r(new report(w.get_report(0)));
+    void_p r(new report(w.get_report(0,0.0)));
     // -- for init, type 1, noun 0, verb 0 carries a report struct.
     output.push(ipc_record_p(new gp_sim_message(output, 1, 0, 0, r)));
     glog.trace("Entering game cycle");
@@ -360,7 +359,7 @@ void sim_core::run_sim(sim_core & w)
       w.resolve_collisions();
       // output turn status
       unsigned long long elapsed = turnclock.interval_as_usec();
-      void_p r(new report(w.get_report(elapsed)));
+      void_p r(new report(w.get_report(elapsed,wallclock.interval())));
       // -- for output, type 1, noun 1, verb 0 carries a report struct.
       output.push(ipc_record_p(new gp_sim_message(output, 1, 1, 0, r)));
       // check for overrun and report as needed.

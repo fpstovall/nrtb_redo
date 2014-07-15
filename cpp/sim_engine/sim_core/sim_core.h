@@ -61,6 +61,7 @@ public:
   {
     unsigned long long quanta;
     unsigned long long duration;
+    double wallclock;
     object_list objects;
   };
   strlist obj_status();
@@ -79,7 +80,7 @@ private:
   void tick();
   void collision_check();
   void resolve_collisions();
-  report get_report(unsigned long long ticks);
+  report get_report(unsigned long long ticks, double wt);
   static void run_sim(sim_core & w);
 };
 
