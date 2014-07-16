@@ -34,7 +34,8 @@ sim_core::sim_core(float time_slice)
   : quanta(0), 
     quanta_duration(time_slice),
     end_run(false),
-    is_running(false)
+    is_running(false),
+    q(gp_sim_message_adapter(messages))
 {};
 
 sim_core::report sim_core::get_report(unsigned long long ticks, double wt)
@@ -118,8 +119,7 @@ void sim_core::turn_init()
   // Process all the messages in queue at this point.
   for(int i=messages.size();i>0;i--)
   {
-    ipc_record_p raw(messages.pop());
-    gp_sim_message_p msg(static_cast<gp_sim_message *>(raw.release()));
+    gp_sim_message_p msg = q.pop();
     // check for proper message type
     if (msg->msg_type() != 0)
     {
@@ -253,17 +253,14 @@ void sim_core::resolve_collisions()
   };
 };
 
-void sim_core::put_message(gp_sim_message_p m)
+void sim_core::put_message(gp_sim_message_p & m)
 {
-  ipc_record_p t(static_cast<abs_ipc_record *>(m.release()));
-  messages.push(std::move(t));
+  q.push(m);
 };
 
 gp_sim_message_p sim_core::next_out_message()
 {
-  ipc_record_p t(messages.pop());
-  gp_sim_message_p g(static_cast<gp_sim_message *>(t.release()));
-  return std::move(g);
+  return q.pop();
 };
 
 void sim_core::add_object(object_p obj)
@@ -274,7 +271,7 @@ void sim_core::add_object(object_p obj)
     void_p d(new object_p(obj));
     gp_sim_message_p g(new gp_sim_message(messages,0,1,1,d));
     // queue the message.
-    put_message(std::move(g));
+    put_message(g);
   }
   else 
   {
@@ -290,7 +287,7 @@ void sim_core::remove_obj(long long unsigned int oid)
     void_p d(new unsigned long long(oid));
     gp_sim_message_p g(new gp_sim_message(messages,0,1,2,d));
     // queue the message.
-    put_message(std::move(g));
+    put_message(g);
   }
   else
   {
@@ -335,12 +332,13 @@ void sim_core::run_sim(sim_core & w)
     // -- sim_core output channel
     ipc_channel_manager& ipc
       = global_ipc_channel_manager::get_reference();
-    ipc_queue & output = ipc.get("sim_output");
+    ipc_queue & oq = ipc.get("sim_output");
+    gp_sim_message_adapter output(oq);
     // output initial state
     glog.trace("Storing inital model state");
     void_p r(new report(w.get_report(0,0.0)));
     // -- for init, type 1, noun 0, verb 0 carries a report struct.
-    output.push(ipc_record_p(new gp_sim_message(output, 1, 0, 0, r)));
+    output.push(new gp_sim_message(oq, 1, 0, 0, r));
     glog.trace("Entering game cycle");
     // start wall-clock timer.
     hirez_timer wallclock; // governs the overall turn time
@@ -361,7 +359,7 @@ void sim_core::run_sim(sim_core & w)
       unsigned long long elapsed = turnclock.interval_as_usec();
       void_p r(new report(w.get_report(elapsed,wallclock.interval())));
       // -- for output, type 1, noun 1, verb 0 carries a report struct.
-      output.push(ipc_record_p(new gp_sim_message(output, 1, 1, 0, r)));
+      output.push(new gp_sim_message(oq, 1, 1, 0, r));
       // check for overrun and report as needed.
       if (elapsed >= ticks)
       {

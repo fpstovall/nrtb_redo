@@ -52,7 +52,7 @@ class gp_sim_message_adapter
 {
 public:
   gp_sim_message_adapter(ipc_queue & _q);
-  void push(gp_sim_message_p m);
+  void push(gp_sim_message_p & m);
   void push(gp_sim_message * m);
   gp_sim_message_p pop();
 protected:

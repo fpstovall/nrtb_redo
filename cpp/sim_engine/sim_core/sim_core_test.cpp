@@ -184,8 +184,14 @@ bool log_test(log_recorder & l, string s, bool failed)
 int main()
 {
   bool failed = false;
+  
+  auto & ipc = global_ipc_channel_manager::get_reference();
+  ipc_queue & soq = ipc.get("sim_output");
+  gp_sim_message_adapter sim_out(soq);
+  
   log_recorder log(common_log::get_reference()("sim_core_test"));
   log.trace("Starting");
+  
   cout << "=========== sim core test ============="
     << endl;
 
@@ -215,8 +221,6 @@ int main()
   failed = failed or t; 
   // stop test.
   world.stop_sim();
-  t = log_test(log,"sim_core::stop_sim() returned",false);
-  failed = failed or t; 
   engine.join();
   t = log_test(log,"sim_run() stopped",world.running());
   failed = failed or t; 
@@ -226,19 +230,15 @@ int main()
   failed = failed or t; 
 
   // get the results for the first run.
-  ipc_channel_manager& ipc
-    = global_ipc_channel_manager::get_reference();
-  ipc_queue & output = ipc.get("sim_output");
   // verify the expected number of records.
-  int c = output.size();
+  int c = soq.size();
   cout << c << " output records found." << endl;
   t = log_test(log,"Output record count", ((c < 150) or (c>155)));
   failed = failed or t;
   // list the results
-  while (output.size())
+  while (soq.size())
   {
-    ipc_record_p raw(output.pop());
-    gp_sim_message_p msg(static_cast<gp_sim_message *>(raw.release()));
+    gp_sim_message_p msg = sim_out.pop();
     sim_core::report qr = msg->data<sim_core::report>(); 
     cout << qr.quanta << ":" << qr.duration
       << "," << qr.wallclock << "," << qr.objects.size() << endl;

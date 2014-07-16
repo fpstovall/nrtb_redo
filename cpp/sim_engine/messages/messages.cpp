@@ -64,7 +64,7 @@ int gp_sim_message::verb()
 gp_sim_message_adapter::gp_sim_message_adapter(ipc_queue& _q):
   q(_q) {};
   
-void gp_sim_message_adapter::push(gp_sim_message_p m)
+void gp_sim_message_adapter::push(gp_sim_message_p & m)
 {
   q.push(ipc_record_p(std::move(m)));
 };

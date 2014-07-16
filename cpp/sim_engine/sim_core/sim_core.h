@@ -52,7 +52,7 @@ public:
   void remove_obj(unsigned long long oid);
   // general purpose work thread interface.
   gp_sim_message_p next_out_message();
-  void put_message(gp_sim_message_p m);
+  void put_message(nrtb::gp_sim_message_p & m);
   /**************************************
    * Reporting methods.
    *************************************/
@@ -69,6 +69,7 @@ public:
   
 private:
   ipc_queue messages;
+  gp_sim_message_adapter q;
   std::atomic<bool> end_run;
   std::atomic<bool> is_running;
   std::atomic<unsigned long long> quanta;
