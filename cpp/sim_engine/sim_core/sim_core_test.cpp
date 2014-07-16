@@ -181,14 +181,62 @@ bool log_test(log_recorder & l, string s, bool failed)
   return failed;
 };
 
-int main()
+typedef map<string,float> val_map;
+val_map get_sim_metrics()
 {
-  bool failed = false;
-  
+  // set up access.
   auto & ipc = global_ipc_channel_manager::get_reference();
   ipc_queue & soq = ipc.get("sim_output");
   gp_sim_message_adapter sim_out(soq);
-  
+  // total it up.
+  int c = soq.size();
+  // gather data
+  float avg_ticks = 0.0;
+  float max_ticks = 0.0;
+  float min_ticks = 1e6;
+  float avg_wall = 0.0;
+  float max_wall = 0.0;
+  float min_wall = 1e6;
+  float wb = 0.0;
+  int counted = 0;
+  while (soq.size())
+  {
+    gp_sim_message_p msg = sim_out.pop();
+    sim_core::report qr = msg->data<sim_core::report>(); 
+    // discard quanta < 2; interval lacks a full turn.
+    if (qr.quanta > 1)
+    {
+      counted++;
+      avg_ticks += qr.duration;
+      max_ticks = qr.duration > max_ticks ? qr.duration : max_ticks;
+      min_ticks = qr.duration < min_ticks ? qr.duration : min_ticks;
+      float wt = qr.wallclock - wb;
+      avg_wall += wt;
+      max_wall = wt > max_wall ? wt : max_wall;
+      min_wall = wt < min_wall ? wt : min_wall;
+      wb = qr.wallclock;
+    };
+  };
+  avg_ticks /= counted;
+  avg_wall /= counted;
+  // store it all
+  val_map returnme;
+  returnme["turns"] = c;
+  returnme["counted"] = counted;
+  returnme["avg_usec"] = avg_ticks;
+  returnme["max_usec"] = max_ticks;
+  returnme["min_usec"] = min_ticks;
+  returnme["avg_wall"] = avg_wall;
+  returnme["max_wall"] = max_wall;
+  returnme["min_wall"] = min_wall;
+  returnme["run_time"] = wb;
+  return returnme;
+};
+
+int main()
+{
+  bool failed = false;
+    
   log_recorder log(common_log::get_reference()("sim_core_test"));
   log.trace("Starting");
   
@@ -230,19 +278,24 @@ int main()
   failed = failed or t; 
 
   // get the results for the first run.
-  // verify the expected number of records.
-  int c = soq.size();
-  cout << c << " output records found." << endl;
+  val_map metrics = get_sim_metrics();
+  log.info("First run data");
+  for (auto a : metrics)
+  {
+    stringstream s;
+    s << a.first << "=" << a.second;
+    log.info(s.str());
+  };
+  // verify the run results.
+  int c = floor(metrics["turns"]);
   t = log_test(log,"Output record count", ((c < 150) or (c>155)));
   failed = failed or t;
-  // list the results
-  while (soq.size())
-  {
-    gp_sim_message_p msg = sim_out.pop();
-    sim_core::report qr = msg->data<sim_core::report>(); 
-    cout << qr.quanta << ":" << qr.duration
-      << "," << qr.wallclock << "," << qr.objects.size() << endl;
-  };
+  t = log_test(log,"Quanta RT limit", (metrics["max_wall"]>0.03));
+  failed = failed or t;
+  t = log_test(log,"Quanta RT pace", (metrics["avg_wall"]>0.02001));
+  failed = failed or t;
+  t = log_test(log,"Quanta usec limit", (metrics["max_usec"]>1.5e4));
+  failed = failed or t;
 
   for (auto s : world.obj_status())
     cout << s << endl;
