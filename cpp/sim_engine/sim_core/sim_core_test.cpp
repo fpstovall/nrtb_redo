@@ -297,6 +297,39 @@ int main()
   t = log_test(log,"Quanta usec limit", (metrics["max_usec"]>1.5e4));
   failed = failed or t;
 
+  // dynamic object insertion test.
+  sim_core w1(1/50.0);
+  engine = w1.start_sim();
+  while (!(w1.running())) usleep(10);
+  w1.add_object(object_p(new my_object));
+  usleep(1e5);
+  w1.stop_sim();
+  engine.join();
+  object_list objs = w1.get_obj_copies();
+  t = log_test(log,"Dynamic object add", (objs.size() != 1));
+  failed = failed or t;
+  // check metrics again
+  metrics = get_sim_metrics();
+  log.info("Second run data");
+  for (auto a : metrics)
+  {
+    stringstream s;
+    s << a.first << "=" << a.second;
+    log.info(s.str());
+  };
+  // verify the run results.
+  t = log_test(log,"Quanta RT limit", (metrics["max_wall"]>0.03));
+  failed = failed or t;
+  t = log_test(log,"Quanta RT pace", (metrics["avg_wall"]>0.0201));
+  failed = failed or t;
+  t = log_test(log,"Quanta usec limit", (metrics["max_usec"]>1.5e4));
+  failed = failed or t;
+  
+
+
+
+  
+  
   for (auto s : world.obj_status())
     cout << s << endl;
   
