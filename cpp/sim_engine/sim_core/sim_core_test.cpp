@@ -77,7 +77,6 @@ struct impactor : public abs_effector
       and (o.velocity.y < 0.0))
     {
       // impact!!
-      cout << "(" << time << ") IMPACT " << o.as_str() << endl;
       return true;
     }
     else
@@ -85,7 +84,6 @@ struct impactor : public abs_effector
       // apogee test..
       if ((o.location.y > 0.1) and (o.velocity.y <= 0.0) and (!peak))
       {
-        cout << "(" << time << ") APPOGEE " << o.as_str() << endl;
         peak = true;
       };
       return false;
@@ -325,8 +323,44 @@ int main()
   t = log_test(log,"Quanta usec limit", (metrics["max_usec"]>1.5e4));
   failed = failed or t;
   
-
-
+  // 50/50 load test.
+  sim_core w2(1/50.0);
+  for(int i=0; i<50; i++)
+  {
+    object_p r(new rocket_ball);
+    r->location.x = i * 5.0;
+    w2.add_object(r);
+  };
+  // verify starting count
+  t = log_test(log,"50/50 start count", (w2.obj_status().size()!=50));
+  failed = failed or t;
+  engine = w2.start_sim();
+  sleep(3);
+  w2.stop_sim();
+  engine.join();
+  // verify ending count (all should have been distroyed.
+  t = log_test(log,"50/50 end count", (w2.obj_status().size()));
+  failed = failed or t;
+  
+  // Verify metrics one last time.
+  metrics = get_sim_metrics();
+  log.info("50/50 run data");
+  for (auto a : metrics)
+  {
+    stringstream s;
+    s << a.first << "=" << a.second;
+    log.info(s.str());
+  };
+  // verify the run results.
+  c = floor(metrics["turns"]);
+  t = log_test(log,"Output record count", ((c < 150) or (c>155)));
+  failed = failed or t;
+  t = log_test(log,"Quanta RT limit", (metrics["max_wall"]>0.03));
+  failed = failed or t;
+  t = log_test(log,"Quanta RT pace", (metrics["avg_wall"]>0.02001));
+  failed = failed or t;
+  t = log_test(log,"Quanta usec limit", (metrics["max_usec"]>1.5e4));
+  failed = failed or t;
 
   
   
