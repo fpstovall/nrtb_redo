@@ -134,8 +134,7 @@ struct my_object : public base_object
 {
   bool apply_collision(object_p o) 
   {
-    cout << "** BUMP (" << id << "," << o->id << ")" << endl;
-    return false;
+    return true;
   };
   
   base_object * clone()
@@ -254,10 +253,7 @@ int main()
                 (world.obj_status().size() != 1));
   failed = failed or t; 
   
-  for (auto s : world.obj_status())
-    cout << s << endl;
-  
-  // engine start test.
+  cout << "Single object run (3 secs)" << endl;
   auto engine = world.start_sim();
   t = log_test(log,"sim_core::start_sim() returned",false);
   failed = failed or t;
@@ -295,7 +291,7 @@ int main()
   t = log_test(log,"Quanta usec limit", (metrics["max_usec"]>1.5e4));
   failed = failed or t;
 
-  // dynamic object insertion test.
+  cout << "Dynamic add test (0.1 secs)" << endl;
   sim_core w1(1/50.0);
   engine = w1.start_sim();
   while (!(w1.running())) usleep(10);
@@ -323,7 +319,7 @@ int main()
   t = log_test(log,"Quanta usec limit", (metrics["max_usec"]>1.5e4));
   failed = failed or t;
   
-  // 50/50 load test.
+  cout << "50 objects/50 hz (3 secs)" << endl;
   sim_core w2(1/50.0);
   for(int i=0; i<50; i++)
   {
@@ -362,11 +358,20 @@ int main()
   t = log_test(log,"Quanta usec limit", (metrics["max_usec"]>1.5e4));
   failed = failed or t;
 
-  
-  
-  for (auto s : world.obj_status())
-    cout << s << endl;
-  
+  cout << "Collision test (1 secs)" << endl;
+  sim_core w3(1/50.0);
+  w3.add_object(object_p(new rocket_ball));
+  object_p target(new my_object);
+  target->location.y = 0.75;
+  w3.add_object(target);
+  engine = w3.start_sim();
+  sleep(1);
+  w3.stop_sim();
+  engine.join();
+  // verify ending count (all should have been distroyed.
+  t = log_test(log,"Collision test", (w3.obj_status().size()));
+  failed = failed or t;
+    
   log_test(log,"Unit Test",failed);
   
   cout << "=========== sim_core test complete ============="
