@@ -60,3 +60,24 @@ int gp_sim_message::verb()
 {
   return _verb;
 };
+
+gp_sim_message_adapter::gp_sim_message_adapter(ipc_queue& _q):
+  q(_q) {};
+  
+void gp_sim_message_adapter::push(gp_sim_message_p & m)
+{
+  q.push(ipc_record_p(std::move(m)));
+};
+
+void gp_sim_message_adapter::push(gp_sim_message * m)
+{
+  q.push(ipc_record_p(m));
+};
+
+gp_sim_message_p gp_sim_message_adapter::pop()
+{
+  return std::move(gp_sim_message_p(
+    static_cast<gp_sim_message *>(q.pop().release())));
+};
+
+

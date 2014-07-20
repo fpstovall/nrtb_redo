@@ -42,6 +42,9 @@ typedef std::map<unsigned long long, object_p> object_list;
 struct abs_effector
 {
   static serializer effector_num;
+  virtual ~abs_effector() {};
+  // polymorphic copier
+  virtual abs_effector * clone() = 0;
   unsigned long long id = effector_num();
   std::string handle;
   virtual std::string as_str() = 0;
@@ -54,6 +57,9 @@ typedef std::map<unsigned long long, effector_p> effector_list;
 struct base_object
 {
   static serializer object_num;
+  virtual ~base_object() {};
+  // polymophic copier
+  virtual base_object * clone() = 0;
   // data
   unsigned long long id = object_num();
   std::string handle;
@@ -75,6 +81,9 @@ struct base_object
   virtual abs_effector & get_pre(unsigned long long i);
   virtual void add_post(abs_effector * e);
   virtual abs_effector & get_post(unsigned long long i);
+  // -- these return deep copies of the attribs list.
+  virtual effector_list get_pre_attribs_copy();
+  virtual effector_list get_post_attribs_copy();
   // sim methods
   // returns true if a collision is detected.
   virtual bool check_collision(object_p o);

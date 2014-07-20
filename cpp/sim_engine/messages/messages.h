@@ -48,6 +48,17 @@ private:
 
 typedef std::unique_ptr<gp_sim_message> gp_sim_message_p;
 
+class gp_sim_message_adapter
+{
+public:
+  gp_sim_message_adapter(ipc_queue & _q);
+  void push(gp_sim_message_p & m);
+  void push(gp_sim_message * m);
+  gp_sim_message_p pop();
+protected:
+  ipc_queue & q;
+};
+
 
 template <class T>
   T & gp_sim_message::data()
