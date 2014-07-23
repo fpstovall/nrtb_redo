@@ -81,6 +81,7 @@ struct base_object
   virtual abs_effector & get_pre(unsigned long long i);
   virtual void add_post(abs_effector * e);
   virtual abs_effector & get_post(unsigned long long i);
+  virtual void drop_attrib(unsigned long long i);
   // -- these return deep copies of the attribs list.
   virtual effector_list get_pre_attribs_copy();
   virtual effector_list get_post_attribs_copy();
@@ -93,7 +94,8 @@ struct base_object
   virtual bool apply_collision(object_p o) = 0;
 protected:
   effector_list pre_attribs;
-  effector_list post_attribs;    
+  effector_list post_attribs; 
+  std::vector<unsigned long long> dropped_attribs;
 };
 
 } // namepace nrtb

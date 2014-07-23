@@ -59,6 +59,18 @@ bool base_object::tick(int time)
   force = 0;
   torque = 0;
   mass_mod = 0;
+  // execute any pending attrib drops
+  for(auto i : dropped_attribs)
+  {
+    // ignore errors here
+    try
+    {
+      pre_attribs.erase(i);
+      post_attribs.erase(i);
+    }
+    catch (...) {};
+  };
+  // execute the pre_attribs list.
   bool killme (false);
   for (auto e : pre_attribs)
     if (e.second->tick(*this, time))
@@ -135,6 +147,11 @@ effector_list base_object::get_post_attribs_copy()
     returnme[a.first] = effector_p(a.second->clone());
   };
   return returnme;
+};
+
+void base_object::drop_attrib(long long unsigned int i)
+{
+  dropped_attribs.push_back(i);
 };
 
 
