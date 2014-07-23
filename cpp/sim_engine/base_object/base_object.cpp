@@ -70,6 +70,7 @@ bool base_object::tick(int time)
     }
     catch (...) {};
   };
+  dropped_attribs.clear();
   // execute the pre_attribs list.
   bool killme (false);
   for (auto e : pre_attribs)
