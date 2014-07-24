@@ -20,8 +20,6 @@
 
 #include "sim_core.h"
 #include <unistd.h>
-#include <future>
-#include <thread>
 #include <hires_timer.h>
 #include <ipc_channel.h>
 #include <common_log.h>
@@ -298,9 +296,11 @@ void sim_core::remove_obj(long long unsigned int oid)
 void sim_core::stop_sim()
 {
   end_run = true;
+  if (engine.joinable())
+    engine.join();
 };
 
-std::thread sim_core::start_sim()
+void sim_core::start_sim()
 {
   // are we already running?
   if (is_running)
@@ -311,7 +311,7 @@ std::thread sim_core::start_sim()
     throw e; 
   };
   // launch the run_sim() method.
-  return std::thread(sim_core::run_sim,std::ref(*this));
+  engine =  std::thread(sim_core::run_sim,std::ref(*this));
 };
 
 bool sim_core::running()

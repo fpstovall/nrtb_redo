@@ -254,7 +254,7 @@ int main()
   failed = failed or t; 
   
   cout << "Single object run (3 secs)" << endl;
-  auto engine = world.start_sim();
+  world.start_sim();
   t = log_test(log,"sim_core::start_sim() returned",false);
   failed = failed or t;
   // run 3 and running test.
@@ -263,7 +263,6 @@ int main()
   failed = failed or t; 
   // stop test.
   world.stop_sim();
-  engine.join();
   t = log_test(log,"sim_run() stopped",world.running());
   failed = failed or t; 
 
@@ -293,12 +292,11 @@ int main()
 
   cout << "Dynamic add test (0.1 secs)" << endl;
   sim_core w1(1/50.0);
-  engine = w1.start_sim();
+  w1.start_sim();
   while (!(w1.running())) usleep(10);
   w1.add_object(object_p(new my_object));
   usleep(1e5);
   w1.stop_sim();
-  engine.join();
   object_list objs = w1.get_obj_copies();
   t = log_test(log,"Dynamic object add", (objs.size() != 1));
   failed = failed or t;
@@ -330,10 +328,9 @@ int main()
   // verify starting count
   t = log_test(log,"50/50 start count", (w2.obj_status().size()!=50));
   failed = failed or t;
-  engine = w2.start_sim();
+  w2.start_sim();
   sleep(3);
   w2.stop_sim();
-  engine.join();
   // verify ending count (all should have been distroyed.
   t = log_test(log,"50/50 end count", (w2.obj_status().size()));
   failed = failed or t;
@@ -364,10 +361,9 @@ int main()
   object_p target(new my_object);
   target->location.y = 0.75;
   w3.add_object(target);
-  engine = w3.start_sim();
+  w3.start_sim();
   sleep(1);
   w3.stop_sim();
-  engine.join();
   // verify ending count (all should have been distroyed.
   t = log_test(log,"Collision test", (w3.obj_status().size()));
   failed = failed or t;

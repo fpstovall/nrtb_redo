@@ -46,7 +46,7 @@ public:
    * control methods.
    **************************************/
   bool running();
-  std::thread start_sim();
+  void start_sim();
   void stop_sim();
   void add_object(object_p obj);
   void remove_obj(unsigned long long oid);
@@ -73,6 +73,7 @@ private:
   std::atomic<bool> end_run;
   std::atomic<bool> is_running;
   std::atomic<unsigned long long> quanta;
+  std::thread engine;
   float quanta_duration;
   object_list all_objects;
   std::vector<clsn_rec> collisions;
