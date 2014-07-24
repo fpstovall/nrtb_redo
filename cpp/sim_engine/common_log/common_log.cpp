@@ -24,9 +24,9 @@
 
 using namespace nrtb;
 
-log_queue clq;
+log_queue log_factory::clq;
 
-log_file_writer writer(clq, "sim_engine.log");
+log_file_writer log_factory::writer(clq, "sim_engine.log");
 
 log_recorder log_factory::operator () (std::string s)
 {

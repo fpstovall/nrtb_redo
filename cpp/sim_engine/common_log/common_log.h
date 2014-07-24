@@ -41,6 +41,9 @@ class log_factory
 {
 public:
   log_recorder operator () (std::string s);
+private:
+  static log_queue clq;
+  static log_file_writer writer;
 };
 
 typedef singleton<log_factory> common_log;
