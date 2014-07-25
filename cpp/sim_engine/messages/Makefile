@@ -22,6 +22,7 @@ lib:	${target}_test
 	@./${target}_test
 	@cp -v ${target}.h ../include/
 	@cp -v ${target}.o ../obj/
+	@ar -r ../lib/sim_engine.a ${target}.o
 	@echo build complete
 
 ${target}_test:	${target}.o ${target}_test.cpp
