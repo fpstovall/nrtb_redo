@@ -22,6 +22,7 @@ lib:	${target}_test
 	@./${target}_test
 	@cp -v ${target}.h ../include/
 	@cp -v ${target}.o ../obj/
+	@ar -r ../lib/sim_engine.a ${target}.o
 	@echo build complete
 
 ${target}_test:	${target}.o ${target}_test.cpp
@@ -39,7 +40,7 @@ clean:
 	@echo all objects and executables have been erased.
 
 switches=-std=gnu++11 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP 
-libs=../../common/lib/nrtb_common.a -lpthread
+libs=../../common/lib/nrtb_common.a ../lib/sim_engine.a -lpthread
 include=-I../../common/include -I../include
 bargs=${switches} ${include}
 largs=${switches} ${libs}
