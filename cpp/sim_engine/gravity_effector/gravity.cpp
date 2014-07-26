@@ -31,13 +31,13 @@ abs_effector* norm_gravity::clone()
 std::string norm_gravity::as_str()
 {
   std::stringstream s;
-  s << "gravity=" << value;
+  s << "gravity=" << gn;
   return s.str();
 };
 
 bool norm_gravity::tick(base_object& o, int time)
 {
-  o.accel_mod += value;
+  o.accel_mod += gn;
   return false;
 };
 

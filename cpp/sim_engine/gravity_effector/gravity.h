@@ -27,13 +27,12 @@ namespace nrtb
 
 struct norm_gravity: public abs_effector
 {
-  triplet value = triplet(0.0,0.0,-9.80665);
+  triplet gn = triplet(0.0,0.0,-9.80665);
   abs_effector * clone();
   std::string as_str();
   bool tick(base_object & o, int time);
 };
   
-
 } // namepace nrtb
 
 #endif // gravity_effector_header
