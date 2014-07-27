@@ -1,5 +1,5 @@
 /***********************************************
- This file is part of the NRTB project (https://launchpad.net/nrtb).
+ This file is part of the NRTB project (https://github.com/fpstovall/nrtb_alpha).
  
  NRTB is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
