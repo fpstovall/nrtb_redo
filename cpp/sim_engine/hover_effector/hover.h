@@ -27,6 +27,14 @@ namespace nrtb
 
 struct hover: public abs_effector
 {
+  hover(float set, float min, float bias);
+  // target ride height.
+  float set_altitude;
+  // min ride height.
+  float min_altitude;
+  // exponent to bias response.
+  float curve;
+  // required overrides.
   abs_effector * clone();
   std::string as_str();
   bool tick(base_object & o, int time);
