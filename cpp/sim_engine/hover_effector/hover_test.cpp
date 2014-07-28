@@ -17,6 +17,7 @@
  **********************************************/
 
 #include "hover.h"
+#include <gravity.h>
 #include <iostream>
 #include <string>
 
@@ -50,18 +51,20 @@ struct recorder : abs_effector
   };
 };
 
-struct faller : public base_object
+struct floater : public base_object
 {
-  faller()
+  floater()
   {
+    add_pre(new hover(1.0,0.90,1.0));
     add_pre(new norm_gravity);
     add_post(new recorder);
-    // put it high enough to fall for 10 seconds
-    location = triplet(0.0,0.0,((9.80665*100)/2));
+    // start it at the set height.
+    location = triplet(0.0,0.0,1.0);
+    velocity = 0.0;
   };
   base_object * clone()
   {
-    faller * t = new faller(*this);
+    floater * t = new floater(*this);
     t->pre_attribs = get_pre_attribs_copy();
     t->post_attribs = get_post_attribs_copy();
     return t;
@@ -72,23 +75,37 @@ struct faller : public base_object
 int main()
 {
   bool failed = false;
-  cout << "========== gravity test ============="
+  cout << "========== ground_effect test ============="
     << endl;
 
   int counter = 0;
-  faller icarus;
-  while (icarus.location.z > 0.0)
+  floater zepplin;
+  while (counter < 50)
   {
     counter++;
-    icarus.tick(counter);
-    icarus.apply(counter,1/50.0);
+    zepplin.tick(counter);
+    zepplin.apply(counter,1/50.0);
   };
   
-  cout << "Icarus fell " << counter/50.0 << " seconds" << endl;
+  cout << "hovered at " << zepplin.location.z << " meters." << endl;
 
-  failed = failed or ((counter/50.0) != 10.0);
+  velocities.clear();
+  locations.clear();
+  zepplin.location.z = 0.95;
+  counter = 0;
+  while (counter < 1000)
+  {
+    counter++;
+    zepplin.tick(counter);
+    zepplin.apply(counter,1/50.0);
+  };
   
-  cout << "=========== gravity test complete ============="
+  cout << "hovered at " << zepplin.location.z << " meters." << endl;
+  
+  for(int i=950; i<1000; i++)
+    cout << i << ":" << locations[i] << velocities[i] << endl;
+  
+  cout << "=========== ground_effect test complete ============="
     << endl;
   
   return failed;
