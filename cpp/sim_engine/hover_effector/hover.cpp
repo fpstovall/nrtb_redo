@@ -24,7 +24,7 @@
 using namespace nrtb;
 
 hover::hover(float set, float min, float bias)
-  : set_altitude(set), min_altitude(min), curve(bias)
+  : set_altitude(set), range(set-min), curve(bias)
 {};
 
 abs_effector * hover::clone()
@@ -36,7 +36,7 @@ std::string hover::as_str()
 {
   std::stringstream s;
   s << "hover=" << set_altitude << "," 
-    << min_altitude << "," << curve;
+    << range << "," << curve;
   return s.str();
 };
 
@@ -46,7 +46,6 @@ bool hover::tick(base_object& o, int time)
   // do nothing if we are above set_altitude
   if (o.location.z < set_altitude)
   {
-    float range = set_altitude - min_altitude;
     float deviation = set_altitude - o.location.z;
     float adjustment = pow(deviation/range,curve);
     o.accel_mod += adjustment;

@@ -31,7 +31,7 @@ struct hover: public abs_effector
   // target ride height.
   float set_altitude;
   // min ride height.
-  float min_altitude;
+  float range;
   // exponent to bias response.
   float curve;
   // required overrides.
