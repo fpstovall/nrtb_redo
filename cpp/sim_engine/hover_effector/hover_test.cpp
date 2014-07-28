@@ -55,7 +55,7 @@ struct floater : public base_object
 {
   floater()
   {
-    add_pre(new hover(1.0,0.90,1.0));
+    add_pre(new hover(1.0,0.5,2.0));
     add_pre(new norm_gravity);
     add_post(new recorder);
     // start it at the set height.
@@ -72,6 +72,28 @@ struct floater : public base_object
   bool apply_collision(object_p o) {return false;};
 };
 
+typedef map<std::string,double> rtype;
+rtype report(vector<triplet> v)
+{
+  double min = 1e6;
+  double max = 0.0;
+  double avg = 0.0;
+  double count = 0;
+  for(auto t: v)
+  {
+    count++;
+    min = (min < t.z) ? min : t.z;
+    max = (max > t.z) ? max : t.z;
+    avg += t.z;
+  };
+  avg /= count;
+  rtype returnme;
+  returnme["min"] = min;
+  returnme["max"] = max;
+  returnme["avg"] = avg;
+  return returnme;
+};
+
 int main()
 {
   bool failed = false;
@@ -80,20 +102,23 @@ int main()
 
   int counter = 0;
   floater zepplin;
-  while (counter < 50)
+  while (counter < 500)
   {
     counter++;
     zepplin.tick(counter);
     zepplin.apply(counter,1/50.0);
   };
-  
-  cout << "hovered at " << zepplin.location.z << " meters." << endl;
+
+  auto results = report(locations);
+  for (auto a : results)
+    cout << a.first << " " << a.second << endl;
 
   velocities.clear();
   locations.clear();
-  zepplin.location.z = 0.95;
+  zepplin.velocity.z = 0.0;
+  zepplin.location.z = 0.0;
   counter = 0;
-  while (counter < 1000)
+  while (counter < 500)
   {
     counter++;
     zepplin.tick(counter);
@@ -102,8 +127,20 @@ int main()
   
   cout << "hovered at " << zepplin.location.z << " meters." << endl;
   
-  for(int i=950; i<1000; i++)
-    cout << i << ":" << locations[i] << velocities[i] << endl;
+  velocities.clear();
+  locations.clear();
+  zepplin.velocity.z = 0.0;
+  zepplin.location.z = 2.0;
+  counter = 0;
+  while (counter < 500)
+  {
+    counter++;
+    zepplin.tick(counter);
+    zepplin.apply(counter,1/50.0);
+  };
+  
+  cout << "hovered at " << zepplin.location.z << " meters." << endl;
+  
   
   cout << "=========== ground_effect test complete ============="
     << endl;
