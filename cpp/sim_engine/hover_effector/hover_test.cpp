@@ -94,6 +94,16 @@ rtype report(vector<triplet> v)
   return returnme;
 };
 
+string write_details(rtype l, rtype v)
+{
+  stringstream s;
+  s << "Alt : " << l["min"] << ":" 
+    << l["avg"] << ":" << l["max"] 
+    << "\nVel : " << v["min"] << ":" 
+    << v["avg"] << ":" << v["max"];
+  return s.str();
+};
+
 int main()
 {
   bool failed = false;
@@ -107,12 +117,20 @@ int main()
     counter++;
     zepplin.tick(counter);
     zepplin.apply(counter,1/50.0);
+    if (counter == 449)
+    {
+      locations.clear();
+      velocities.clear();
+    };
   };
 
-  auto results = report(locations);
-  for (auto a : results)
-    cout << a.first << " " << a.second << endl;
-
+  auto a = report(locations);
+  auto v = report(velocities);
+  cout << "Start from set:\n" << write_details(a,v) << endl;
+  failed = failed or (fabs(a["avg"]-1.0) > 0.01);
+  failed = failed or (fabs(a["min"]-1.0) > 0.02);
+  failed = failed or (fabs(a["max"]-1.0) > 0.02);
+  
   velocities.clear();
   locations.clear();
   zepplin.velocity.z = 0.0;
@@ -123,9 +141,19 @@ int main()
     counter++;
     zepplin.tick(counter);
     zepplin.apply(counter,1/50.0);
+    if (counter == 449)
+    {
+      locations.clear();
+      velocities.clear();
+    };
   };
   
-  cout << "hovered at " << zepplin.location.z << " meters." << endl;
+  a = report(locations);
+  v = report(velocities);
+  cout << "Start from below:\n" << write_details(a,v) << endl;
+  failed = failed or (fabs(a["avg"]-1.0) > 0.01);
+  failed = failed or (fabs(a["min"]-1.0) > 0.04);
+  failed = failed or (fabs(a["max"]-1.0) > 0.04);
   
   velocities.clear();
   locations.clear();
@@ -137,9 +165,19 @@ int main()
     counter++;
     zepplin.tick(counter);
     zepplin.apply(counter,1/50.0);
+    if (counter == 449)
+    {
+      locations.clear();
+      velocities.clear();
+    };
   };
   
-  cout << "hovered at " << zepplin.location.z << " meters." << endl;
+  a = report(locations);
+  v = report(velocities);
+  cout << "Start from above:\n" << write_details(a,v) << endl;
+  failed = failed or (fabs(a["avg"]-1.0) > 0.01);
+  failed = failed or (fabs(a["min"]-1.0) > 0.04);
+  failed = failed or (fabs(a["max"]-1.0) > 0.04);
   
   
   cout << "=========== ground_effect test complete ============="

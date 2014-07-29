@@ -45,7 +45,7 @@ bool hover::tick(base_object& o, int time)
 {
   float deviation = fabs(set_altitude - o.location.z);
   // override assumed gravity if we are below setting.
-  if (o.location.z <= set_altitude)
+  if (o.location.z < set_altitude)
   { 
     o.accel_mod.z += 9.80665 * 2;
   };
