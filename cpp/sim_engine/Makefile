@@ -38,6 +38,7 @@ doit:
 	cd common_log; make ${action}
 	cd sim_core; make ${action}
 	cd gravity_effector; make ${action}
+	cd hover_effector; make ${action}
 
 ../common/nrtb_common.a:
 	@cd ../common; make 
