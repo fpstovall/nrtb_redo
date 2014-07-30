@@ -24,8 +24,16 @@
 
 namespace nrtb
 {
+/****************************************
+ * WARNING: Never use the effectors below
+ * directly. Instead, instanciate an instance
+ * of the diff_steer class found later and
+ * use that to provide the effectors to the
+ * object and your control interface into
+ * the effectors.
+ ****************************************/  
 
-struct diff_steer: public abs_effector
+struct diff_steer_pre: public abs_effector
 {
   // TODO: Constructor
   // TODO: local data
@@ -34,7 +42,42 @@ struct diff_steer: public abs_effector
   std::string as_str();
   bool tick(base_object & o, int time);
 };
-  
+
+struct diff_steer_post: public abs_effector
+{
+  // TODO: Constructor
+  // TODO: local data
+  // required overrides.
+  abs_effector * clone();
+  std::string as_str();
+  bool tick(base_object & o, int time);
+};
+
+typedef std::shared_ptr<diff_steer_pre> df_pre_p;
+typedef std::shared_ptr<diff_steer_post> df_post_p;
+
+class diff_steer
+{
+public:
+  diff_steer(base_object & o, float thrust, float turn_rate,
+             float skid_friction, float slide_friction); 
+  // control methods
+  float drive(float power);   // sets the "throttle"
+  float brake(float braking); // sets the brake
+  float turn(float rate);     // sets turn rate
+  // status reporting;
+  float get_drive();
+  float get_brake();
+  float get_turn();
+protected:
+  float drive_val {0.0};
+  float brake_val {0.0};
+  float turn_val  {0.0};
+  df_pre_p pre_effector;
+  df_post_p post_effector;  
+};
+
+
 } // namepace nrtb
 
 #endif // diff_steer_effector_header

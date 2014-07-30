@@ -24,22 +24,77 @@
 
 using namespace nrtb;
 
-abs_effector * diff_steer::clone()
+abs_effector * diff_steer_pre::clone()
 {
-  return new diff_steer(*this);
+  return new diff_steer_pre(*this);
 };
 
-std::string diff_steer::as_str()
+std::string diff_steer_pre::as_str()
 {
   std::stringstream s;
   // TODO: Complete the status string
-  s << "diff_steer=" << "TODO";
+  s << "diff_steer_pre=" << "TODO";
   return s.str();
 };
 
-bool diff_steer::tick(base_object& o, int time)
+bool diff_steer_pre::tick(base_object& o, int time)
 {
   // TODO: just a filler.
   return false;
 };
+
+abs_effector * diff_steer_post::clone()
+{
+  return new diff_steer_post(*this);
+};
+
+std::string diff_steer_post::as_str()
+{
+  std::stringstream s;
+  // TODO: Complete the status string
+  s << "diff_steer_post=" << "TODO";
+  return s.str();
+};
+
+bool diff_steer_post::tick(base_object& o, int time)
+{
+  // TODO: just a filler.
+  return false;
+};
+
+diff_steer::diff_steer(base_object& o, float thrust, float turn_rate, float skid_friction, float slide_friction)
+{
+  // TODO: Create and attach the effectors to the object.
+};
+
+float diff_steer::drive(float power)
+{
+  // TODO: update the local variable and the pre-effector;
+};
+
+float diff_steer::brake(float braking)
+{
+  // TODO: update the local variable and the pre-effector;
+};
+
+float diff_steer::turn(float rate)
+{
+  // TODO: update the local variable and the pre-effector;
+};
+
+float diff_steer::get_drive()
+{
+  return drive_val;
+};
+
+float diff_steer::get_brake()
+{
+  return brake_val;
+};
+
+float diff_steer::get_turn()
+{
+  return turn_val;
+};
+
 
