@@ -24,39 +24,39 @@
 
 using namespace nrtb;
 
-abs_effector * diff_steer_pre::clone()
+abs_effector * diff_steer::pre::clone()
 {
-  return new diff_steer_pre(*this);
+  return new diff_steer::pre(*this);
 };
 
-std::string diff_steer_pre::as_str()
+std::string diff_steer::pre::as_str()
 {
   std::stringstream s;
   // TODO: Complete the status string
-  s << "diff_steer_pre=" << "TODO";
+  s << "diff_steer::pre=" << "TODO";
   return s.str();
 };
 
-bool diff_steer_pre::tick(base_object& o, int time)
+bool diff_steer::pre::tick(base_object& o, int time)
 {
   // TODO: just a filler.
   return false;
 };
 
-abs_effector * diff_steer_post::clone()
+abs_effector * diff_steer::post::clone()
 {
-  return new diff_steer_post(*this);
+  return new diff_steer::post(*this);
 };
 
-std::string diff_steer_post::as_str()
+std::string diff_steer::post::as_str()
 {
   std::stringstream s;
   // TODO: Complete the status string
-  s << "diff_steer_post=" << "TODO";
+  s << "diff_steer::post=" << "TODO";
   return s.str();
 };
 
-bool diff_steer_post::tick(base_object& o, int time)
+bool diff_steer::post::tick(base_object& o, int time)
 {
   // TODO: just a filler.
   return false;
