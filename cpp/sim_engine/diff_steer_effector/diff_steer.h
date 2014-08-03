@@ -28,7 +28,8 @@ namespace nrtb
 class diff_steer
 {
 public:
-  diff_steer(base_object & o, float thrust, float turn_rate,
+  diff_steer(base_object & o, float thrust, float _brake,
+             float turn_rate,
              float skid_threshold, float slide_friction); 
   // control methods
   float drive(float power);   // sets the "throttle"
@@ -59,8 +60,11 @@ public:
   };
   struct post: public abs_effector
   {
-    // TODO: Constructor
-    // TODO: local data
+    // Constructor
+    post(float t, float f);
+    // local data
+    float skid_threshold;
+    float slide_friction;
     // required overrides.
     abs_effector * clone();
     std::string as_str();

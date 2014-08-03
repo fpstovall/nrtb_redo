@@ -24,11 +24,21 @@
 
 using namespace nrtb;
 
-
-diff_steer::diff_steer(base_object& o, float thrust, float turn_rate, 
+diff_steer::diff_steer(base_object& o, float thrust, float _brake,
+                       float turn_rate, 
                        float skid_threshold, float slide_friction)
 {
-  // TODO: Create and attach the effectors to the object.
+  pre_effector.reset(new pre(thrust,_brake,turn_rate));
+  post_effector.reset(new post(skid_threshold,slide_friction));
+  o.add_pre(static_cast<abs_effector *>(pre_effector.get()));
+  o.add_post(static_cast<abs_effector *>( post_effector.get()));
+  if ((pre_effector.use_count() != 2)
+    or (post_effector.use_count() !=2 ))
+  {
+    base_exception e;
+    e.store("Shared pointers use_count not correct.");
+    throw e;
+  };
 };
 
 float diff_steer::drive(float power)
@@ -91,6 +101,10 @@ bool diff_steer::pre::tick(base_object& o, int time)
 };
 
 /******** post-effector **********/
+
+diff_steer::post::post(float t, float f)
+  : skid_threshold(t), slide_friction(f)
+{};
 
 abs_effector * diff_steer::post::clone()
 {
