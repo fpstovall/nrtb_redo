@@ -29,7 +29,7 @@ class diff_steer
 {
 public:
   diff_steer(base_object & o, float thrust, float turn_rate,
-             float skid_friction, float slide_friction); 
+             float skid_threshold, float slide_friction); 
   // control methods
   float drive(float power);   // sets the "throttle"
   float brake(float braking); // sets the brake
@@ -41,8 +41,17 @@ public:
   // effector definitions
   struct pre: public abs_effector
   {
-    // TODO: Constructor
-    // TODO: local data
+    // Constructor
+    pre(float mp, float mb, float mt);
+    pre(const pre & t);
+    // local data
+    float max_p;
+    float max_b;
+    float max_t;
+    // Input fields
+    std::atomic<float> set_p {0};
+    std::atomic<float> set_b {0};
+    std::atomic<float> set_t {0};
     // required overrides.
     abs_effector * clone();
     std::string as_str();
@@ -66,7 +75,6 @@ protected:
   pre_p pre_effector;
   post_p post_effector;  
 };
-
 
 } // namepace nrtb
 
