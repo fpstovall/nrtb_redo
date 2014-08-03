@@ -32,8 +32,10 @@ diff_steer::diff_steer(base_object& o, float thrust, float _brake,
   post_effector.reset(new post(skid_threshold,slide_friction));
   o.add_pre(static_cast<abs_effector *>(pre_effector.get()));
   o.add_post(static_cast<abs_effector *>( post_effector.get()));
+  // TODO: Determine if the above is safe, then
+  // TODO: remove the tests below once things are good.
   if ((pre_effector.use_count() != 2)
-    or (post_effector.use_count() !=2 ))
+    or (post_effector.use_count() !=2))
   {
     base_exception e;
     e.store("Shared pointers use_count not correct.");
@@ -43,32 +45,32 @@ diff_steer::diff_steer(base_object& o, float thrust, float _brake,
 
 float diff_steer::drive(float power)
 {
-  // TODO: update the local variable and the pre-effector;
+  pre_effector->set_p.store(power);
 };
 
 float diff_steer::brake(float braking)
 {
-  // TODO: update the local variable and the pre-effector;
+  pre_effector->set_b.store(braking);
 };
 
 float diff_steer::turn(float rate)
 {
-  // TODO: update the local variable and the pre-effector;
+  pre_effector->set_t.store(rate);
 };
 
 float diff_steer::get_drive()
 {
-  return drive_val;
+  return pre_effector->set_p.load();
 };
 
 float diff_steer::get_brake()
 {
-  return brake_val;
+  return pre_effector->set_b.load();
 };
 
 float diff_steer::get_turn()
 {
-  return turn_val;
+  return pre_effector->set_t.load();
 };
 
 /******** pre-effector **********/

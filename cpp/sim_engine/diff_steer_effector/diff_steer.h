@@ -73,9 +73,6 @@ public:
   typedef std::shared_ptr<pre> pre_p;
   typedef std::shared_ptr<post> post_p;
 protected:
-  float drive_val {0.0};
-  float brake_val {0.0};
-  float turn_val  {0.0};
   pre_p pre_effector;
   post_p post_effector;  
 };
