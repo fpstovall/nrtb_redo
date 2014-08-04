@@ -53,8 +53,11 @@ struct recorder : abs_effector
 
 struct driver : public base_object
 {
+  // diff_steer interface
+  shared_ptr<diff_steer>  mobility;
   driver()
   {
+    mobility.reset(new diff_steer(*this,100,1000,100,10,8));
     // TODO: add_pre(new driver(?));
     add_pre(new norm_gravity);
     add_post(new recorder);
@@ -108,6 +111,7 @@ int main()
   cout << "========== diff_steer test ============="
     << endl;
   
+  driver test_ob;
   
   cout << "=========== diff_steer test complete ============="
     << endl;
