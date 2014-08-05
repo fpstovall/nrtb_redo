@@ -115,7 +115,9 @@ int main()
   rocket_ball.add_pre(new gravity);
   cout << rocket_ball.as_str() << endl;
   
-  rocket_ball.add_pre(new rocket);
+  // test effector_p add.
+  effector_p rp(new rocket);
+  rocket_ball.add_pre(rp);
   cout << rocket_ball.as_str() << endl;  
   
   cout << "Launch:" << endl;
