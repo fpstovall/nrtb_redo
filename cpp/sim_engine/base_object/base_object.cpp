@@ -115,7 +115,7 @@ void base_object::add_pre(abs_effector* e)
   pre_attribs[e->id] = effector_p(e);
 };
 
-void base_object::add_pre(effector_p e)
+void base_object::add_pre(effector_p & e)
 {
   pre_attribs[e->id] = e;
 };
@@ -131,7 +131,7 @@ void base_object::add_post(abs_effector* e)
   post_attribs[e->id] = effector_p(e);
 };
 
-void base_object::add_post(effector_p e)
+void base_object::add_post(effector_p & e)
 {
   post_attribs[e->id] = e;
 };

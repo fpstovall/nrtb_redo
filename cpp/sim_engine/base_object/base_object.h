@@ -78,10 +78,10 @@ struct base_object
   virtual std::string as_str();
   // effector management
   virtual void add_pre(abs_effector * e);
-  virtual void add_pre(effector_p e);
+  virtual void add_pre(effector_p & e);
   virtual abs_effector & get_pre(unsigned long long i);
   virtual void add_post(abs_effector * e);
-  virtual void add_post(effector_p e);
+  virtual void add_post(effector_p & e);
   virtual abs_effector & get_post(unsigned long long i);
   virtual void drop_attrib(unsigned long long i);
   // -- these return deep copies of the attribs list.
