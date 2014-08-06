@@ -84,14 +84,36 @@ abs_effector * diff_steer::pre::clone()
 std::string diff_steer::pre::as_str()
 {
   std::stringstream s;
-  // TODO: Complete the status string
-  s << "diff_steer::pre=" << "TODO";
+  s << "diff_steer::pre=" 
+    << max_p << "," << set_p << ","
+    << max_b << "," << set_b << ","
+    << max_t << "," << set_t;
   return s.str();
 };
 
 bool diff_steer::pre::tick(base_object& o, int time)
 {
-  // TODO: just a filler.
+  // are we in contact with the ground?
+  float gl = o.location.z  - o.bounding_sphere.radius;
+  if (gl < 0.5)
+  {
+    float p = set_p.load();
+    float b = set_b.load();
+    float t = set_t.load();
+    // calc the planar thrust and brake vector
+    triplet vec = o.attitude;
+    vec.z = 0.0;
+    vec = vec.normalize();
+    // Apply propulsion setting.
+    if (fabs(p) <= max_p)
+      o.accel_mod += (vec * p);
+    // Apply brake setting.
+    if ((b <= max_b) and (b > 0.0))
+      o.accel_mod -= (vec * b);
+    // Apply turn setting;
+    if (fabs(t) <= max_t)
+      o.torque_mod.z += t;    
+  };
   return false;
 };
 
