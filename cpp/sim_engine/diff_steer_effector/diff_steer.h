@@ -35,6 +35,7 @@ public:
   float drive(float power);   // sets the "throttle"
   float brake(float braking); // sets the brake
   float turn(float rate);     // sets turn rate
+  void lockdown();            // full stop.
   // status reporting;
   float get_drive();
   float get_brake();

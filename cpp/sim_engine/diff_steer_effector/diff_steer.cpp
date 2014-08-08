@@ -38,17 +38,46 @@ diff_steer::diff_steer(base_object& o, float thrust, float _brake,
 
 float diff_steer::drive(float power)
 {
-  pre_effector->set_p.store(power);
+  if (fabsf(power) <= 100.0)
+  {
+    pre_effector->set_p.store(power/100);
+  }
+  else
+  {
+    lockdown();
+  };
 };
 
 float diff_steer::brake(float braking)
 {
-  pre_effector->set_b.store(braking);
+  if ((braking >= 0.0) and (braking <= 100.0))
+  {
+    pre_effector->set_b.store(braking/100);
+  }
+  else 
+  {
+    lockdown();
+  };
 };
 
 float diff_steer::turn(float rate)
 {
-  pre_effector->set_t.store(rate);
+  if (fabsf(rate) <= 100.0)
+  {
+    pre_effector->set_t.store(rate/100);
+  }
+  else
+  {
+    lockdown();
+  };
+};
+
+void diff_steer::lockdown()
+{
+  // full stop.
+  pre_effector->set_p.store(0.0);
+  pre_effector->set_b.store(1.0);
+  pre_effector->set_t.store(0.0);  
 };
 
 float diff_steer::get_drive()
@@ -97,22 +126,19 @@ bool diff_steer::pre::tick(base_object& o, int time)
   float gl = o.location.z  - o.bounding_sphere.radius;
   if (gl < 0.5)
   {
-    float p = set_p.load();
-    float b = set_b.load();
-    float t = set_t.load();
+    float p = set_p.load() * max_p;
+    float b = set_b.load() * max_b;
+    float t = set_t.load() * max_t;
     // calc the planar thrust and brake vector
     triplet vec = o.attitude;
     vec.z = 0.0;
     vec = vec.normalize();
     // Apply propulsion setting.
-    if (fabs(p) <= max_p)
-      o.accel_mod += (vec * p);
+    o.accel_mod += (vec * p);
     // Apply brake setting.
-    if ((b <= max_b) and (b > 0.0))
-      o.accel_mod -= (vec * b);
+    o.accel_mod -= (vec * b);
     // Apply turn setting;
-    if (fabs(t) <= max_t)
-      o.torque_mod.z += t;    
+    o.torque_mod.z += t;    
   };
   return false;
 };
