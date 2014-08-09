@@ -44,15 +44,13 @@ public:
   struct pre: public abs_effector
   {
     // Constructor
-    pre(float mp, float mb, float mt);
+    pre(float mp, float mt);
     pre(const pre & t);
     // local data
     float max_p;
-    float max_b;
     float max_t;
     // Input fields
     std::atomic<float> set_p {0};
-    std::atomic<float> set_b {0};
     std::atomic<float> set_t {0};
     // required overrides.
     abs_effector * clone();
