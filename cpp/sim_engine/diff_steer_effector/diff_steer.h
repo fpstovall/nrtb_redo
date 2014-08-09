@@ -60,8 +60,11 @@ public:
   struct post: public abs_effector
   {
     // Constructor
-    post(float t, float f);
+    post(float mb,float t, float f);
+    post(const post & t);
     // local data
+    float max_b;
+    std::atomic<float> set_b {1.0};
     float skid_threshold;
     float slide_friction;
     // required overrides.

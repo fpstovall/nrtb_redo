@@ -29,7 +29,7 @@ diff_steer::diff_steer(base_object& o, float thrust, float _brake,
                        float skid_threshold, float slide_friction)
 {
   pre_effector.reset(new pre(thrust,turn_rate));
-  post_effector.reset(new post(skid_threshold,slide_friction));
+  post_effector.reset(new post(_brake,skid_threshold,slide_friction));
   effector_p t(pre_effector);
   o.add_pre(t);
   t = post_effector;
@@ -52,7 +52,7 @@ float diff_steer::brake(float braking)
 {
   if ((braking >= 0.0) and (braking <= 100.0))
   {
-//    pre_effector->set_b.store(braking/100);
+    post_effector->set_b.store(braking/100);
   }
   else 
   {
@@ -76,7 +76,7 @@ void diff_steer::lockdown()
 {
   // full stop.
   pre_effector->set_p.store(0.0);
-//  pre_effector->set_b.store(1.0);
+  post_effector->set_b.store(1.0);
   pre_effector->set_t.store(0.0);  
 };
 
@@ -87,7 +87,7 @@ float diff_steer::get_drive()
 
 float diff_steer::get_brake()
 {
-//  return pre_effector->set_b.load();
+  return post_effector->set_b.load();
 };
 
 float diff_steer::get_turn()
@@ -141,8 +141,13 @@ bool diff_steer::pre::tick(base_object& o, int time)
 
 /******** post-effector **********/
 
-diff_steer::post::post(float t, float f)
+diff_steer::post::post(float mb, float t, float f)
   : skid_threshold(t), slide_friction(f)
+{};
+
+diff_steer::post::post(const diff_steer::post& t)
+  : max_b(t.max_b), slide_friction(t.slide_friction),
+    skid_threshold(t.skid_threshold), set_b(t.set_b.load())
 {};
 
 abs_effector * diff_steer::post::clone()
@@ -153,8 +158,9 @@ abs_effector * diff_steer::post::clone()
 std::string diff_steer::post::as_str()
 {
   std::stringstream s;
-  // TODO: Complete the status string
-  s << "diff_steer::post=" << "TODO";
+  s << "diff_steer::post=" 
+    << max_b << "," << set_b
+    << skid_threshold << "," << slide_friction;
   return s.str();
 };
 
