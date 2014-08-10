@@ -166,7 +166,19 @@ std::string diff_steer::post::as_str()
 
 bool diff_steer::post::tick(base_object& o, int time)
 {
-  // TODO: just a filler.
+  // are we in contact with the ground?
+  float gl = o.location.z  - o.bounding_sphere.radius;
+  if (gl < 0.5)
+  {
+    triplet DoT = o.velocity;
+    triplet DoH = o.attitude;
+    // -- squash verticals
+    DoT.z = 0.0;
+    DoH.z = 0.0;
+    // get the cosine of the angle between them.
+    auto delta = DoT.normalize().dot_product(DoH.normalize());
+    
+  };
   return false;
 };
 
