@@ -26,8 +26,20 @@
 
 namespace nrtb
 {
+
+const float pi=3.14159;
   
 typedef triad<float> triplet;
+
+struct rotatable
+{
+  triplet axis;
+  float period(2.0 * pi);
+  void trim();
+  void apply_force(float mass, float arm, triplet vec);
+  // TODO: more to do here.
+  
+};
 
 struct sphere
 {
