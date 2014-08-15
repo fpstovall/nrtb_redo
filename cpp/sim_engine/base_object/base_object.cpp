@@ -16,7 +16,7 @@
  
  **********************************************/
 
-// see base_socket.h for documentation
+// see base_object.h for documentation
 
 #include "base_object.h"
 #include <sstream>
@@ -25,6 +25,27 @@ using namespace nrtb;
 
 serializer abs_effector::effector_num;
 serializer base_object::object_num;
+
+rotatable::rotatable(triplet s)
+  : axis(s) 
+{};
+
+void rotatable::trim()
+{
+  axis.x = fmodf(axis.x,period);
+  axis.y = fmodf(axis.y,period);
+  axis.z = fmodf(axis.z,period);
+};
+
+void rotatable::apply_force(float mass, float arm, triplet vec)
+{
+  // TODO: need the guts here.
+};
+
+triplet rotatable::get_cart()
+{
+  // TODO: need the guts here.
+};
 
 std::string base_object::as_str()
 {

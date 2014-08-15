@@ -33,12 +33,12 @@ typedef triad<float> triplet;
 
 struct rotatable
 {
+  rotatable(triplet s);
   triplet axis;
-  float period(2.0 * pi);
+  float period = 2.0 * pi;
   void trim();
   void apply_force(float mass, float arm, triplet vec);
-  // TODO: more to do here.
-  
+  triplet get_cart();
 };
 
 struct sphere
