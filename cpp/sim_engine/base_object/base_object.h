@@ -35,7 +35,7 @@ struct rotatable
 {
   rotatable(triplet s);
   triplet axis;
-  float period = 2.0 * pi;
+  const float period = 2.0 * pi;
   void trim();
   void apply_force(float mass, float arm, triplet vec);
   triplet get_cart();

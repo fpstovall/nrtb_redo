@@ -39,7 +39,10 @@ void rotatable::trim()
 
 void rotatable::apply_force(float mass, float arm, triplet vec)
 {
-  // TODO: need the guts here.
+  float I = ((arm*arm) * mass)/2;
+  axis.x = vec.x / I;
+  axis.y = vec.y / I;
+  axis.z = vec.z / I;
 };
 
 triplet rotatable::get_cart()
