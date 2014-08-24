@@ -38,7 +38,8 @@ struct rotatable
   const float period = 2.0 * pi;
   void trim();
   void apply_force(float mass, float arm, triplet vec);
-  triplet get_cart();
+  triplet get_cos();
+  triplet get_sin();
 };
 
 struct sphere

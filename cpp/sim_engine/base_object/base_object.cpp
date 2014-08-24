@@ -40,14 +40,27 @@ void rotatable::trim()
 void rotatable::apply_force(float mass, float arm, triplet vec)
 {
   float I = ((arm*arm) * mass)/2;
-  axis.x = vec.x / I;
-  axis.y = vec.y / I;
-  axis.z = vec.z / I;
+  axis.x += vec.x / I;
+  axis.y += vec.y / I;
+  axis.z += vec.z / I;
 };
 
-triplet rotatable::get_cart()
+triplet rotatable::get_cos()
 {
-  // TODO: need the guts here.
+  triplet returnme;
+  returnme.x = cosf(axis.x);
+  returnme.y = cosf(axis.y);
+  returnme.z = cosf(axis.z);
+  return returnme;
+};
+
+triplet rotatable::get_sin()
+{
+  triplet returnme;
+  returnme.x = sinf(axis.x);
+  returnme.y = sinf(axis.y);
+  returnme.z = sinf(axis.z);
+  return returnme;
 };
 
 std::string base_object::as_str()
