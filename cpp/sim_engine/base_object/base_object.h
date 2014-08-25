@@ -33,11 +33,11 @@ typedef triad<float> triplet;
 
 struct rotatable
 {
-  rotatable(triplet s);
+  rotatable(triplet s=triplet(0.0));
   triplet axis;
   const float period = 2.0 * pi;
   void trim();
-  void apply_force(float mass, float arm, triplet vec);
+  void apply_force(float mass, float arm, triplet vec, float t);
   triplet get_cos();
   triplet get_sin();
 };
@@ -77,13 +77,13 @@ struct base_object
   unsigned long long id = object_num();
   std::string handle;
   triplet location;
-  triplet attitude;
+  rotatable attitude;
   triplet velocity;
-  triplet rotation;
+  rotatable rotation;
   triplet force;
-  triplet torque;
+  rotatable torque;
   triplet accel_mod;
-  triplet torque_mod;
+  rotatable torque_mod;
   float mass;
   float mass_mod;
   sphere bounding_sphere;

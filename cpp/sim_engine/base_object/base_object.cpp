@@ -37,9 +37,9 @@ void rotatable::trim()
   axis.z = fmodf(axis.z,period);
 };
 
-void rotatable::apply_force(float mass, float arm, triplet vec)
+void rotatable::apply_force(float mass, float arm, triplet vec, float t)
 {
-  float I = ((arm*arm) * mass)/2;
+  float I = (((arm*arm) * mass)/2)*t;
   axis.x += vec.x / I;
   axis.y += vec.y / I;
   axis.z += vec.z / I;
@@ -68,13 +68,13 @@ std::string base_object::as_str()
   std::stringstream returnme;
   returnme << "ID=" << id
     << ":loc=" << location
-    << ":att=" << attitude
+    << ":att=" << attitude.axis
     << ":vel=" << velocity
-    << ":rot=" << rotation
+    << ":rot=" << rotation.axis
     << ":f=" << force
-    << ":t=" << torque
+    << ":t=" << torque.axis
     << ":acc_mod=" << accel_mod
-    << ":t_mod=" << torque_mod
+    << ":t_mod=" << torque_mod.axis
     << ":mass=" << mass
     << ":mass_mod=" << mass_mod
     << ":b_sphere=" << bounding_sphere.center
@@ -92,9 +92,9 @@ bool base_object::tick(int time)
 {
   // clean up for next pass
   accel_mod = 0;
-  torque_mod = 0;
+  torque_mod.axis = 0;
   force = 0;
-  torque = 0;
+  torque.axis = 0;
   mass_mod = 0;
   // execute any pending attrib drops
   for(auto i : dropped_attribs)
@@ -118,19 +118,20 @@ bool base_object::tick(int time)
 
 bool base_object::apply(int time, float quanta)
 {
+  // TODO: use rotatable for attitude and rotation.
   // move acording to forces
   float tmass = mass + mass_mod;
   triplet a = force / tmass;
-  triplet ra = torque / (tmass * 0.5); // not accurate!!
+  // TODO: correct: triplet ra = torque / (tmass * 0.5); // not accurate!!
   // compute quanta effective Vs
   triplet ev = velocity + (((a + accel_mod)/2) * quanta);
-  triplet er = rotation + (((ra + torque_mod)/2) * quanta);
+  // TODO: correct: triplet er = rotation + (((ra + torque_mod)/2) * quanta);
   // compute final velocities for the quanta
   velocity += (a  + accel_mod) * quanta;
-  rotation += (ra + torque_mod) * quanta;
+  // TODO: correct: rotation += (ra + torque_mod) * quanta;
   // update position, attitude
   location += ev * quanta;
-  attitude += er * quanta;
+  // TODO: correct: attitude += er * quanta;
   // apply post-effectors
   bool killme (false);
   for (auto e : post_attribs)
