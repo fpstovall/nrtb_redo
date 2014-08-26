@@ -122,15 +122,13 @@ bool base_object::apply(int time, float quanta)
   // move acording to forces
   float tmass = mass + mass_mod;
   triplet a = force / tmass;
-  // TODO: correct: triplet ra = torque / (tmass * 0.5); // not accurate!!
-  // compute quanta effective Vs
   triplet ev = velocity + (((a + accel_mod)/2) * quanta);
-  // TODO: correct: triplet er = rotation + (((ra + torque_mod)/2) * quanta);
-  // compute final velocities for the quanta
   velocity += (a  + accel_mod) * quanta;
-  // TODO: correct: rotation += (ra + torque_mod) * quanta;
-  // update position, attitude
   location += ev * quanta;
+  // rotate according to the forces
+  // TODO: correct: triplet ra = torque / (tmass * 0.5); // not accurate!!
+  // TODO: correct: triplet er = rotation + (((ra + torque_mod)/2) * quanta);
+  // TODO: correct: rotation += (ra + torque_mod) * quanta;
   // TODO: correct: attitude += er * quanta;
   // apply post-effectors
   bool killme (false);
