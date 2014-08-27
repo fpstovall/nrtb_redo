@@ -83,7 +83,7 @@ struct base_object
   triplet force;
   rotatable torque;
   triplet accel_mod;
-  rotatable torque_mod;
+  rotatable rotation_mod;
   float mass;
   float mass_mod;
   sphere bounding_sphere;

@@ -74,7 +74,7 @@ std::string base_object::as_str()
     << ":f=" << force
     << ":t=" << torque.axis
     << ":acc_mod=" << accel_mod
-    << ":t_mod=" << torque_mod.axis
+    << ":r_mod=" << rotation_mod.axis
     << ":mass=" << mass
     << ":mass_mod=" << mass_mod
     << ":b_sphere=" << bounding_sphere.center
@@ -92,7 +92,7 @@ bool base_object::tick(int time)
 {
   // clean up for next pass
   accel_mod = 0;
-  torque_mod.axis = 0;
+  rotation_mod.axis = 0;
   force = 0;
   torque.axis = 0;
   mass_mod = 0;
@@ -118,18 +118,19 @@ bool base_object::tick(int time)
 
 bool base_object::apply(int time, float quanta)
 {
-  // TODO: use rotatable for attitude and rotation.
   // move acording to forces
   float tmass = mass + mass_mod;
   triplet a = force / tmass;
-  triplet ev = velocity + (((a + accel_mod)/2) * quanta);
+  triplet ev = velocity + (((a + accel_mod)/2.0) * quanta);
   velocity += (a  + accel_mod) * quanta;
   location += ev * quanta;
   // rotate according to the forces
-  // TODO: correct: triplet ra = torque / (tmass * 0.5); // not accurate!!
-  // TODO: correct: triplet er = rotation + (((ra + torque_mod)/2) * quanta);
-  // TODO: correct: rotation += (ra + torque_mod) * quanta;
-  // TODO: correct: attitude += er * quanta;
+  rotatable rbase = rotation;
+  rotation.axis += rotation_mod.axis * quanta;
+  rotation.apply_force(tmass, bounding_sphere.radius,
+                       torque.axis,quanta);
+  attitude.axis += (rotation.axis + rbase.axis)/2.0;
+  attitude.trim();
   // apply post-effectors
   bool killme (false);
   for (auto e : post_attribs)
