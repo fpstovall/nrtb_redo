@@ -32,6 +32,7 @@ rotatable::rotatable(triplet s)
 
 void rotatable::trim()
 {
+  dirty = true;
   axis.x = fmodf(axis.x,period);
   axis.y = fmodf(axis.y,period);
   axis.z = fmodf(axis.z,period);
@@ -39,6 +40,7 @@ void rotatable::trim()
 
 void rotatable::apply_force(float mass, float arm, triplet vec, float t)
 {
+  dirty = true;
   float I = (((arm*arm) * mass)/2)*t;
   axis.x += vec.x / I;
   axis.y += vec.y / I;
@@ -47,6 +49,7 @@ void rotatable::apply_force(float mass, float arm, triplet vec, float t)
 
 triplet rotatable::get_cos()
 {
+  if (dirty) recalc();
   triplet returnme;
   returnme.x = cosf(axis.x);
   returnme.y = cosf(axis.y);
@@ -56,6 +59,7 @@ triplet rotatable::get_cos()
 
 triplet rotatable::get_sin()
 {
+  if (dirty) recalc();
   triplet returnme;
   returnme.x = sinf(axis.x);
   returnme.y = sinf(axis.y);
@@ -68,13 +72,13 @@ std::string base_object::as_str()
   std::stringstream returnme;
   returnme << "ID=" << id
     << ":loc=" << location
-    << ":att=" << attitude.axis
+    << ":att=" << attitude.angles()
     << ":vel=" << velocity
-    << ":rot=" << rotation.axis
+    << ":rot=" << rotation.angles()
     << ":f=" << force
-    << ":t=" << torque.axis
+    << ":t=" << torque.angles()
     << ":acc_mod=" << accel_mod
-    << ":r_mod=" << rotation_mod.axis
+    << ":r_mod=" << rotation_mod.angles()
     << ":mass=" << mass
     << ":mass_mod=" << mass_mod
     << ":b_sphere=" << bounding_sphere.center
@@ -92,9 +96,9 @@ bool base_object::tick(int time)
 {
   // clean up for next pass
   accel_mod = 0;
-  rotation_mod.axis = 0;
+  rotation_mod.set(triplet(0));
   force = 0;
-  torque.axis = 0;
+  torque.set(triplet(0));
   mass_mod = 0;
   // execute any pending attrib drops
   for(auto i : dropped_attribs)
@@ -126,10 +130,10 @@ bool base_object::apply(int time, float quanta)
   location += ev * quanta;
   // rotate according to the forces
   rotatable rbase = rotation;
-  rotation.axis += rotation_mod.axis * quanta;
+  rotation.add(rotation_mod.angles() * quanta);
   rotation.apply_force(tmass, bounding_sphere.radius,
-                       torque.axis,quanta);
-  attitude.axis += (rotation.axis + rbase.axis)/2.0;
+                       torque.angles(),quanta);
+  attitude.add((rotation.angles() + rbase.angles())/2.0);
   attitude.trim();
   // apply post-effectors
   bool killme (false);
