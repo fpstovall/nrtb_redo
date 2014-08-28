@@ -47,6 +47,8 @@ struct rotatable
 private:
   bool dirty;
   triplet axis;
+  triplet cos;
+  triplet sin;
   void recalc();
 };
 

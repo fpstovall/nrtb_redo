@@ -27,7 +27,7 @@ serializer abs_effector::effector_num;
 serializer base_object::object_num;
 
 rotatable::rotatable(triplet s)
-  : axis(s) 
+  : axis(s), dirty(true) 
 {};
 
 void rotatable::trim()
@@ -47,24 +47,55 @@ void rotatable::apply_force(float mass, float arm, triplet vec, float t)
   axis.z += vec.z / I;
 };
 
+void rotatable::scale(triplet factor)
+{
+  dirty = true;
+  axis *= factor;
+};
+
+void rotatable::add(triplet value)
+{
+  dirty = true;
+  axis += value;
+};
+
+void rotatable::set(triplet a)
+{
+  dirty = true;
+  axis = a;
+};
+
+void rotatable::set(rotatable a)
+{
+  set(a.angles());
+};
+
+triplet rotatable::angles()
+{
+  return axis;
+};
+
 triplet rotatable::get_cos()
 {
   if (dirty) recalc();
-  triplet returnme;
-  returnme.x = cosf(axis.x);
-  returnme.y = cosf(axis.y);
-  returnme.z = cosf(axis.z);
-  return returnme;
+  return cos;
 };
 
 triplet rotatable::get_sin()
 {
   if (dirty) recalc();
-  triplet returnme;
-  returnme.x = sinf(axis.x);
-  returnme.y = sinf(axis.y);
-  returnme.z = sinf(axis.z);
-  return returnme;
+  return sin;
+};
+
+void rotatable::recalc()
+{
+  cos.x = cosf(axis.x);
+  cos.y = cosf(axis.y);
+  cos.z = cosf(axis.z);
+  sin.x = sinf(axis.x);
+  sin.y = sinf(axis.y);
+  sin.z = sinf(axis.z);
+  dirty=false;
 };
 
 std::string base_object::as_str()
