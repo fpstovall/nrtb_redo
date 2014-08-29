@@ -194,21 +194,61 @@ int main()
   
   //******* rotatable tests ********
   
+  bool rfailed = false;
   rotatable r1;
+  // add, set, get_cos, get_sin, angles tests.
   triplet forward(r1.get_cos().z, r1.get_sin().z,0);
-  cout << "Forward: " << forward << endl;
- 
   float eight = pi/4;
   for(int i=0; i<8; i++)
   {
     float p = eight*(i+1);
     r1.add(triplet(0,0,eight));
     triplet cart(r1.get_cos().z, r1.get_sin().z,0);
-    cout << p << cart << ":" << cart.magnatude() << endl;
+    if (fabs(cart.magnatude()-1.0) > 1e-5)
+    {
+      rfailed = true;
+      cout << "** Cartisian conversion failed" << endl;
+    };
+  };
+  // verify add accuracy.
+  float dv = r1.angles().z-r1.period;
+  if (fabs(dv) > 1e-5)
+  {
+    rfailed = true;
+    cout << "** rotation.add() failed " << dv << endl;
+  };
+  // rotatable scale test
+  r1.scale(triplet(2,2,2));
+  dv = r1.angles().magnatude() - (r1.period*2.0);
+  if (fabs(dv) > 1e-5)
+  {
+    rfailed = true;
+    cout << "** rotation.scale() failed " << dv << endl;
+  };
+  // rotatable trim test.
+  r1.trim();
+  dv = r1.angles().magnatude();
+  if (dv > 1e-5)
+  {
+    rfailed = true;
+    cout << "** rotation.trim() failed " << dv << endl;
+  };
+  // rotatable.apply_force test.
+  r1.set(triplet(0,0,0));
+  r1.apply_force(100,1,triplet(100,100,100),1);
+  triplet dvt = r1.angles();
+  if ((dvt.x != dvt.y) or (dvt.y != dvt.z) or (dvt.x != 2.0))
+  {
+    rfailed = true;
+    cout << "** rotatable.apply_force() failed " << dvt << endl;
   };
   
+  // sum it up.
+  cout << "** rotatable test: " 
+    << (rfailed ? "Failed" : "Passed") << endl;
   
-  
+  failed = failed or rfailed;
+    
   cout << "=========== base_object test complete ============="
     << endl;
   
