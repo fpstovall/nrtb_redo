@@ -192,6 +192,23 @@ int main()
 
   failed = failed or c or cl;
   
+  //******* rotatable tests ********
+  
+  rotatable r1;
+  triplet forward(r1.get_cos().z, r1.get_sin().z,0);
+  cout << "Forward: " << forward << endl;
+ 
+  float eight = pi/4;
+  for(int i=0; i<8; i++)
+  {
+    float p = eight*(i+1);
+    r1.add(triplet(0,0,eight));
+    triplet cart(r1.get_cos().z, r1.get_sin().z,0);
+    cout << p << cart << ":" << cart.magnatude() << endl;
+  };
+  
+  
+  
   cout << "=========== base_object test complete ============="
     << endl;
   
