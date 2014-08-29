@@ -34,6 +34,7 @@ typedef triad<float> triplet;
 struct rotatable
 {
   rotatable(triplet s=triplet(0.0));
+  rotatable(rotatable& a);
   const float period = 2.0 * pi;
   void trim();
   void apply_force(float mass, float arm, triplet vec, float t);
@@ -45,7 +46,7 @@ struct rotatable
   triplet get_cos();
   triplet get_sin();
 private:
-  bool dirty;
+  std::atomic<bool> dirty;
   triplet axis;
   triplet cos;
   triplet sin;

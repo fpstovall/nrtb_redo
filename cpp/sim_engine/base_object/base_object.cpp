@@ -30,6 +30,10 @@ rotatable::rotatable(triplet s)
   : axis(s), dirty(true) 
 {};
 
+rotatable::rotatable(rotatable & a)
+  : axis(a.angles()), dirty(true)
+{};
+
 void rotatable::trim()
 {
   dirty = true;
