@@ -42,13 +42,14 @@ void rotatable::trim()
   axis.z = fmodf(axis.z,period);
 };
 
-void rotatable::apply_force(float mass, float arm, triplet vec, float t)
+void rotatable::apply_force(float mass, float arm, 
+                            triplet vec, float t)
 {
   dirty = true;
-  float I = (((arm*arm) * mass)/2)*t;
-  axis.x += vec.x / I;
-  axis.y += vec.y / I;
-  axis.z += vec.z / I;
+  float I = (((arm*arm) * mass)/2);
+  axis.x += (vec.x / I) * t;
+  axis.y += (vec.y / I) * t;
+  axis.z += (vec.z / I) * t;
 };
 
 void rotatable::scale(triplet factor)
@@ -168,7 +169,7 @@ bool base_object::apply(int time, float quanta)
   rotation.add(rotation_mod.angles() * quanta);
   rotation.apply_force(tmass, bounding_sphere.radius,
                        torque.angles(),quanta);
-  attitude.add((rotation.angles() + rbase.angles())/2.0);
+  attitude.add(((rotation.angles() + rbase.angles())/2.0)*quanta);
   attitude.trim();
   // apply post-effectors
   bool killme (false);
