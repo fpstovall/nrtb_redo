@@ -16,7 +16,7 @@
  
  **********************************************/
 
-// see base_socket.h for documentation
+// see base_object.h for documentation
 
 #include "base_object.h"
 #include <sstream>
@@ -26,18 +26,95 @@ using namespace nrtb;
 serializer abs_effector::effector_num;
 serializer base_object::object_num;
 
+rotatable::rotatable(triplet s)
+  : axis(s), dirty(true) 
+{};
+
+rotatable::rotatable(rotatable & a)
+  : axis(a.angles()), dirty(true)
+{};
+
+void rotatable::trim()
+{
+  dirty = true;
+  axis.x = fmodf(axis.x,period);
+  axis.y = fmodf(axis.y,period);
+  axis.z = fmodf(axis.z,period);
+};
+
+void rotatable::apply_force(float mass, float arm, 
+                            triplet vec, float t)
+{
+  dirty = true;
+  float I = (((arm*arm) * mass)/2);
+  axis.x += (vec.x / I) * t;
+  axis.y += (vec.y / I) * t;
+  axis.z += (vec.z / I) * t;
+};
+
+void rotatable::scale(triplet factor)
+{
+  dirty = true;
+  axis *= factor;
+};
+
+void rotatable::add(triplet value)
+{
+  dirty = true;
+  axis += value;
+};
+
+void rotatable::set(triplet a)
+{
+  dirty = true;
+  axis = a;
+};
+
+void rotatable::set(rotatable a)
+{
+  set(a.angles());
+};
+
+triplet rotatable::angles()
+{
+  return axis;
+};
+
+triplet rotatable::get_cos()
+{
+  if (dirty) recalc();
+  return cos;
+};
+
+triplet rotatable::get_sin()
+{
+  if (dirty) recalc();
+  return sin;
+};
+
+void rotatable::recalc()
+{
+  cos.x = cosf(axis.x);
+  cos.y = cosf(axis.y);
+  cos.z = cosf(axis.z);
+  sin.x = sinf(axis.x);
+  sin.y = sinf(axis.y);
+  sin.z = sinf(axis.z);
+  dirty=false;
+};
+
 std::string base_object::as_str()
 {
   std::stringstream returnme;
   returnme << "ID=" << id
     << ":loc=" << location
-    << ":att=" << attitude
+    << ":att=" << attitude.angles()
     << ":vel=" << velocity
-    << ":rot=" << rotation
+    << ":rot=" << rotation.angles()
     << ":f=" << force
-    << ":t=" << torque
+    << ":t=" << torque.angles()
     << ":acc_mod=" << accel_mod
-    << ":t_mod=" << torque_mod
+    << ":r_mod=" << rotation_mod.angles()
     << ":mass=" << mass
     << ":mass_mod=" << mass_mod
     << ":b_sphere=" << bounding_sphere.center
@@ -55,9 +132,9 @@ bool base_object::tick(int time)
 {
   // clean up for next pass
   accel_mod = 0;
-  torque_mod = 0;
+  rotation_mod.set(triplet(0));
   force = 0;
-  torque = 0;
+  torque.set(triplet(0));
   mass_mod = 0;
   // execute any pending attrib drops
   for(auto i : dropped_attribs)
@@ -84,16 +161,16 @@ bool base_object::apply(int time, float quanta)
   // move acording to forces
   float tmass = mass + mass_mod;
   triplet a = force / tmass;
-  triplet ra = torque / (tmass * 0.5); // not accurate!!
-  // compute quanta effective Vs
-  triplet ev = velocity + (((a + accel_mod)/2) * quanta);
-  triplet er = rotation + (((ra + torque_mod)/2) * quanta);
-  // compute final velocities for the quanta
+  triplet ev = velocity + (((a + accel_mod)/2.0) * quanta);
   velocity += (a  + accel_mod) * quanta;
-  rotation += (ra + torque_mod) * quanta;
-  // update position, attitude
   location += ev * quanta;
-  attitude += er * quanta;
+  // rotate according to the forces
+  rotatable rbase = rotation;
+  rotation.add(rotation_mod.angles() * quanta);
+  rotation.apply_force(tmass, bounding_sphere.radius,
+                       torque.angles(),quanta);
+  attitude.add(((rotation.angles() + rbase.angles())/2.0)*quanta);
+  attitude.trim();
   // apply post-effectors
   bool killme (false);
   for (auto e : post_attribs)

@@ -26,8 +26,32 @@
 
 namespace nrtb
 {
+
+const float pi=3.14159;
   
 typedef triad<float> triplet;
+
+struct rotatable
+{
+  rotatable(triplet s=triplet(0.0));
+  rotatable(rotatable& a);
+  const float period = 2.0 * pi;
+  void trim();
+  void apply_force(float mass, float arm, triplet vec, float t);
+  void scale(triplet factor);
+  void add(triplet value);
+  void set(triplet a);
+  void set(rotatable a);
+  triplet angles();
+  triplet get_cos();
+  triplet get_sin();
+private:
+  std::atomic<bool> dirty;
+  triplet axis;
+  triplet cos;
+  triplet sin;
+  void recalc();
+};
 
 struct sphere
 {
@@ -64,13 +88,13 @@ struct base_object
   unsigned long long id = object_num();
   std::string handle;
   triplet location;
-  triplet attitude;
+  rotatable attitude;
   triplet velocity;
-  triplet rotation;
+  rotatable rotation;
   triplet force;
-  triplet torque;
+  rotatable torque;
   triplet accel_mod;
-  triplet torque_mod;
+  rotatable rotation_mod;
   float mass;
   float mass_mod;
   sphere bounding_sphere;
