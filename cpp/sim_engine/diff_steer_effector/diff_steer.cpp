@@ -128,13 +128,12 @@ bool diff_steer::pre::tick(base_object& o, int time)
     float p = set_p.load() * max_p;
     float t = set_t.load() * max_t;
     // calc the planar thrust and brake vector
-    triplet vec = o.attitude;
-    vec.z = 0.0;
-    vec = vec.normalize();
+    rotatable & a = o.attitude;
+    triplet vec(a.get_cos().z,a.get_sin().z,0.0);
     // Apply propulsion setting.
     o.accel_mod += (vec * p);
     // Apply turn setting;
-    o.torque_mod.z += t;    
+    o.torque.add(t);    
   };
   return false;
 };
@@ -170,14 +169,30 @@ bool diff_steer::post::tick(base_object& o, int time)
   float gl = o.location.z  - o.bounding_sphere.radius;
   if (gl < 0.5)
   {
-    triplet DoT = o.velocity;
-    triplet DoH = o.attitude;
+    triplet DoT = o.velocity.normalize();
+    rotatable & a = o. attitude;
+    triplet DoH(a.get_cos().z,a.get_sin().z,0.0);
     // -- squash verticals
     DoT.z = 0.0;
-    DoH.z = 0.0;
     // get the cosine of the angle between them.
     auto delta = DoT.normalize().dot_product(DoH.normalize());
-    
+    // are we sliding?
+    if (delta < 0.95)
+    {
+      // sliding.. need to fix and apply drag.
+      // simplistic for alpha.. simply snap to the 
+      // set direction.
+      float speed = o.velocity.magnatude();
+      triplet tv = o.velocity.normalize();
+      // TODO: figure out how to set x,y while
+      // TODO: maintaining ratio to z.
+      
+      
+    };
+    // apply rolling friction.
+    float speed = o.velocity.magnatude();
+    float drag_q = 1 - (pow(speed,2.0)/pow(100.0,2.0));
+    o.velocity = o.velocity * (drag_q > 0.0 ? drag_q : 0.0);
   };
   return false;
 };
