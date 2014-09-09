@@ -169,24 +169,37 @@ bool diff_steer::post::tick(base_object& o, int time)
   float gl = o.location.z  - o.bounding_sphere.radius;
   if (gl < 0.5)
   {
+    // get velocity vector.
     triplet DoT = o.velocity.normalize();
-    rotatable & a = o. attitude;
-    triplet DoH(a.get_cos().z,a.get_sin().z,0.0);
+    // save some copies separately.. we'll need it later.
+    triplet tv = DoT;
     // -- squash verticals
     DoT.z = 0.0;
+    DoT.normalize();
+    // build the xy plane vector
+    rotatable & a = o. attitude;
+    triplet DoH(a.get_cos().z,a.get_sin().z,0.0);
     // get the cosine of the angle between them.
-    auto delta = DoT.normalize().dot_product(DoH.normalize());
+    float delta = DoT.dot_product(DoH);
     // are we sliding?
-    if (delta < 0.95)
+    if (delta < 0.995)
     {
       // sliding.. need to fix and apply drag.
       // simplistic for alpha.. simply snap to the 
       // set direction.
       float speed = o.velocity.magnatude();
-      triplet tv = o.velocity.normalize();
-      // TODO: figure out how to set x,y while
-      // TODO: maintaining ratio to z.
-      
+      float xy_scale = 1.0 - ((tv.x*tv.x)+(tv.y*tv.y));
+      DoH = DoH * xy_scale;
+      DoH.z = tv.z;
+      // TODO: remove this check once we know things work.
+      if (fabs(DoH.magnatude() - 1.0) > 0.001)
+      {
+        // Sanity check failed.
+        base_exception e;
+        e.store("diff_steer::post::tick() DoH magnitude != 1.0");
+        throw e;
+      };
+      // TODO: Complete applying corrections.
       
     };
     // apply rolling friction.
