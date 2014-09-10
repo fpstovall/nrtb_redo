@@ -186,12 +186,15 @@ bool diff_steer::post::tick(base_object& o, int time)
     {
       // sliding.. need to fix and apply drag.
       // simplistic for alpha.. simply snap to the 
-      // set direction.
+      // get the current speed.
       float speed = o.velocity.magnatude();
+      // Scale new xy to match original components
       float xy_scale = 1.0 - ((tv.x*tv.x)+(tv.y*tv.y));
       DoH = DoH * xy_scale;
+      // restore the z component.
       DoH.z = tv.z;
       // TODO: remove this check once we know things work.
+      // Verify this is a unit vector.
       if (fabs(DoH.magnatude() - 1.0) > 0.001)
       {
         // Sanity check failed.
@@ -200,13 +203,14 @@ bool diff_steer::post::tick(base_object& o, int time)
         throw e;
       };
       // TODO: Complete applying corrections.
-      
+      // scale back to original speed and apply to the object.
+      o.velocity = DoH * speed;
     };
-    // apply rolling friction.
-    float speed = o.velocity.magnatude();
-    float drag_q = 1 - (pow(speed,2.0)/pow(100.0,2.0));
-    o.velocity = o.velocity * (drag_q > 0.0 ? drag_q : 0.0);
   };
+  // apply rolling friction (limit is 360 km/h).
+  float speed = o.velocity.magnatude();
+  float drag_q = 1 - ((speed*speed)/10000);
+  o.velocity = o.velocity * (drag_q > 0.0 ? drag_q : 0.0);
   return false;
 };
 
