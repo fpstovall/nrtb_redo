@@ -44,14 +44,16 @@ public:
   struct pre: public abs_effector
   {
     // Constructor
-    pre(float mp, float mt);
+    pre(float mp, float mb, float mt);
     pre(const pre & t);
     // local data
     float max_p;
     float max_t;
+    float max_b;
     // Input fields
-    std::atomic<float> set_p {0};
-    std::atomic<float> set_t {0};
+    std::atomic<float> set_p {0.0};
+    std::atomic<float> set_t {0.0};
+    std::atomic<float> set_b {1.0};
     // required overrides.
     abs_effector * clone();
     std::string as_str();
@@ -60,11 +62,9 @@ public:
   struct post: public abs_effector
   {
     // Constructor
-    post(float mb,float t, float f);
+    post(float t, float f);
     post(const post & t);
     // local data
-    float max_b;
-    std::atomic<float> set_b {1.0};
     float skid_threshold;
     float slide_friction;
     // required overrides.
