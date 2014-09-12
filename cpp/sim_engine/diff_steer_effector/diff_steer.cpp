@@ -122,7 +122,6 @@ std::string diff_steer::pre::as_str()
 
 bool diff_steer::pre::tick(base_object& o, int time)
 {
-  // TODO: Add braking here.
   // are we in contact with the ground?
   float gl = o.location.z  - o.bounding_sphere.radius;
   if (gl < 0.5)
@@ -206,7 +205,6 @@ bool diff_steer::post::tick(base_object& o, int time)
         e.store("diff_steer::post::tick() DoH magnitude != 1.0");
         throw e;
       };
-      // TODO: Complete applying corrections.
       // scale back to original speed adjusted for slide drag
       o.velocity = DoH * (speed * delta);
     };
