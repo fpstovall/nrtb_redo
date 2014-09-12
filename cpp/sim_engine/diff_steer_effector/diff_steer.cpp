@@ -128,14 +128,17 @@ bool diff_steer::pre::tick(base_object& o, int time)
   if (gl < 0.5)
   {
     float p = set_p.load() * max_p;
+    float b = set_b.load() * max_b;
     float t = set_t.load() * max_t;
     // calc the planar thrust and brake vector
     rotatable & a = o.attitude;
     triplet vec(a.get_cos().z,a.get_sin().z,0.0);
-    // Apply propulsion setting.
+    // Apply propulsion and braking setting.
     o.accel_mod += (vec * p);
-    // Apply turn setting;
-    o.torque.add(t);    
+    o.accel_mod -= (vec * b);
+    // Apply turn settings
+    o.torque.add(t);
+    o.torque.add(-(b/100.0));
   };
   return false;
 };
@@ -204,8 +207,8 @@ bool diff_steer::post::tick(base_object& o, int time)
         throw e;
       };
       // TODO: Complete applying corrections.
-      // scale back to original speed and apply to the object.
-      o.velocity = DoH * speed;
+      // scale back to original speed adjusted for slide drag
+      o.velocity = DoH * (speed * delta);
     };
   };
   // apply rolling friction (limit is 360 km/h).
