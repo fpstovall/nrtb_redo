@@ -134,9 +134,13 @@ bool diff_steer::pre::tick(base_object& o, int time)
     triplet vec(a.get_cos().z,a.get_sin().z,0.0);
     // Apply propulsion and braking setting.
     o.accel_mod += (vec * p);
+    // TODO: Need to alter this so that we do not
+    // TODO: exceed the current system kenetic energy.
     o.accel_mod -= (vec * b);
     // Apply turn settings
     o.torque.add(t);
+    // TODO: Correct this so that it can not 
+    // TODO: exceed the current rotational KE.
     o.torque.add(-(b/100.0));
   };
   return false;
