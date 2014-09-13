@@ -132,16 +132,24 @@ bool diff_steer::pre::tick(base_object& o, int time)
     // calc the planar thrust and brake vector
     rotatable & a = o.attitude;
     triplet vec(a.get_cos().z,a.get_sin().z,0.0);
-    // Apply propulsion and braking setting.
+    // Apply propulsion force.
     o.accel_mod += (vec * p);
-    // TODO: Need to alter this so that we do not
-    // TODO: exceed the current system kenetic energy.
+    // get the kenetic energy.
+    float speed = o.velocity.magnatude();
+    float KE = o.mass * speed * speed;
+    // limit b to KE
+    b = (b > KE) ? b : KE;
+    // apply breaking force.
     o.accel_mod -= (vec * b);
     // Apply turn settings
     o.torque.add(t);
-    // TODO: Correct this so that it can not 
-    // TODO: exceed the current rotational KE.
-    o.torque.add(-(b/100.0));
+    // apply breaking effects to turn rate
+    float rV = o.rotation.angles().z;
+    float rKE = (o.mass * rV * rV)/2.0;
+    // limit braking torque to rKE if needed. 
+    float rb = (b > rKE) ? b : rKE;
+    // apply the braking force opposite rotation.
+    o.torque.add((rV > 0 ? -rb : rb));
   };
   return false;
 };
@@ -191,8 +199,11 @@ bool diff_steer::post::tick(base_object& o, int time)
     // are we sliding?
     if (delta < 0.995)
     {
-      // sliding.. need to fix and apply drag.
-      // simplistic for alpha.. simply snap to the 
+      /********************************
+       * sliding.. need to fix and apply drag.
+       * simplistic for alpha.. simply snap to the 
+       * current heading.
+       *******************************/
       // get the current speed.
       float speed = o.velocity.magnatude();
       // Scale new xy to match original components
