@@ -135,10 +135,12 @@ bool diff_steer::pre::tick(base_object& o, int time)
     // Apply propulsion force.
     o.accel_mod += (vec * p);
     // get the kenetic energy.
-    float speed = o.velocity.magnatude();
+    triplet vel = o.velocity;
+    vel.z = 0.0;
+    float speed = vel.magnatude();
     float KE = o.mass * speed * speed;
     // limit b to KE
-    b = (b > KE) ? b : KE;
+    b = (b > KE) ? KE : b;
     // apply breaking force.
     o.accel_mod -= (vec * b);
     // Apply turn settings
@@ -147,7 +149,7 @@ bool diff_steer::pre::tick(base_object& o, int time)
     float rV = o.rotation.angles().z;
     float rKE = (o.mass * rV * rV)/2.0;
     // limit braking torque to rKE if needed. 
-    float rb = (b > rKE) ? b : rKE;
+    float rb = (b > rKE) ? rKE : b;
     // apply the braking force opposite rotation.
     o.torque.add((rV > 0 ? -rb : rb));
   };
@@ -204,6 +206,7 @@ bool diff_steer::post::tick(base_object& o, int time)
        * simplistic for alpha.. simply snap to the 
        * current heading.
        *******************************/
+      // TODO: Fix to only use and effect ground speed.
       // get the current speed.
       float speed = o.velocity.magnatude();
       // Scale new xy to match original components
@@ -225,9 +228,18 @@ bool diff_steer::post::tick(base_object& o, int time)
     };
   };
   // apply rolling friction (limit is 360 km/h).
-  float speed = o.velocity.magnatude();
+  // get the ground speed.
+  triplet vel = o.velocity;
+  vel.z = 0.0;
+  float speed = vel.magnatude();
+  // calculate drag
   float drag_q = 1 - ((speed*speed)/10000);
-  o.velocity = o.velocity * (drag_q > 0.0 ? drag_q : 0.0);
+  drag_q = drag_q > 0 ? drag_q : 0.001;
+  // assemble drag vector;
+  vel.x = drag_q; vel.y = drag_q; vel.z = 1.0;
+std::cout << vel << std::endl;
+  // apply drag.
+  o.velocity = o.velocity * vel;
   return false;
 };
 

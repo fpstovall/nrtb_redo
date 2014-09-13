@@ -55,14 +55,33 @@ struct driver : public base_object
 {
   // diff_steer interface
   shared_ptr<diff_steer>  mobility;
+  // control interface
+  void drive(float p)
+  {
+    mobility->drive(p);
+  };
+  void brake(float b)
+  {
+    mobility->brake(b);
+  };
+  void turn(float t)
+  {
+    mobility->turn(t);
+  };
+  void lockdown()
+  {
+    mobility->lockdown();
+  };
+  // constructor
   driver()
   {
     mobility.reset(new diff_steer(*this,100,1000,100,10,8));
-    // TODO: add_pre(new driver(?));
     add_pre(new norm_gravity);
     add_post(new recorder);
-    // TODO: Set initial conditions
+    mass=100.0;
+    bounding_sphere.radius = 1.0;
   };
+  // clone method
   base_object * clone()
   {
     driver * t = new driver(*this);
@@ -70,6 +89,7 @@ struct driver : public base_object
     t->post_attribs = get_post_attribs_copy();
     return t;
   };
+  // nop collision application.
   bool apply_collision(object_p o) {return false;};
 };
 
@@ -112,6 +132,18 @@ int main()
     << endl;
   
   driver test_ob;
+  test_ob.lockdown();
+  for(int i=0; i<2; i++)
+  {
+    cout << test_ob.as_str() << endl << endl;
+    test_ob.tick(i);
+    cout << test_ob.as_str() << endl << endl;
+    test_ob.apply(i,1/50);
+    cout << test_ob.as_str() << endl << endl;
+    cout << "--------------------"  << endl << endl;
+  };
+  cout << write_details(report(locations),report(velocities))
+    << endl;
   
   cout << "=========== diff_steer test complete ============="
     << endl;
