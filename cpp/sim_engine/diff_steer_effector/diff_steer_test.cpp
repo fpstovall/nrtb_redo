@@ -130,21 +130,33 @@ int main()
   bool failed = false;
   cout << "========== diff_steer test ============="
     << endl;
-  
-  driver test_ob;
-  test_ob.lockdown();
-  for(int i=0; i<2; i++)
+
+  try
   {
-    cout << test_ob.as_str() << endl << endl;
-    test_ob.tick(i);
-    cout << test_ob.as_str() << endl << endl;
-    test_ob.apply(i,1/50);
-    cout << test_ob.as_str() << endl << endl;
-    cout << "--------------------"  << endl << endl;
+    driver test_ob;
+    test_ob.lockdown();
+    for(int i=0; i<2; i++)
+    {
+  //    cout << test_ob.as_str() << endl << endl;
+      test_ob.tick(i);
+  //    cout << test_ob.as_str() << endl << endl;
+      test_ob.apply(i,1/50.0);
+  //    cout << test_ob.as_str() << endl << endl;
+      cout << "--------------------"  << endl << endl;
+    };
+    cout << write_details(report(locations),report(velocities))
+      << endl;
+  }
+  catch (base_exception &e)
+  {
+    failed = true;
+    cout << "Exception: " << e.comment() << endl;
+  }
+  catch (...)
+  {
+    failed = true;
+    cout << "Unspecified Exception!" << endl;
   };
-  cout << write_details(report(locations),report(velocities))
-    << endl;
-  
   cout << "=========== diff_steer test complete ============="
     << endl;
   

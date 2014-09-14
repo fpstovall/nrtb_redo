@@ -40,7 +40,7 @@ float diff_steer::drive(float power)
 {
   if (fabsf(power) <= 100.0)
   {
-    pre_effector->set_p.store(power/100);
+    pre_effector->set_p.store(power/100.0);
   }
   else
   {
@@ -52,7 +52,7 @@ float diff_steer::brake(float braking)
 {
   if ((braking >= 0.0) and (braking <= 100.0))
   {
-    pre_effector->set_b.store(braking/100);
+    pre_effector->set_b.store(braking/100.0);
   }
   else 
   {
@@ -64,7 +64,7 @@ float diff_steer::turn(float rate)
 {
   if (fabsf(rate) <= 100.0)
   {
-    pre_effector->set_t.store(rate/100);
+    pre_effector->set_t.store(rate/100.0);
   }
   else
   {
@@ -151,7 +151,7 @@ bool diff_steer::pre::tick(base_object& o, int time)
     // limit braking torque to rKE if needed. 
     float rb = (b > rKE) ? rKE : b;
     // apply the braking force opposite rotation.
-    o.torque.add((rV > 0 ? -rb : rb));
+    o.torque.add((rV > 0.0 ? -rb : rb));
   };
   return false;
 };
@@ -193,6 +193,10 @@ bool diff_steer::post::tick(base_object& o, int time)
     // -- squash verticals
     DoT.z = 0.0;
     DoT.normalize();
+    // get the current ground speed
+    triplet Vgs = tv;
+    Vgs.z = 0.0;
+    float speed = Vgs.magnatude();
     // build the xy plane vector
     rotatable & a = o. attitude;
     triplet DoH(a.get_cos().z,a.get_sin().z,0.0);
@@ -206,9 +210,6 @@ bool diff_steer::post::tick(base_object& o, int time)
        * simplistic for alpha.. simply snap to the 
        * current heading.
        *******************************/
-      // TODO: Fix to only use and effect ground speed.
-      // get the current speed.
-      float speed = o.velocity.magnatude();
       // Scale new xy to match original components
       float xy_scale = 1.0 - ((tv.x*tv.x)+(tv.y*tv.y));
       DoH = DoH * xy_scale;
@@ -220,26 +221,25 @@ bool diff_steer::post::tick(base_object& o, int time)
       {
         // Sanity check failed.
         base_exception e;
-        e.store("diff_steer::post::tick() DoH magnitude != 1.0");
+        std::stringstream s;
+        s << "diff_steer::post::tick() DoH magnitude != 1.0"
+          << ":" << DoH << "," << DoH.magnatude();
+        e.store(s.str());
         throw e;
       };
       // scale back to original speed adjusted for slide drag
-      o.velocity = DoH * (speed * delta);
+      speed *= delta;
+      o.velocity = DoH * speed;
     };
+    // apply rolling friction (limit is 360 km/h).
+    // calculate drag
+    float drag_q = 1 - ((speed*speed)/10000.0);
+    drag_q = drag_q > 0 ? drag_q : 0.001;
+    // assemble drag vector;
+    triplet drags(drag_q,drag_q,1.0);
+    // apply drag.
+    o.velocity = o.velocity * drags;
   };
-  // apply rolling friction (limit is 360 km/h).
-  // get the ground speed.
-  triplet vel = o.velocity;
-  vel.z = 0.0;
-  float speed = vel.magnatude();
-  // calculate drag
-  float drag_q = 1 - ((speed*speed)/10000);
-  drag_q = drag_q > 0 ? drag_q : 0.001;
-  // assemble drag vector;
-  vel.x = drag_q; vel.y = drag_q; vel.z = 1.0;
-std::cout << vel << std::endl;
-  // apply drag.
-  o.velocity = o.velocity * vel;
   return false;
 };
 
