@@ -188,6 +188,7 @@ bool diff_steer::post::tick(base_object& o, int time)
   {
     // get velocity vector.
     triplet DoT = o.velocity.normalize();
+    float speed = o.velocity.magnatude();
     // save some copies separately.. we'll need it later.
     triplet tv = DoT;
     // -- squash verticals
@@ -196,14 +197,14 @@ bool diff_steer::post::tick(base_object& o, int time)
     // get the current ground speed
     triplet Vgs = tv;
     Vgs.z = 0.0;
-    float speed = Vgs.magnatude();
+    float gspeed = Vgs.magnatude();
     // build the xy plane vector
     rotatable & a = o. attitude;
     triplet DoH(a.get_cos().z,a.get_sin().z,0.0);
     // get the cosine of the angle between them.
     float delta = DoT.dot_product(DoH);
     // are we sliding?
-    if (delta < 0.995)
+    if ((gspeed > 0.0001) and (delta < 0.995))
     {
       /********************************
        * sliding.. need to fix and apply drag.
@@ -211,29 +212,28 @@ bool diff_steer::post::tick(base_object& o, int time)
        * current heading.
        *******************************/
       // Scale new xy to match original components
-      float xy_scale = 1.0 - ((tv.x*tv.x)+(tv.y*tv.y));
-      DoH = DoH * xy_scale;
+      float xy_scale =  ((tv.x*tv.x)+(tv.y*tv.y)) / 1.0;
+      DoH = DoH * (xy_scale * gspeed);
       // restore the z component.
-      DoH.z = tv.z;
+      DoH.z = o.velocity.z;
       // TODO: remove this check once we know things work.
-      // Verify this is a unit vector.
-      if (fabs(DoH.magnatude() - 1.0) > 0.001)
+      // Verify we have the correct velocity.
+      if (fabs(DoH.magnatude() - speed) > 0.001)
       {
         // Sanity check failed.
         base_exception e;
         std::stringstream s;
-        s << "diff_steer::post::tick() DoH magnitude != 1.0"
+        s << "diff_steer::post::tick() DoH magnitude incorrect"
           << ":" << DoH << "," << DoH.magnatude();
         e.store(s.str());
         throw e;
       };
       // scale back to original speed adjusted for slide drag
-      speed *= delta;
-      o.velocity = DoH * speed;
+      o.velocity = DoH * delta;
     };
     // apply rolling friction (limit is 360 km/h).
     // calculate drag
-    float drag_q = 1 - ((speed*speed)/10000.0);
+    float drag_q = 1 - ((gspeed*gspeed)/10000.0);
     drag_q = drag_q > 0 ? drag_q : 0.001;
     // assemble drag vector;
     triplet drags(drag_q,drag_q,1.0);

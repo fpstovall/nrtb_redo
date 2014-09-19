@@ -139,12 +139,12 @@ int main()
     {
   //    cout << test_ob.as_str() << endl << endl;
       test_ob.tick(i);
-  //    cout << test_ob.as_str() << endl << endl;
+      cout << test_ob.as_str() << endl << endl;
       test_ob.apply(i,1/50.0);
-  //    cout << test_ob.as_str() << endl << endl;
+  cout << test_ob.as_str() << endl << endl;
       cout << "--------------------"  << endl << endl;
     };
-    cout << write_details(report(locations),report(velocities))
+  cout << write_details(report(locations),report(velocities))
       << endl;
   }
   catch (base_exception &e)
