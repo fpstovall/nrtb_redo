@@ -18,6 +18,7 @@
 
 #include "diff_steer.h"
 #include <gravity.h>
+#include <hover.h>
 #include <iostream>
 #include <string>
 
@@ -77,9 +78,11 @@ struct driver : public base_object
   {
     mobility.reset(new diff_steer(*this,100,1000,100,10,8));
     add_pre(new norm_gravity);
+    add_pre(new hover(1.25,0.10,2.0));
     add_post(new recorder);
     mass=100.0;
     bounding_sphere.radius = 1.0;
+    location.z = 1.25;
   };
   // clone method
   base_object * clone()
@@ -135,14 +138,14 @@ int main()
   {
     driver test_ob;
     test_ob.lockdown();
-    for(int i=0; i<2; i++)
+    for(int i=0; i<20; i++)
     {
-  //    cout << test_ob.as_str() << endl << endl;
+//    cout << test_ob.as_str() << endl << endl;
       test_ob.tick(i);
-      cout << test_ob.as_str() << endl << endl;
+//      cout << test_ob.as_str() << endl << endl;
       test_ob.apply(i,1/50.0);
-  cout << test_ob.as_str() << endl << endl;
-      cout << "--------------------"  << endl << endl;
+//  cout << test_ob.as_str() << endl << endl;
+//      cout << "--------------------"  << endl << endl;
     };
   cout << write_details(report(locations),report(velocities))
       << endl;

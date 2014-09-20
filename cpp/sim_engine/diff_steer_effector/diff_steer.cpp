@@ -34,6 +34,7 @@ diff_steer::diff_steer(base_object& o, float thrust, float _brake,
   o.add_pre(t);
   t = post_effector;
   o.add_post(t);
+  lockdown();
 };
 
 float diff_steer::drive(float power)
@@ -233,8 +234,8 @@ bool diff_steer::post::tick(base_object& o, int time)
     };
     // apply rolling friction (limit is 360 km/h).
     // calculate drag
-    float drag_q = 1 - ((gspeed*gspeed)/10000.0);
-    drag_q = drag_q > 0 ? drag_q : 0.001;
+    float drag_q = 1.0 - ((gspeed*gspeed)/10000.0);
+    drag_q = drag_q > 0.0 ? drag_q : 0.001;
     // assemble drag vector;
     triplet drags(drag_q,drag_q,1.0);
     // apply drag.
