@@ -136,29 +136,36 @@ int main()
 
   try
   {
+    cout << "Initial state test: ";
     driver test_ob;
-    test_ob.lockdown();
-    for(int i=0; i<20; i++)
+    triplet startL = test_ob.location;
+    for(int i=0; i<50; i++)
     {
-//    cout << test_ob.as_str() << endl << endl;
       test_ob.tick(i);
-//      cout << test_ob.as_str() << endl << endl;
       test_ob.apply(i,1/50.0);
-//  cout << test_ob.as_str() << endl << endl;
-//      cout << "--------------------"  << endl << endl;
     };
-  cout << write_details(report(locations),report(velocities))
-      << endl;
+    bool test_failed = (test_ob.location.x != 0.0)
+                    or (test_ob.location.y != 0.0)
+                    or (test_ob.velocity.x != 0.0)
+                    or (test_ob.velocity.y != 0.0);
+    failed = failed or test_failed;
+    cout << (test_failed ? "Failed" : "Passed") << " " 
+      << test_ob.location << test_ob.velocity << endl;
   }
   catch (base_exception &e)
   {
     failed = true;
     cout << "Exception: " << e.comment() << endl;
   }
+  catch (std::exception &e)
+  {
+    failed = true;
+    cout << "Exception: " << e.what() << endl;
+  }
   catch (...)
   {
     failed = true;
-    cout << "Unspecified Exception!" << endl;
+    cout << "GACK!" << endl;    
   };
   cout << "=========== diff_steer test complete ============="
     << endl;
