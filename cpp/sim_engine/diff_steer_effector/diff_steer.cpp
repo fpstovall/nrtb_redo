@@ -134,7 +134,7 @@ bool diff_steer::pre::tick(base_object& o, int time)
     rotatable & a = o.attitude;
     triplet vec(a.get_cos().z,a.get_sin().z,0.0);
     // Apply propulsion force.
-    o.accel_mod += (vec * p);
+    o.force += (vec * p);
     // get the kenetic energy.
     triplet vel = o.velocity;
     vel.z = 0.0;
@@ -143,7 +143,7 @@ bool diff_steer::pre::tick(base_object& o, int time)
     // limit b to KE
     b = (b > KE) ? KE : b;
     // apply breaking force.
-    o.accel_mod -= (vec * b);
+    o.force -= (vec * b);
     // Apply turn settings
     o.torque.add(t);
     // apply breaking effects to turn rate
@@ -187,18 +187,14 @@ bool diff_steer::post::tick(base_object& o, int time)
   float gl = o.location.z  - o.bounding_sphere.radius;
   if (gl < 0.5)
   {
-    // get velocity vector.
-    triplet DoT = o.velocity.normalize();
+    // get velocity vector and speed.
+    triplet DoT = o.velocity;
     float speed = o.velocity.magnatude();
-    // save some copies separately.. we'll need it later.
-    triplet tv = DoT;
     // -- squash verticals
     DoT.z = 0.0;
-    DoT.normalize();
+    DoT = DoT.normalize();
     // get the current ground speed
-    triplet Vgs = o.velocity;
-    Vgs.z = 0.0;
-    float gspeed = Vgs.magnatude();
+    float gspeed = DoT.magnatude();
     // build the xy plane vector
     rotatable & a = o. attitude;
     triplet DoH(a.get_cos().z,a.get_sin().z,0.0);
@@ -213,12 +209,10 @@ bool diff_steer::post::tick(base_object& o, int time)
        * current heading.
        *******************************/
       // Scale new xy to match original components
-      triplet & v = o.velocity;
-      float xy_scale = ((v.x*v.x)+(v.y*v.y))/(speed*speed);
-      DoH = DoH * (xy_scale * gspeed);
+      DoH = DoH * gspeed;
       // restore the z component.
       DoH.z = o.velocity.z;
-      // TODO: remove this check once we know things work.
+      // TODO: we may want remove this check.
       // Verify we have the correct velocity.
       if (fabs(DoH.magnatude() - speed) > 0.001)
       {
@@ -226,9 +220,7 @@ bool diff_steer::post::tick(base_object& o, int time)
         base_exception e;
         std::stringstream s;
         s << "diff_steer::post::tick() DoH magnitude incorrect"
-          << ":" << DoH << "," << DoH.magnatude() << "\n"
-          << "speed:" << speed << " delta:" << delta << " xy_scale:" 
-          << xy_scale << " Object follows:\n" << o.as_str();
+          << ":" << DoH << "," << DoH.magnatude();
         e.store(s.str());
         throw e;
       };
@@ -238,7 +230,7 @@ bool diff_steer::post::tick(base_object& o, int time)
     // apply rolling friction (limit is 360 km/h).
     // calculate drag
     float drag_q = 1.0 - ((gspeed*gspeed)/10000.0);
-    drag_q = drag_q > 0.0 ? drag_q : 0.001;
+    drag_q = drag_q > 1.0 ? drag_q : 0.001;
     // assemble drag vector;
     triplet drags(drag_q,drag_q,1.0);
     // apply drag.

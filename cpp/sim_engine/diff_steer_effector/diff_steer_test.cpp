@@ -159,9 +159,17 @@ int main()
     {
       test_ob.tick(i);
       test_ob.apply(i,1/50.0);
-    cout << test_ob.as_str() << endl;
     };
-    cout << test_ob.as_str() << endl;
+    test_failed = (test_ob.location.y != 0.0)
+      or (fabsf(test_ob.location.x - 0.0100196) > 1e-4)
+      or (test_ob.velocity.y != 0.0)
+      or (fabsf(test_ob.velocity.x - 2.002e-05) > 1e-4);
+    failed = failed or test_failed;
+    cout << (test_failed ? "Failed" : "Passed") << " " 
+      << test_ob.location << test_ob.velocity << endl;
+
+    
+      
   }
   catch (base_exception &e)
   {
