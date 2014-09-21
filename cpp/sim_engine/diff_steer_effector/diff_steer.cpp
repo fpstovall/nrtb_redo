@@ -196,7 +196,7 @@ bool diff_steer::post::tick(base_object& o, int time)
     DoT.z = 0.0;
     DoT.normalize();
     // get the current ground speed
-    triplet Vgs = tv;
+    triplet Vgs = o.velocity;
     Vgs.z = 0.0;
     float gspeed = Vgs.magnatude();
     // build the xy plane vector
@@ -213,7 +213,8 @@ bool diff_steer::post::tick(base_object& o, int time)
        * current heading.
        *******************************/
       // Scale new xy to match original components
-      float xy_scale =  ((tv.x*tv.x)+(tv.y*tv.y)) / 1.0;
+      triplet & v = o.velocity;
+      float xy_scale = ((v.x*v.x)+(v.y*v.y))/(speed*speed);
       DoH = DoH * (xy_scale * gspeed);
       // restore the z component.
       DoH.z = o.velocity.z;
@@ -225,7 +226,9 @@ bool diff_steer::post::tick(base_object& o, int time)
         base_exception e;
         std::stringstream s;
         s << "diff_steer::post::tick() DoH magnitude incorrect"
-          << ":" << DoH << "," << DoH.magnatude();
+          << ":" << DoH << "," << DoH.magnatude() << "\n"
+          << "speed:" << speed << " delta:" << delta << " xy_scale:" 
+          << xy_scale << " Object follows:\n" << o.as_str();
         e.store(s.str());
         throw e;
       };

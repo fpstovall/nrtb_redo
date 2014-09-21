@@ -151,11 +151,22 @@ int main()
     failed = failed or test_failed;
     cout << (test_failed ? "Failed" : "Passed") << " " 
       << test_ob.location << test_ob.velocity << endl;
+      
+    cout << "Simple drive test: ";
+    test_ob.drive(100.0);
+    test_ob.brake(0.0);
+    for(int i=0; i<50; i++)
+    {
+      test_ob.tick(i);
+      test_ob.apply(i,1/50.0);
+    cout << test_ob.as_str() << endl;
+    };
+    cout << test_ob.as_str() << endl;
   }
   catch (base_exception &e)
   {
     failed = true;
-    cout << "Exception: " << e.comment() << endl;
+    cout << e.comment() << endl;
   }
   catch (std::exception &e)
   {
