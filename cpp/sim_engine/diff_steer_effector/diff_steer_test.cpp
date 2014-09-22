@@ -168,8 +168,20 @@ int main()
     cout << (test_failed ? "Failed" : "Passed") << " " 
       << test_ob.location << test_ob.velocity << endl;
 
-    
-      
+    cout << "Simple braking test: ";
+    test_ob.drive(0.0);
+    test_ob.brake(100.0);
+    int i=0;
+    while ((test_ob.velocity.x > 0.0) or (test_ob.velocity.y > 0.0))
+    {
+      test_ob.tick(i);
+      test_ob.apply(i,1/50.0);
+      i++;
+    }; 
+    test_failed = (i != 14);
+    failed = failed or test_failed;
+    cout << (test_failed ? "Failed" : "Passed") << " "
+      << i << " " << test_ob.location << test_ob.velocity << endl; 
   }
   catch (base_exception &e)
   {
