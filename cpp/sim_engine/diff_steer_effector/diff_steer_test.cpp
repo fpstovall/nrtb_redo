@@ -155,23 +155,27 @@ int main()
     cout << "Simple drive test: ";
     test_ob.drive(100.0);
     test_ob.brake(0.0);
-    for(int i=0; i<50; i++)
+    bool done = false;
+    int i = 0;
+    while (!done)
     {
       test_ob.tick(i);
       test_ob.apply(i,1/50.0);
+      i++;
+      done = (test_ob.location.x >= 1.0) or (i > 100);
     };
     test_failed = (test_ob.location.y != 0.0)
-      or (fabsf(test_ob.location.x - 0.0100196) > 1e-4)
+      or (i != 71)
       or (test_ob.velocity.y != 0.0)
-      or (fabsf(test_ob.velocity.x - 2.002e-05) > 1e-4);
+      or (fabsf(test_ob.velocity.x - 2.0) > 1e-4);
     failed = failed or test_failed;
-    cout << (test_failed ? "Failed" : "Passed") << " " 
+    cout << (test_failed ? "Failed" : "Passed") << " " << i << " "
       << test_ob.location << test_ob.velocity << endl;
 
     cout << "Simple braking test: ";
     test_ob.drive(0.0);
     test_ob.brake(100.0);
-    int i=0;
+    i=0;
     while ((test_ob.velocity.x > 0.0) or (test_ob.velocity.y > 0.0))
     {
       test_ob.tick(i);

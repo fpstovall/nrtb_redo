@@ -229,14 +229,16 @@ bool diff_steer::post::tick(base_object& o, int time)
       // scale back to original speed adjusted for slide drag
       o.velocity = DoH * delta;
     };
+    /******** removed for now **********
     // apply rolling friction (limit is 360 km/h).
     // calculate drag
-    float drag_q = 1.0 - ((gspeed*gspeed)/10000.0);
-    drag_q = drag_q > 1.0 ? drag_q : 0.001;
+    float drag_q = 1.0 - (gspeed/10000.0);
+    drag_q = drag_q > 1.0 ? 1.0 : drag_q;
     // assemble drag vector;
     triplet drags(drag_q,drag_q,1.0);
     // apply drag.
     o.velocity = o.velocity * drags;
+    ***********************************/
   };
   return false;
 };
