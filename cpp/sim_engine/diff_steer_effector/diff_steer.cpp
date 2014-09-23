@@ -139,7 +139,8 @@ bool diff_steer::pre::tick(base_object& o, int time)
     triplet vel = o.velocity;
     vel.z = 0.0;
     float speed = vel.magnatude();
-    float KE = o.mass * speed * speed;
+    float bspeed = speed * 50;
+    float KE = o.mass * bspeed * bspeed ;
     // Include current power setting in budget.
     KE += p;
     // limit b to KE
@@ -194,13 +195,13 @@ bool diff_steer::post::tick(base_object& o, int time)
     float speed = o.velocity.magnatude();
     // -- squash verticals
     DoT.z = 0.0;
-    DoT = DoT.normalize();
     // get the current ground speed
     float gspeed = DoT.magnatude();
     // build the xy plane vector
     rotatable & a = o. attitude;
     triplet DoH(a.get_cos().z,a.get_sin().z,0.0);
     // get the cosine of the angle between them.
+    DoT = DoT.normalize();
     float delta = DoT.dot_product(DoH);
     // are we sliding?
     if ((gspeed > 0.0001) and (delta < 0.995))
@@ -228,6 +229,12 @@ bool diff_steer::post::tick(base_object& o, int time)
       };
       // scale back to original speed adjusted for slide drag
       o.velocity = DoH * delta;
+    };
+    // if gspeed is less than 0.001, just stop.
+    if (gspeed < 1e-3)
+    {
+      o.velocity.x = 0.0;
+      o.velocity.y = 0.0;
     };
     /******** removed for now **********
     // apply rolling friction (limit is 360 km/h).

@@ -162,12 +162,12 @@ int main()
       test_ob.tick(i);
       test_ob.apply(i,1/50.0);
       i++;
-      done = (test_ob.location.x >= 1.0) or (i > 100);
+      done = (test_ob.location.x >= 1.0) or (i > 80);
     };
     test_failed = (test_ob.location.y != 0.0)
       or (i != 71)
       or (test_ob.velocity.y != 0.0)
-      or (fabsf(test_ob.velocity.x - 2.0) > 1e-4);
+      or (fabsf(test_ob.velocity.x - 1.42) > 1e-4);
     failed = failed or test_failed;
     cout << (test_failed ? "Failed" : "Passed") << " " << i << " "
       << test_ob.location << test_ob.velocity << endl;
@@ -181,11 +181,13 @@ int main()
       test_ob.tick(i);
       test_ob.apply(i,1/50.0);
       i++;
+      if (i > 29) break;
     }; 
-    test_failed = (i != 14);
+    test_failed = (i != 8);
     failed = failed or test_failed;
     cout << (test_failed ? "Failed" : "Passed") << " "
       << i << " " << test_ob.location << test_ob.velocity << endl; 
+
   }
   catch (base_exception &e)
   {
