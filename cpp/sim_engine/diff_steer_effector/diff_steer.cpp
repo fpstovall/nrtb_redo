@@ -129,7 +129,11 @@ bool diff_steer::pre::tick(base_object& o, int time)
   {
     float p = set_p.load() * max_p;
     float b = set_b.load() * max_b;
-    float t = set_t.load() * max_t;
+    float t = set_t.load() * pi;
+    // Adjust our turn rate 
+    triplet rot = o.rotation.angles();
+    rot.z = t;
+    o.rotation.set(rot);
     // calc the planar thrust and brake vector
     rotatable & a = o.attitude;
     triplet vec(a.get_cos().z,a.get_sin().z,0.0);
@@ -147,15 +151,6 @@ bool diff_steer::pre::tick(base_object& o, int time)
     b = (b > KE) ? KE : b;
     // apply breaking force.
     o.force -= (vec * b);
-    // Apply turn settings
-    o.torque.add(t);
-    // apply breaking effects to turn rate
-    float rV = o.rotation.angles().z;
-    float rKE = (o.mass * rV * rV)/2.0;
-    // limit braking torque to rKE if needed. 
-    float rb = (b > rKE) ? rKE : b;
-    // apply the braking force opposite rotation.
-    o.torque.add((rV > 0.0 ? -rb : rb));
   };
   return false;
 };
@@ -235,6 +230,7 @@ bool diff_steer::post::tick(base_object& o, int time)
     {
       o.velocity.x = 0.0;
       o.velocity.y = 0.0;
+      gspeed = 0.0;
     };
     /******** removed for now **********
     // apply rolling friction (limit is 360 km/h).
