@@ -188,6 +188,26 @@ int main()
     cout << (test_failed ? "Failed" : "Passed") << " "
       << i << " " << test_ob.location << test_ob.velocity << endl; 
 
+    cout << "Simple turning test: ";
+    test_ob.drive(0.0);
+    test_ob.brake(100.0);
+    test_ob.turn(100.0);
+    i=0;
+    // rotate 90 degrees in 1/2 second.
+    while (test_ob.attitude.angles().z <= (pi/2.0))
+    {
+      test_ob.tick(i);
+      test_ob.apply(i,1/50.0);
+      i++;
+      if (i > 49) break;
+    }; 
+    test_failed = (i != 26);
+    failed = failed or test_failed;
+    cout << (test_failed ? "Failed" : "Passed") << " "
+      << i << " " << test_ob.attitude.angles() << endl; 
+
+      
+      
   }
   catch (base_exception &e)
   {
