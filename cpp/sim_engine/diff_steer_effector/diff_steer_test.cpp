@@ -194,7 +194,7 @@ int main()
     test_ob.turn(100.0);
     i=0;
     // rotate 90 degrees in 1/2 second.
-    while (test_ob.attitude.angles().z <= (pi/2.0))
+    while (test_ob.attitude.angles().z < (pi/2.0))
     {
       test_ob.tick(i);
       test_ob.apply(i,1/50.0);
@@ -205,6 +205,25 @@ int main()
     failed = failed or test_failed;
     cout << (test_failed ? "Failed" : "Passed") << " "
       << i << " " << test_ob.attitude.angles() << endl; 
+
+    cout << "Compound moment test: ";
+    test_ob.drive(100.0);
+    test_ob.brake(0.0);
+    test_ob.turn(-10.0);
+    i=0;
+    // rotate 90 degrees in 5 second.
+    while (test_ob.attitude.angles().z > 0.0)
+    {
+      test_ob.tick(i);
+      test_ob.apply(i,1/50.0);
+      i++;
+      if (i > 300) break;
+    }; 
+    test_failed = (i != 261);
+    failed = failed or test_failed;
+    cout << (test_failed ? "Failed" : "Passed") << " "
+      << i << " " << test_ob.attitude.angles() 
+      << test_ob.location << test_ob.velocity << endl; 
 
       
       
