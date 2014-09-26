@@ -129,7 +129,7 @@ bool diff_steer::pre::tick(base_object& o, int time)
   {
     float p = set_p.load() * max_p;
     float b = set_b.load() * max_b;
-    float t = set_t.load() * pi;
+    float t = set_t.load() * max_t;
     // Adjust our turn rate 
     triplet rot = o.rotation.angles();
     rot.z = t;

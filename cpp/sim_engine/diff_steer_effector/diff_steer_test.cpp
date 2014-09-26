@@ -76,7 +76,7 @@ struct driver : public base_object
   // constructor
   driver()
   {
-    mobility.reset(new diff_steer(*this,100,1000,100,10,8));
+    mobility.reset(new diff_steer(*this,100,1000,pi,10,8));
     add_pre(new norm_gravity);
     add_pre(new hover(1.25,0.10,2.0));
     add_post(new recorder);
