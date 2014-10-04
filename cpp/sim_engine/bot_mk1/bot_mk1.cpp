@@ -23,3 +23,23 @@
 
 using namespace nrtb;
 
+bot_mk1::bot_mk1(tcp_socket_p link, triplet where)
+{
+  // set the physical parameters of the bot here.
+  mass = 3e4;
+  bounding_sphere.radius = 4.5/2.0;
+  location = where;
+  location.z = bounding_sphere.radius + 0.25;
+  // add effectors
+  add_pre(new norm_gravity);
+  add_pre(new hover(location.z,0.10,2.0));
+  drive.reset(new diff_steer(*this,1e5,1e6,4*pi,10,8));
+  // bot control and com setup.
+  BCP = std::move(link);
+  ImAlive = true;
+  // Start the receiver and transmitter
+  r_thread = std::thread(&bot_mk1::receiver,this);
+  t_thread = std::thread(&bot_mk1::transmitter,this);
+  // Send ready to the BCP
+  to_BCP.push("READY\r");
+};
