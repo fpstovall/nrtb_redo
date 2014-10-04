@@ -25,6 +25,9 @@ using namespace nrtb;
 
 bot_mk1::bot_mk1(tcp_socket_p link, triplet where)
 {
+  std::stringstream s;
+  s << "mk1_" << id;
+  name = s.str();
   // set the physical parameters of the bot here.
   mass = 3e4;
   bounding_sphere.radius = 4.5/2.0;
@@ -41,5 +44,162 @@ bot_mk1::bot_mk1(tcp_socket_p link, triplet where)
   r_thread = std::thread(&bot_mk1::receiver,this);
   t_thread = std::thread(&bot_mk1::transmitter,this);
   // Send ready to the BCP
-  to_BCP.push("READY\r");
+  to_BCP.push("READY");
 };
+
+bot_mk1::~bot_mk1()
+{
+  ImAlive = false;
+  // unconditionally shutdown the queue and close the socket.
+  try { to_BCP.shutdown(); } catch (...) {};
+  try { BCP->close(); } catch (...) {};
+  // Wait on the threads.
+  r_thread.join();
+  t_thread.join();
+};
+
+bool bot_mk1::tick(int time)
+{
+  if (ImAlive)
+  {
+    std::unique_lock<std::mutex> lock(cooking_lock);
+    return nrtb::base_object::tick(time);
+  }
+  else
+  {
+    // we are dead.. tell sim_engine.
+    return true;
+  };
+};
+
+bool bot_mk1::apply(int time, float quanta)
+{
+  if (ImAlive)
+  {
+    std::unique_lock<std::mutex> lock(cooking_lock);
+    return nrtb::base_object::apply(time, quanta);
+  }
+  else
+  {
+    // we are dead.. tell sim_engine.
+    return true;
+  };
+};
+
+bool bot_mk1::check_collision(object_p o)
+{
+  if (ImAlive)
+  {
+    std::unique_lock<std::mutex> lock(cooking_lock);
+    return nrtb::base_object::check_collision(o);
+  }
+  else
+  {
+    // we are dead.. tell sim_engine.
+    return true;
+  };
+};
+
+bool bot_mk1::apply_collision(object_p o)
+{
+  return false;
+};
+
+void bot_mk1::receiver()
+{
+  auto & conf = global_conf_reader::get_reference();
+  int timeout = conf.get<int>("bcp_timeout",60);
+  auto log(common_log::get_reference()("name"));
+  try
+  {
+    while (ImAlive)
+    {
+      std::string s;
+      s = BCP->getln("\r",64,timeout);
+      log.trace("<< "+s);
+      msg_router(s);
+    };
+  }
+  catch (...)
+  {
+    ImAlive = false;
+  };
+};
+
+void bot_mk1::transmitter()
+{
+  auto log(common_log::get_reference()("name"));
+  try
+  {
+    std::string s = to_BCP.pop();
+    BCP->put(s+"\r");
+    log.trace(">> "+s);
+  }
+  catch (...)
+  {
+    ImAlive = false;
+  };
+};
+
+void bot_mk1::msg_router(std::string s)
+{
+  try
+  {
+    auto token = split(s,' ');
+    std::string & sys = token[0];
+    std::string & verb = token[1];
+    // check for drive commands
+    if (sys == "drive")
+    {
+      if (verb == "status")
+      {
+        std::stringstream s;
+        s << drive->get_drive()
+          << "," << drive->get_brake()
+          << "," << drive->get_turn();
+        to_BCP.push(s.str());
+      }
+      else
+      {
+        // get the float argument.
+        std::stringstream s;
+        s << token[2];
+        float val;
+        s >> val;
+        // apply val to the correct setting.
+        if (verb == "power") { drive->drive(val); }
+        else if (verb == "brake") { drive->brake(val); }
+        else if (verb == "turn") { drive->turn(val); }
+        else 
+        {
+          to_BCP.push("bad_cmd");
+          drive->lockdown();
+        };
+      };
+    }
+    else if (sys == "bot")
+    {
+      if (verb == "lvar")
+      {
+        std::unique_lock<std::mutex> lock(cooking_lock);
+        std::stringstream s;
+        s << location << velocity
+          << attitude.angles() << rotation.angles();
+        to_BCP.push(s.str());
+      }
+      else if (verb == "health")
+      {
+        to_BCP.push("100");
+      };
+    }
+    else
+    {
+      to_BCP.push("bad_sys");
+    };
+  }
+  catch (...)
+  {
+    to_BCP.push("WTF?");
+  };
+};
+

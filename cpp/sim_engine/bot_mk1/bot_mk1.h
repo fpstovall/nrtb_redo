@@ -21,6 +21,8 @@
 
 #include <base_object.h>
 #include <base_socket.h>
+#include <confreader.h>
+#include <common_log.h>
 #include <diff_steer.h>
 #include <hover.h>
 #include <gravity.h>
@@ -32,10 +34,11 @@ namespace nrtb
 struct bot_mk1: public base_object
 {
   bot_mk1(tcp_socket_p link, triplet where);
-  virtual ~bot_mk1() {};
+  virtual ~bot_mk1();
   // polymophic copier
   virtual base_object * clone() = 0;
   // additional data
+  std::string name;
   std::atomic<bool> ImAlive;
   std::shared_ptr<diff_steer> drive;
   tcp_socket_p BCP;
@@ -55,6 +58,7 @@ struct bot_mk1: public base_object
   // BCP communications managers;
   void receiver();
   void transmitter();
+  void msg_router(std::string s);
 };
 
 } // namepace nrtb
