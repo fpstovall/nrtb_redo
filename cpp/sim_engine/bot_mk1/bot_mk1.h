@@ -46,8 +46,6 @@ struct bot_mk1: public base_object
   std::mutex cooking_lock;
   std::thread r_thread;
   std::thread t_thread;
-  // reporting
-  virtual std::string as_str();
   // sim methods
   // returns true if a collision is detected.
   virtual bool check_collision(object_p o);
