@@ -47,6 +47,21 @@ bot_mk1::bot_mk1(tcp_socket_p link, triplet where)
   to_BCP.push("READY");
 };
 
+base_object * bot_mk1::clone()
+{
+  bot_mk1 * t = new bot_mk1(tcp_socket_p(nullptr), location);
+  t->pre_attribs = get_pre_attribs_copy();
+  t->post_attribs = get_post_attribs_copy();
+  t->name = t->name + "_clone";
+  t->id = id;
+  t->location = location;
+  t->velocity = velocity;
+  t->attitude.set(attitude);
+  t->rotation.set(rotation);
+  t->ImAlive.store(ImAlive);
+  return t;
+};
+
 bot_mk1::~bot_mk1()
 {
   ImAlive = false;
