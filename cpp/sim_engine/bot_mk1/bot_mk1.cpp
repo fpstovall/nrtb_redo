@@ -124,13 +124,15 @@ void bot_mk1::receiver()
 {
   auto & conf = global_conf_reader::get_reference();
   int timeout = conf.get<int>("bcp_timeout",60);
-  auto log(common_log::get_reference()("name"));
+  auto log(common_log::get_reference()(name));
   try
   {
     while (ImAlive)
     {
       std::string s;
       s = BCP->getln("\r",64,timeout);
+      // strip carrage return.
+      s = s.substr(0,s.length()-1);
       log.trace("<< "+s);
       msg_router(s);
     };
@@ -143,12 +145,15 @@ void bot_mk1::receiver()
 
 void bot_mk1::transmitter()
 {
-  auto log(common_log::get_reference()("name"));
+  auto log(common_log::get_reference()(name));
   try
   {
-    std::string s = to_BCP.pop();
-    BCP->put(s+"\r");
-    log.trace(">> "+s);
+    while (ImAlive)
+    {
+      std::string s = to_BCP.pop();
+      BCP->put(s+"\r");
+      log.trace(">> "+s);
+    };
   }
   catch (...)
   {
@@ -174,7 +179,7 @@ void bot_mk1::msg_router(std::string s)
           << "," << drive->get_turn();
         to_BCP.push(s.str());
       }
-      else
+      else if (token.size() == 3)
       {
         // get the float argument.
         std::stringstream s;
@@ -184,12 +189,12 @@ void bot_mk1::msg_router(std::string s)
         // apply val to the correct setting.
         if (verb == "power") { drive->drive(val); }
         else if (verb == "brake") { drive->brake(val); }
-        else if (verb == "turn") { drive->turn(val); }
-        else 
-        {
-          to_BCP.push("bad_cmd");
-          drive->lockdown();
-        };
+        else if (verb == "turn") { drive->turn(val); };
+      }
+      else 
+      {
+        to_BCP.push("bad_cmd");
+        drive->lockdown();
       };
     }
     else if (sys == "bot")
@@ -205,6 +210,10 @@ void bot_mk1::msg_router(std::string s)
       else if (verb == "health")
       {
         to_BCP.push("100");
+      }
+      else
+      {
+        to_BCP.push("bad_cmd");
       };
     }
     else
