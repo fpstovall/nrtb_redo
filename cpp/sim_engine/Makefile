@@ -40,6 +40,7 @@ doit:
 	cd gravity_effector; make ${action}
 	cd hover_effector; make ${action}
 	cd diff_steer_effector; make ${action}
+	cd bot_mk1; make ${action}
 
 ../common/nrtb_common.a:
 	@cd ../common; make 
