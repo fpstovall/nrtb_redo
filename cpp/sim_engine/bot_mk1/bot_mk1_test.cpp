@@ -105,7 +105,7 @@ int main()
     // get bot error response.
     BCP.put("bot error\r");
     msg = gsub(BCP.getln("\r",64,2),"\r","");
-    bad = (msg != "bad_cmd") or !(test_bot->ImAlive);
+    bad = (msg != "bad_cmd \"bot error\"") or !(test_bot->ImAlive);
     failed = failed or bad;
     cout << "bot cmd error: " << ( bad ? "FAILED" : "Passed" ) 
       << " '" << msg << "'" << endl;
@@ -132,7 +132,7 @@ int main()
     // check drive lockown on error.
     BCP.put("drive nocmd\r");
     msg = gsub(BCP.getln("\r",64,2),"\r","");
-    bad = (msg != "bad_cmd") or !(test_bot->ImAlive);
+    bad = (msg != "bad_cmd \"drive nocmd\"") or !(test_bot->ImAlive);
     failed = failed or bad;
     cout << "drive cmd error: " << ( bad ? "FAILED" : "Passed" ) 
       << " '" << msg << "'" << endl;

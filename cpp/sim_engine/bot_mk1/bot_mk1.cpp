@@ -193,7 +193,7 @@ void bot_mk1::msg_router(std::string s)
       }
       else 
       {
-        to_BCP.push("bad_cmd");
+        to_BCP.push("bad_cmd \""+s+"\"");
         drive->lockdown();
       };
     }
@@ -213,17 +213,17 @@ void bot_mk1::msg_router(std::string s)
       }
       else
       {
-        to_BCP.push("bad_cmd");
+        to_BCP.push("bad_cmd \""+s+"\"");
       };
     }
     else
     {
-      to_BCP.push("bad_sys");
+      to_BCP.push("bad_sys \""+s+"\"");
     };
   }
   catch (...)
   {
-    to_BCP.push("WTF?");
+    to_BCP.push("WTF? \""+s+"\"");
   };
 };
 
