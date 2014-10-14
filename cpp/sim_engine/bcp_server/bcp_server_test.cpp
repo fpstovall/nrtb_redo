@@ -16,6 +16,7 @@
  
  **********************************************/
 
+#include <sim_core.h>
 #include "bcp_server.h"
 #include <iostream>
 #include <string>
