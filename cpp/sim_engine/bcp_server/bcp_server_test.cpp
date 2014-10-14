@@ -24,25 +24,13 @@
 using namespace nrtb;
 using namespace std;
 
-shared_ptr<bot_mk1> test_bot;
-
-
 int main()
 {
   bool failed = false;
   cout << "========== bcp_server test ============="
     << endl;
 
-  // -- set up and start the listener
-  string address = "localhost:64500";
-  tcp_server_socket_factory test_server(address);
-//  test_server.start_listen();
-  // start request processor
-//  auto rp_out = 
-//    async(launch::async,request_processor,std::ref(test_server));
-
-  // -- connect (should create a bot_mk1).
-  tcp_socket BCP;
+//  tcp_socket BCP;
     
   cout << "=========== bcp_server test complete ============="
     << endl;

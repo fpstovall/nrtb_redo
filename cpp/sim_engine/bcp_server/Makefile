@@ -27,13 +27,13 @@ lib:	${target}_test
 
 ${target}_test:	${target}.o ${target}_test.cpp
 	@rm -f ${target}_test
-	g++ -c -O3 ${target}_test.cpp -I ../include ${bargs} 
+	g++ -c -O3 ${target}_test.cpp ${bargs} 
 	g++ -o ${target}_test ${target}_test.o ${target}.o ${largs}
 
 
 ${target}.o:	${target}.cpp ${target}.h Makefile
 	@rm -f ${target}.o
-	g++ -c -O3 ${target}.cpp -I ../include ${bargs} 
+	g++ -c -O3 ${target}.cpp ${bargs} 
 
 clean:
 	@rm -vf *.o *.log ../include/${target}.h ../obj/${target}.o ${target}_test

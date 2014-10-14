@@ -35,7 +35,10 @@ public:
   ~bcp_listener();
   
   int connections();
+  int dropped();
+  int pending();
   bool listening();
+  void start();
   void stop();
   
 private:

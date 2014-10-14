@@ -19,8 +19,76 @@
 // see base_object.h for documentation
 
 #include "bcp_server.h"
+#include <random>
 #include <sstream>
 
 using namespace nrtb;
+
+bcp_listener::bcp_listener(sim_core& e)
+  : engine(e),
+    listener("*:"+
+      global_conf_reader::get_reference().get<std::string>(
+        "bcp_port","64500"))
+{};
+
+bcp_listener::~bcp_listener()
+{
+  try { stop(); } catch (...) {};
+};
+
+void bcp_listener::start()
+{
+  listener.start_listen();
+  p_thread = std::thread(&bcp_listener::processor,this);
+};
+
+void bcp_listener::stop()
+{
+  try { listener.stop_listen(); } catch (...) {};
+  p_thread.join();
+};
+
+bool bcp_listener::listening()
+{
+  return listener.listening();
+};
+
+int bcp_listener::connections()
+{
+  return listener.accepted();
+};
+
+int bcp_listener::dropped()
+{
+  return listener.discarded();
+};
+
+int bcp_listener::pending()
+{
+  return listener.available();
+};
+
+void bcp_listener::processor()
+{
+  auto log = common_log::get_reference()("BCP_req_proc");
+  log.trace("Starting");
+  try
+  {
+    std::mt19937 rng;
+    std::uniform_int_distribution<int> u(0,2e5);
+    while (listener.listening())
+    {
+      tcp_socket_p bcp = listener.get_sock();
+      log.trace("new connection");
+      triplet l(u(rng)-1e5,u(rng)-1e5,0.0);
+      engine.add_object(object_p(new bot_mk1(std::move(bcp), l)));
+      log.trace("bot added to sim");
+    };
+  }
+  catch (...)
+  {};
+  log.trace("Exiting");
+};
+
 
 
