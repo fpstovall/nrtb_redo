@@ -25,22 +25,49 @@
 using namespace nrtb;
 using namespace std;
 
+tcp_socket_p new_conn()
+{
+  tcp_socket_p sock(new tcp_socket);
+  sock->connect("localhost:64500");
+  return std::move(sock);
+};
+
 int main()
 {
   bool failed = false;
   cout << "========== bcp_server test ============="
     << endl;
 
+  // use the listener to make some bots.
   sim_core sc1(1.0/50.0);
-  sc1.start_sim();
   bcp_listener listener(sc1);
   listener.start();
-  chrono::milliseconds t(2500);
+  std::vector<tcp_socket_p> bcps;
+  for(int i=0;i<10;i++)
+  {
+    bcps.push_back(new_conn());
+  };
+  chrono::milliseconds t(250);
   this_thread::sleep_for(t);
   listener.stop();
-  sc1.stop_sim();
   
-    
+  // let's check the results.
+  int count = 0;
+  triplet maxs(0);
+  triplet mins(1e6,1e6,1e6);
+  float r = 0.0;
+/*  for(auto obj : sc1.get_obj_copies())
+  {
+    auto o = obj.second;
+    if (maxs.x < o->location.x) maxs.x = o->location.x;
+    if (maxs.y < o->location.y) maxs.y = o->location.y;
+    if (mins.x > o->location.x) mins.x = o->location.x;
+    if (mins.y > o->location.y) mins.y = o->location.y;
+    r += o->location.magnatude();
+    count++;
+  };
+*/  cout << count << mins << maxs << r/count << endl;
+  
   cout << "=========== bcp_server test complete ============="
     << endl;
 

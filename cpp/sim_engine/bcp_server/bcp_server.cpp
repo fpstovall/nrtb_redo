@@ -75,12 +75,12 @@ void bcp_listener::processor()
   try
   {
     std::mt19937 rng;
-    std::uniform_int_distribution<int> u(0,2e5);
+    std::uniform_int_distribution<int> u(0,2e4);
     while (listener.listening())
     {
       tcp_socket_p bcp = listener.get_sock();
       log.trace("new connection");
-      triplet l(u(rng)-1e5,u(rng)-1e5,0.0);
+      triplet l(u(rng)-1e4,u(rng)-1e4,0.0);
       engine.add_object(object_p(new bot_mk1(std::move(bcp), l)));     
       log.trace("bot added to sim");
     };
