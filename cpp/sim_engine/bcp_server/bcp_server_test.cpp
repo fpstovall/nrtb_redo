@@ -31,7 +31,15 @@ int main()
   cout << "========== bcp_server test ============="
     << endl;
 
-//  tcp_socket BCP;
+  sim_core sc1(1.0/50.0);
+  sc1.start_sim();
+  bcp_listener listener(sc1);
+  listener.start();
+  chrono::milliseconds t(2500);
+  this_thread::sleep_for(t);
+  listener.stop();
+  sc1.stop_sim();
+  
     
   cout << "=========== bcp_server test complete ============="
     << endl;

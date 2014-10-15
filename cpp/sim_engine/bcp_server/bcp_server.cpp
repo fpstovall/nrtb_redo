@@ -81,12 +81,35 @@ void bcp_listener::processor()
       tcp_socket_p bcp = listener.get_sock();
       log.trace("new connection");
       triplet l(u(rng)-1e5,u(rng)-1e5,0.0);
-      engine.add_object(object_p(new bot_mk1(std::move(bcp), l)));
+      engine.add_object(object_p(new bot_mk1(std::move(bcp), l)));     
       log.trace("bot added to sim");
     };
   }
+  catch (base_exception& e)
+  {
+    if (e.comment() != "")
+    {
+      std::stringstream s;
+      s << e.what() << ":" << e.comment();
+      log.warning(s.str());
+    }
+    else
+    {
+      log.trace("shutdown requested");
+    };
+  }
+  catch (std::exception& e)
+  {
+    log.severe(e.what());
+  }
   catch (...)
-  {};
+  {
+    log.critical("Unidentified exception");
+  };
+  std::stringstream s;
+  s << "connections: " << connections() 
+    << ", dropped: " << dropped();
+  log.info(s.str());
   log.trace("Exiting");
 };
 
