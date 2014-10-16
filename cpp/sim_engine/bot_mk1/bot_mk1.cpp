@@ -23,7 +23,7 @@
 
 using namespace nrtb;
 
-bot_mk1::bot_mk1(tcp_socket_p link, triplet where)
+bot_mk1::bot_mk1(triplet where)
 {
   std::stringstream s;
   s << "mk1_" << id;
@@ -33,6 +33,11 @@ bot_mk1::bot_mk1(tcp_socket_p link, triplet where)
   bounding_sphere.radius = 4.5/2.0;
   location = where;
   location.z = bounding_sphere.radius + 0.25;
+};
+
+bot_mk1::bot_mk1(tcp_socket_p link, triplet where)
+  : bot_mk1(where)
+{
   // add effectors
   add_pre(new norm_gravity);
   add_pre(new hover(location.z,0.10,2.0));
@@ -49,10 +54,9 @@ bot_mk1::bot_mk1(tcp_socket_p link, triplet where)
 
 base_object * bot_mk1::clone()
 {
-  bot_mk1 * t = new bot_mk1(tcp_socket_p(nullptr), location);
+  bot_mk1 * t = new bot_mk1(location);
   t->pre_attribs = get_pre_attribs_copy();
   t->post_attribs = get_post_attribs_copy();
-  t->name = t->name + "_clone";
   t->id = id;
   t->location = location;
   t->velocity = velocity;

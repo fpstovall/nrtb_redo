@@ -34,6 +34,7 @@ namespace nrtb
 struct bot_mk1: public base_object
 {
   bot_mk1(tcp_socket_p link, triplet where);
+  bot_mk1(triplet where);
   virtual ~bot_mk1();
   // polymophic copier
   virtual base_object * clone();
