@@ -17,7 +17,7 @@
  **********************************************/
  
 #ifndef sim_core_header
-#define sim_core_heade
+#define sim_core_header
 
 #include <vector>
 #include <map>
