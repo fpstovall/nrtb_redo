@@ -47,23 +47,32 @@ int main()
   for(int i=0;i<10;i++)
   {
     bcps.push_back(new_conn());
+    chrono::milliseconds s(5);
+    this_thread::sleep_for(s);
   };
-  chrono::milliseconds t(500);
+  chrono::milliseconds t(50);
   this_thread::sleep_for(t);
   listener.stop();
   sc1.stop_sim();
 
   // let's check the results.
   int count = 0;
-  triplet maxs(0);
-  triplet mins(1e6,1e6,1e6);
-  float r = 0.0;
-  for(auto s : sc1.obj_status())
+
+  // get the results from the sim_core.
+  auto & ipc = global_ipc_channel_manager::get_reference();
+  ipc_queue & soq = ipc.get("sim_output");
+  gp_sim_message_adapter sim_out(soq);
+  cout << "Quanta\tPop\tList" << endl;
+  while (soq.size())
   {
-    cout << s << endl;
-    count++;
+    gp_sim_message_p msg(sim_out.pop());
+    sim_core::report & rep = msg->data<sim_core::report>();
+    cout << rep.quanta << "\t" << rep.objects.size() << "\t";
+    for (auto p : rep.objects)
+      cout << p.first << " ";
+    cout << endl;
+    count = rep.objects.size();
   };
-  cout << count << endl;
   
   cout << "=========== bcp_server test complete ============="
     << endl;
