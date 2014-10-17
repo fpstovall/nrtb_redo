@@ -71,10 +71,10 @@ bot_mk1::~bot_mk1()
   ImAlive = false;
   // unconditionally shutdown the queue and close the socket.
   try { to_BCP.shutdown(); } catch (...) {};
-  try { BCP->close(); } catch (...) {};
+  if (BCP) try { BCP->close(); } catch (...) {};
   // Wait on the threads.
-  r_thread.join();
-  t_thread.join();
+  if (r_thread.joinable()) r_thread.join();
+  if (t_thread.joinable()) t_thread.join();
 };
 
 bool bot_mk1::tick(int time)
