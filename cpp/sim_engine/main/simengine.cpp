@@ -19,6 +19,9 @@
 #include <common.h>
 #include <logger.h>
 #include <confreader.h>
+#include <common_log.h>
+#include <sim_core.h>
+#include <bcp_server.h>
 
 using namespace nrtb;
 using namespace std;
@@ -30,11 +33,9 @@ int main(int argc, char * argv[])
   config.read(argc, argv, "simengine.conf");
   
   // start the system logger
-  log_queue g_log_queue;
-  log_file_writer g_log_writer(g_log_queue,
-	config.get<string>("global_log_file","simengine.log"));
+  
   // create our recorder
-  log_recorder g_log("main",g_log_queue);
+  auto g_log(common_log::get_reference()("main()"));
   
   // Report our startup and configuration.
   g_log.info("Start up");
@@ -48,7 +49,22 @@ int main(int argc, char * argv[])
   // Any modules called from here should be passed the 
   // g_log_queue and config by reference. 
   
+  // start the sim_core.
+  float quanta = config.get<float>("quanta",1.0/50.0); 
+  sim_core world(quanta);
+  world.start_sim();
   
+  // start the bcp_server
+  bcp_listener bcps(world);
+  bcps.start();
+  
+  
+  chrono::seconds rt(1);
+  this_thread::sleep_for(rt);
+  
+
+  bcps.stop();
+  world.stop_sim(); 
   // say goodbye
   g_log.info("Shut down");
 };
