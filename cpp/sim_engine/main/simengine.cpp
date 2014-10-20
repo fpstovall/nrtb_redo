@@ -58,10 +58,20 @@ int main(int argc, char * argv[])
   bcp_listener bcps(world);
   bcps.start();
   
-  
-  chrono::seconds rt(1);
-  this_thread::sleep_for(rt);
-  
+  int run_time = config.get("run_time",1);
+  if (run_time > 0)
+  {
+    // programmed run time.
+    chrono::seconds rt(run_time);
+    this_thread::sleep_for(rt);
+  }
+  else
+  {
+    // run until stop is requested.
+    cout << "\nPress any key to end.\n" << endl;
+    char in = ' ';
+    cin.get();
+  };
 
   bcps.stop();
   world.stop_sim(); 
