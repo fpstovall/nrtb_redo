@@ -33,7 +33,6 @@ clean:
 
 doit:
 	cd messages; make ${action}
-	cd main; make ${action}
 	cd base_object; make ${action}
 	cd common_log; make ${action}
 	cd sim_core; make ${action}
@@ -42,6 +41,7 @@ doit:
 	cd diff_steer_effector; make ${action}
 	cd bot_mk1; make ${action}
 	cd bcp_server; make ${action}
+	cd main; make ${action}
 
 ../common/nrtb_common.a:
 	@cd ../common; make 
