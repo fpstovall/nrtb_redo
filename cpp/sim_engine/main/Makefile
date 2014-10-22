@@ -31,7 +31,7 @@ simengine.o:	simengine.cpp Makefile
 	g++ -c -O3 simengine.cpp ${bargs} 
 
 clean:
-	@rm -vf *.o ${target} *log ../bin/${target}	
+	@rm -vf *.o ${target} *log *out ../bin/${target}	
 	@echo all objects and executables have been erased.
 
 

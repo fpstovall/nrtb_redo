@@ -16,9 +16,11 @@
  
  **********************************************/
 
+#include <fstream>
 #include <common.h>
 #include <logger.h>
 #include <confreader.h>
+#include <ipc_channel.h>
 #include <common_log.h>
 #include <sim_core.h>
 #include <bcp_server.h>
@@ -26,13 +28,38 @@
 using namespace nrtb;
 using namespace std;
 
+void output_writer()
+{
+  ofstream output("simulation.out");
+  try
+  {
+    // get the results from the sim_core.
+    auto & ipc = global_ipc_channel_manager::get_reference();
+    ipc_queue & soq = ipc.get("sim_output");
+    gp_sim_message_adapter sim_out(soq);
+    while (true)
+    {
+      gp_sim_message_p raw = sim_out.pop();
+      sim_core::report & rep = raw->data<sim_core::report>();
+      output << "quanta\t" << rep.quanta 
+        << "\t" << rep.duration
+        << "\t" << rep.wallclock 
+        << endl;
+      for(auto o : rep.objects)
+        output << "obj\t" << o.second->as_str() << endl;
+    };
+  }
+  catch (...)
+  {};
+  output.close();
+  cout << "output writer closed." << endl;
+};
+
 int main(int argc, char * argv[])
 {
   // load the global configuration
   conf_reader config;
   config.read(argc, argv, "simengine.conf");
-  
-  // start the system logger
   
   // create our recorder
   auto g_log(common_log::get_reference()("main()"));
@@ -46,8 +73,8 @@ int main(int argc, char * argv[])
   };
   g_log.info("Configuration list complete");
   
-  // Any modules called from here should be passed the 
-  // g_log_queue and config by reference. 
+  // start the sim output writer.
+  std::thread writer(output_writer);
   
   // start the sim_core.
   float quanta = config.get<float>("quanta",1.0/50.0); 
@@ -68,13 +95,21 @@ int main(int argc, char * argv[])
   else
   {
     // run until stop is requested.
-    cout << "\nPress any key to end.\n" << endl;
-    char in = ' ';
+    cout << "\nPress enter to end.\n" << endl;
+    char t = ' ';
     cin.get();
+    cout << "shutting down" << endl;
   };
-
+  // shut it all down.
   bcps.stop();
-  world.stop_sim(); 
+  world.stop_sim();
+  // wait for output queue to drain.
+  chrono::milliseconds pause(100);
+  auto & soq = global_ipc_channel_manager::get_reference().get("sim_output");  
+  while (soq.size()) this_thread::sleep_for(pause);
+  // close out the writer.
+  soq.shutdown();
+  writer.join();
   // say goodbye
   g_log.info("Shut down");
 };
