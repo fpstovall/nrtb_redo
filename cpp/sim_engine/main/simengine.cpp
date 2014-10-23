@@ -28,7 +28,7 @@
 using namespace nrtb;
 using namespace std;
 
-void output_writer()
+void output_writer(bool write_zeros=true)
 {
   ofstream output("simulation.out");
   try
@@ -41,12 +41,16 @@ void output_writer()
     {
       gp_sim_message_p raw = sim_out.pop();
       sim_core::report & rep = raw->data<sim_core::report>();
-      output << "quanta\t" << rep.quanta 
-        << "\t" << rep.duration
-        << "\t" << rep.wallclock 
-        << endl;
-      for(auto o : rep.objects)
-        output << "obj\t" << o.second->as_str() << endl;
+      if (write_zeros or rep.objects.size())
+      {
+        output << "q\t" << rep.quanta 
+          << "\t" << rep.duration
+          << "\t" << rep.wallclock 
+          << endl;
+        for(auto o : rep.objects)
+          output << "o\t" << rep.quanta 
+            << "\t" << o.second->as_str() << endl;
+      };
     };
   }
   catch (...)
@@ -74,7 +78,7 @@ int main(int argc, char * argv[])
   g_log.info("Configuration list complete");
   
   // start the sim output writer.
-  std::thread writer(output_writer);
+  std::thread writer(output_writer,config.get<bool>("write_zeros",true));
   
   // start the sim_core.
   float quanta = config.get<float>("quanta",1.0/50.0); 
