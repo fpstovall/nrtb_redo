@@ -16,7 +16,10 @@
 #
 #***********************************************
 
-target=../bin/simengine
+target=simengine
+
+lib: ${target}
+	@cp $(target) simengine.conf ../bin/
 
 ${target}:	simengine.o
 	@rm -f ${target}
@@ -28,13 +31,12 @@ simengine.o:	simengine.cpp Makefile
 	g++ -c -O3 simengine.cpp ${bargs} 
 
 clean:
-	@rm -vf *.o ${target}
+	@rm -vf *.o ${target} *log *out ../bin/${target}	
 	@echo all objects and executables have been erased.
 
-lib: ${target}
 
 switches=-std=gnu++11 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP 
-libs=../../common/lib/nrtb_common.a -lpthread
+libs=../lib/sim_engine.a ../../common/lib/nrtb_common.a -lpthread
 include=-I../../common/include -I../include
 bargs=${switches} ${include}
 largs=${switches} ${libs}

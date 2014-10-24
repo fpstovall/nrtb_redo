@@ -135,10 +135,13 @@ void bot_mk1::receiver()
     {
       std::string s;
       s = BCP->getln("\r",64,timeout);
-      // strip carrage return.
-      s = s.substr(0,s.length()-1);
-      log.trace("<< "+s);
-      msg_router(s);
+      // strip CR and LF.
+      s = gsub(gsub(s,"\n",""),"\r","");
+      if (s.length() > 0)
+      {  
+        log.trace("<< "+s);
+        msg_router(s);
+      };
     };
   }
   catch (...)
