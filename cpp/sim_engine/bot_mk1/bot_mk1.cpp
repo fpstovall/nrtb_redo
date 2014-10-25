@@ -41,7 +41,7 @@ bot_mk1::bot_mk1(tcp_socket_p link, triplet where)
   // add effectors
   add_pre(new norm_gravity);
   add_pre(new hover(location.z,0.10,2.0));
-  drive.reset(new diff_steer(*this,1e5,1e6,4*pi,10,8));
+  drive.reset(new diff_steer(*this,1e5,2e5,4*pi,10,8));
   // bot control and com setup.
   BCP = std::move(link);
   ImAlive = true;

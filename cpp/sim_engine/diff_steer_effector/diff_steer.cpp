@@ -146,7 +146,7 @@ bool diff_steer::pre::tick(base_object& o, int time)
     float bspeed = speed * 50;
     float KE = o.mass * bspeed * bspeed ;
     // Include current power setting in budget.
-    // KE += p;
+    KE += p;
     // limit b to KE
     b = (b > KE) ? KE : b;
     // apply breaking force.
