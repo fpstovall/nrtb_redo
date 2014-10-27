@@ -19,7 +19,7 @@
 target=cal_bot
 
 lib: ${target}
-	@cp $(target) ${target}.conf ../bin/
+	@cp ${target} ${target}.conf ../bin/
 
 ${target}:	${target}.o
 	@rm -f ${target}
@@ -28,7 +28,7 @@ ${target}:	${target}.o
 
 ${target}.o:	${target}.cpp Makefile
 	@rm -f ${target}.o
-	g++ -c -O3 ${}target.cpp ${bargs} 
+	g++ -c -O3 ${target}.cpp ${bargs} 
 
 clean:
 	@rm -vf *.o ${target} *log *out ../bin/${target}	

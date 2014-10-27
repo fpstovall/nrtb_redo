@@ -20,16 +20,59 @@
 #include <common.h>
 #include <logger.h>
 #include <confreader.h>
-
+#include <base_socket.h>
+#include <hires_timer.h>
+#include <triad.h>
 
 using namespace nrtb;
 using namespace std;
 
+typedef triad<float> triplet;
+
 int main(int argc, char * argv[])
 {
+  hirez_timer runtime();
   // load the global configuration
   conf_reader config;
   config.read(argc, argv, "cal_bot.conf");
+  
+  // get the configuration data
+  string server_addr(config.get<string>("server","127.0.0.1:64500"));
+  int a_time(config.get<int>("a_ms",1000));
+  int b_time(config.get<int>("b_ms",500));
+  string a_set(config.get<string>("a_set","100"));
+  string b_set(config.get<string>("b_set","100"));
+  
+  tcp_socket server;
+  try
+  {
+    server.connect(server_addr);
+    // get bot ack.
+    cout << "\n" << server.getln() << endl;
+    
+    //Accelleration test.
+    server.put("drive brake 0\r");
+    server.put("drive power "+a_set+"\r");
+    hirez_timer atest;
+    chrono::milliseconds at(a_time);
+    this_thread::sleep_for(at);
+    server.put("drive power 0\rbot lvar\r");
+    float elapsed = atest.stop();
+    stringstream response(gsub(server.getln(),")(",") ("));
+    cout << response.str() << endl;
+    triplet location;
+    triplet velocity;
+    response >> location >> velocity;
+    cout << velocity.x << "/" <<  elapsed
+      << "=" << velocity.x/elapsed << endl;
+    
+    server.close();
+  }
+  catch (...)
+  {};
+  
+  
+  
 
 
   
