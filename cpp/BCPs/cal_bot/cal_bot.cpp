@@ -43,30 +43,49 @@ int main(int argc, char * argv[])
   string a_set(config.get<string>("a_set","100"));
   string b_set(config.get<string>("b_set","100"));
   
-  tcp_socket server;
+  tcp_socket sim;
   try
   {
-    server.connect(server_addr);
+    sim.connect(server_addr);
     // get bot ack.
-    cout << "\n" << server.getln() << endl;
+    cout << "\n" << sim.getln() << endl;
     
     //Accelleration test.
-    server.put("drive brake 0\r");
-    server.put("drive power "+a_set+"\r");
+    sim.put("drive brake 0\r");
+    sim.put("drive power "+a_set+"\r");
     hirez_timer atest;
     chrono::milliseconds at(a_time);
     this_thread::sleep_for(at);
-    server.put("drive power 0\rbot lvar\r");
+    sim.put("drive power 0\rbot lvar\r");
     float elapsed = atest.stop();
-    stringstream response(gsub(server.getln(),")(",") ("));
-    cout << response.str() << endl;
+    stringstream response(gsub(sim.getln(),")(",") ("));
     triplet location;
     triplet velocity;
     response >> location >> velocity;
-    cout << velocity.x << "/" <<  elapsed
-      << "=" << velocity.x/elapsed << endl;
+    cout << "Accelleration:\n\t"
+      << velocity.x << "(m/s) / " <<  elapsed
+      << "(s) = " << velocity.x/elapsed 
+      << " m/s^2" << endl;
+      
+    // Braking test.
+    float start = velocity.x;
+    sim.put("drive brake "+b_set+"\r");
+    hirez_timer brake_time;
+    chrono::milliseconds bt(b_time);
+    this_thread::sleep_for(bt);
+    sim.put("bot lvar\r");
+    elapsed = brake_time.stop();
+    response.str(gsub(sim.getln(),")(",") ("));
+    response >> location >> velocity;
+    float dec = start - velocity.x;
+    cout << "\nDecelleration:\n\t"
+      << dec << "(m/s) / " <<  elapsed
+      << "(s) = " << dec/elapsed 
+      << " m/s^2" << endl;
     
-    server.close();
+      
+    
+    sim.close();
   }
   catch (...)
   {};
