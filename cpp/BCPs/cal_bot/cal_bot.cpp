@@ -40,8 +40,10 @@ int main(int argc, char * argv[])
   string server_addr(config.get<string>("server","127.0.0.1:64500"));
   int a_time(config.get<int>("a_ms",1000));
   int b_time(config.get<int>("b_ms",500));
+  int t_time(config.get<int>("t_ms",440));
   string a_set(config.get<string>("a_set","100"));
   string b_set(config.get<string>("b_set","100"));
+  string t_set(config.get<string>("t_set","100"));
   
   tcp_socket sim;
   try
@@ -82,16 +84,46 @@ int main(int argc, char * argv[])
       << dec << "(m/s) / " <<  elapsed
       << "(s) = " << dec/elapsed 
       << " m/s^2" << endl;
+      
+    // Turn test.
+    // -- make sure we're stopped.  
+    sim.put("bot lvar\r");
+    response.str(gsub(sim.getln(),")(",") ("));      
+    triplet attitude;
+    triplet rotation;
+    response >> location >> velocity >> attitude >> rotation;
+    if ((attitude.magnatude() != 0.0) 
+      or (rotation.magnatude() != 0))
+    {
+      cout << "Bot already turning; test bypassed." << endl;
+      base_exception e;
+      throw e;
+    };
+    // conduct the test if we are okay.
+    cout << "\nTurn Rate:" << endl;
+    sim.put("drive turn "+t_set+"\r");
+    hirez_timer turn_time;
+    chrono::milliseconds tt(t_time);
+    this_thread::sleep_for(tt);
+    sim.put("bot lvar\rdrive turn 0\r");
+    elapsed = turn_time.stop();
+    response.str(gsub(sim.getln(),")(",") ("));
+    response >> location >> velocity >> attitude >> rotation;
+    float ad = (attitude.z/3.14159) * 180;
+    float rd = (rotation.z/3.14159) * 180;
+    cout << "\tSet Rate: " << rd << " d/s\n"
+      << "\tMeasured: "<< (ad / elapsed) << " d/s" 
+      << endl;
     
       
     
-    sim.close();
   }
   catch (...)
   {};
   
   
   
+  sim.close();
 
 
   
