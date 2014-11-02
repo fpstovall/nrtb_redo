@@ -88,7 +88,7 @@ int main()
     // get position and velocity data.
     BCP.put("bot lvar\r");
     msg = gsub(BCP.getln("\r",64,2),"\r","");
-    bad = (msg != "(0,0,2.5)(0,0,0)(0,0,0)(0,0,0)") 
+    bad = (msg != "bot lvar (0,0,2.5) (0,0,0) (0,0,0) (0,0,0)") 
       or !(test_bot->ImAlive);
     failed = failed or bad;
     cout << "bot lvar: " << ( bad ? "FAILED" : "Passed" ) 
@@ -97,7 +97,7 @@ int main()
     // get health data.
     BCP.put("bot health\r");
     msg = gsub(BCP.getln("\r",64,2),"\r","");
-    bad = (msg != "100") or !(test_bot->ImAlive);
+    bad = (msg != "bot health 100") or !(test_bot->ImAlive);
     failed = failed or bad;
     cout << "bot health: " << ( bad ? "FAILED" : "Passed" ) 
       << " '" << msg << "'" << endl;
@@ -113,7 +113,7 @@ int main()
     // get drive settings.
     BCP.put("drive status\r");
     msg = gsub(BCP.getln("\r",64,2),"\r","");
-    bad = (msg != "0,1,0") or !(test_bot->ImAlive);
+    bad = (msg != "drive status 0 1 0") or !(test_bot->ImAlive);
     failed = failed or bad;
     cout << "drive status: " << ( bad ? "FAILED" : "Passed" ) 
       << " '" << msg << "'" << endl;
@@ -124,7 +124,7 @@ int main()
     BCP.put("drive turn 100\r");
     BCP.put("drive status\r");
     msg = gsub(BCP.getln("\r",64,2),"\r","");
-    bad = (msg != "1,0,1") or !(test_bot->ImAlive);
+    bad = (msg != "drive status 1 0 1") or !(test_bot->ImAlive);
     failed = failed or bad;
     cout << "drive settings: " << ( bad ? "FAILED" : "Passed" ) 
       << " '" << msg << "'" << endl;
@@ -138,7 +138,7 @@ int main()
       << " '" << msg << "'" << endl;
     BCP.put("drive status\r");
     msg = gsub(BCP.getln("\r",64,2),"\r","");
-    bad = (msg != "0,1,0") or !(test_bot->ImAlive);
+    bad = (msg != "drive status 0 1 0") or !(test_bot->ImAlive);
     failed = failed or bad;
     cout << "drive lockdown: " << ( bad ? "FAILED" : "Passed" ) 
       << " '" << msg << "'" << endl;

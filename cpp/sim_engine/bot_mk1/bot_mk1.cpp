@@ -172,27 +172,27 @@ void bot_mk1::msg_router(std::string s)
 {
   try
   {
-    auto token = split(s,' ');
-    std::string & sys = token[0];
-    std::string & verb = token[1];
+    std::stringstream tokens(s);
+    std::string sys;
+    std::string verb;
+    tokens >> sys >> verb;
     // check for drive commands
     if (sys == "drive")
     {
       if (verb == "status")
       {
         std::stringstream s;
-        s << drive->get_drive()
-          << "," << drive->get_brake()
-          << "," << drive->get_turn();
+        s << sys << " " << verb << " "
+          << drive->get_drive()
+          << " " << drive->get_brake()
+          << " " << drive->get_turn();
         to_BCP.push(s.str());
       }
-      else if (token.size() == 3)
+      else if (!tokens.eof())
       {
         // get the float argument.
-        std::stringstream s;
-        s << token[2];
         float val;
-        s >> val;
+        tokens >> val;
         // apply val to the correct setting.
         if (verb == "power") { drive->drive(val); }
         else if (verb == "brake") { drive->brake(val); }
@@ -210,13 +210,16 @@ void bot_mk1::msg_router(std::string s)
       {
         std::unique_lock<std::mutex> lock(cooking_lock);
         std::stringstream s;
-        s << location << velocity
-          << attitude.angles() << rotation.angles();
+        s << sys << " " << verb 
+          << " " << location 
+          << " " << velocity
+          << " " << attitude.angles() 
+          << " " << rotation.angles();
         to_BCP.push(s.str());
       }
       else if (verb == "health")
       {
-        to_BCP.push("100");
+        to_BCP.push("sys health 100");
       }
       else
       {
