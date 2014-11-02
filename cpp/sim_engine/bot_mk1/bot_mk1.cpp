@@ -219,7 +219,7 @@ void bot_mk1::msg_router(std::string s)
       }
       else if (verb == "health")
       {
-        to_BCP.push("sys health 100");
+        to_BCP.push("bot health 100");
       }
       else
       {
