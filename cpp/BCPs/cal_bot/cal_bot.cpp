@@ -48,6 +48,7 @@ int main(int argc, char * argv[])
   tcp_socket sim;
   try
   {
+    string sys, verb; 
     sim.connect(server_addr);
     // get bot ack.
     cout << "\n" << sim.getln() << endl;
@@ -60,10 +61,11 @@ int main(int argc, char * argv[])
     this_thread::sleep_for(at);
     sim.put("drive power 0\rbot lvar\r");
     float elapsed = atest.stop();
-    stringstream response(gsub(sim.getln(),")(",") ("));
+    stringstream response(sim.getln());
     triplet location;
     triplet velocity;
-    response >> location >> velocity;
+    response >> sys >> verb 
+      >> location >> velocity;
     cout << "Accelleration:\n\t"
       << velocity.x << "(m/s) / " <<  elapsed
       << "(s) = " << velocity.x/elapsed 
@@ -77,8 +79,9 @@ int main(int argc, char * argv[])
     this_thread::sleep_for(bt);
     sim.put("bot lvar\r");
     elapsed = brake_time.stop();
-    response.str(gsub(sim.getln(),")(",") ("));
-    response >> location >> velocity;
+    response.str(sim.getln());
+    response >> sys >> verb 
+      >> location >> velocity;
     float dec = start - velocity.x;
     cout << "\nDecelleration:\n\t"
       << dec << "(m/s) / " <<  elapsed
@@ -88,10 +91,11 @@ int main(int argc, char * argv[])
     // Turn test.
     // -- make sure we're stopped.  
     sim.put("bot lvar\r");
-    response.str(gsub(sim.getln(),")(",") ("));      
+    response.str(sim.getln());      
     triplet attitude;
     triplet rotation;
-    response >> location >> velocity >> attitude >> rotation;
+    response >> sys >> verb 
+      >> location >> velocity >> attitude >> rotation;
     if ((attitude.magnatude() != 0.0) 
       or (rotation.magnatude() != 0))
     {
@@ -107,8 +111,9 @@ int main(int argc, char * argv[])
     this_thread::sleep_for(tt);
     sim.put("bot lvar\rdrive turn 0\r");
     elapsed = turn_time.stop();
-    response.str(gsub(sim.getln(),")(",") ("));
-    response >> location >> velocity >> attitude >> rotation;
+    response.str(sim.getln());
+    response >> sys >> verb
+      >> location >> velocity >> attitude >> rotation;
     float ad = (attitude.z/3.14159) * 180;
     float rd = (rotation.z/3.14159) * 180;
     cout << "\tSet Rate: " << rd << " d/s\n"
