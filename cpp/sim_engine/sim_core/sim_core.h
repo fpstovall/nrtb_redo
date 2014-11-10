@@ -37,6 +37,32 @@ struct clsn_rec
   object_p a;
   object_p b;
 };
+
+struct sensor_rec
+{
+  int type;
+  unsigned long long id;
+  triplet location;
+  triplet velocity;
+  float radius; 
+};
+
+typedef std::vector<sensor_rec> contacts;
+typedef std::shared_ptr<contacts> contacts_p;
+
+class panopticon
+{
+public:
+  // public accessor
+  contacts_p get();
+  // used only by sim_core;
+  void start_new();
+  void add(sensor_rec s);
+  void done_adding();
+private:
+  contacts_p c_list;
+  contacts_p t_list;
+};
   
 class sim_core
 {

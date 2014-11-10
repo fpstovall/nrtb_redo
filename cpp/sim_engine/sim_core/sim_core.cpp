@@ -28,6 +28,27 @@
 using namespace std;
 using namespace nrtb;
 
+contacts_p panopticon::get()
+{
+  return c_list;
+};
+
+void panopticon::start_new()
+{
+  t_list.reset(new contacts);
+};
+
+void panopticon::add(sensor_rec s)
+{
+  t_list->push_back(s);
+};
+
+void panopticon::done_adding()
+{
+  c_list = t_list;
+};
+
+
 sim_core::sim_core(float time_slice)
   : quanta(0), 
     quanta_duration(time_slice),
