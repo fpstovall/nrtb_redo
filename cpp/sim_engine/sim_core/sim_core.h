@@ -68,10 +68,11 @@ private:
 class sim_core
 {
 public:
-  sim_core(float time_slice);
+  sim_core(float time_slice=1.0/50.0);
   /***************************************
    * control methods.
    **************************************/
+  void set_quanta(float time_slice);
   bool running();
   void start_sim();
   void stop_sim();

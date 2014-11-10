@@ -59,6 +59,20 @@ sim_core::sim_core(float time_slice)
     q(gp_sim_message_adapter(messages))
 {};
 
+void sim_core::set_quanta(float time_slice)
+{
+  if (!is_running and quanta==0)
+  {
+    quanta_duration = time_slice;
+  }
+  else
+  {
+    base_exception e;
+    e.store("Invalid call to sim_core::set_quanta()");
+    throw e; 
+  };
+};
+
 sim_core::report sim_core::get_report(unsigned long long ticks, double wt)
 {
   report returnme;
