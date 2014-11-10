@@ -90,6 +90,12 @@ object_list sim_core::get_obj_copies()
   return returnme;
 };
 
+contacts_p sim_core::contact_list()
+{
+  return public_list.get();
+};
+
+
 void sim_core::tick()
 {
   // call the local tick and apply for each object in the simulation.
@@ -378,6 +384,19 @@ void sim_core::run_sim(sim_core & w)
       w.tick();
       w.collision_check();
       w.resolve_collisions();
+      // populate public sensor list;
+      w.public_list.start_new();
+      for(auto i: w.all_objects)
+      {
+        sensor_rec s;
+        base_object & o = *i.second;
+        s.type = 1;
+        s.id = o.id;
+        s.location = o.location;
+        s.velocity = o.velocity;
+        w.public_list.add(s);
+      };
+      w.public_list.done_adding();
       // output turn status
       unsigned long long elapsed = turnclock.interval_as_usec();
       void_p r(new report(w.get_report(elapsed,wallclock.interval())));

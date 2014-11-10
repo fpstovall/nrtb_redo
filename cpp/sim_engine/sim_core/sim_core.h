@@ -93,6 +93,7 @@ public:
   };
   strlist obj_status();
   object_list get_obj_copies();
+  contacts_p contact_list();
   
 private:
   ipc_queue messages;
@@ -105,6 +106,7 @@ private:
   object_list all_objects;
   std::vector<clsn_rec> collisions;
   std::vector<unsigned long long> deletions;
+  panopticon public_list;
   void turn_init();
   void tick();
   void collision_check();
