@@ -62,6 +62,7 @@ public:
 private:
   contacts_p c_list;
   contacts_p t_list;
+  std::mutex list_lock;
 };
   
 class sim_core

@@ -30,6 +30,7 @@ using namespace nrtb;
 
 contacts_p panopticon::get()
 {
+  std::unique_lock<std::mutex>(list_lock);
   return c_list;
 };
 
@@ -45,6 +46,7 @@ void panopticon::add(sensor_rec s)
 
 void panopticon::done_adding()
 {
+  std::unique_lock<std::mutex>(list_lock);
   c_list = t_list;
 };
 
