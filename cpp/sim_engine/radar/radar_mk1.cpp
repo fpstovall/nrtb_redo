@@ -38,9 +38,13 @@ std::string radar_mk1::contacts()
   for(auto c : *c_list)
   {
     float range = parent.location.range(c.location);
-    // TODO: get xy azimuth
-    // TODO: get yz elevation
+    // get xy azimuth
+    triplet offset = parent.location - c.location;
+    float azimuth = atan2(offset.y, offset.x);
+    // get yz elevation
+    float elevation = atan2(offset.z, offset.x);
     // TODO: assemble return string
+    
   };
   return returnme.str();
 };
