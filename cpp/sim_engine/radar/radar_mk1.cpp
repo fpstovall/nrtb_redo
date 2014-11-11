@@ -35,7 +35,7 @@ std::string radar_mk1::contacts()
   // for now, update every time.
   c_list = sim.contact_list();
   // assemble the return string
-  returnme << c_list->size() -1 << " ";
+  returnme << (c_list->size()-1);
   for(auto c : *c_list)
   {
     if (c.id != parent.id)
@@ -47,11 +47,11 @@ std::string radar_mk1::contacts()
       // get yz elevation
       float elevation = atan2(offset.z, offset.x);
       // assemble return string
-      returnme << c.type << " "
+      returnme << " " << c.type << " "
         << range << " "
         << azimuth << " "
         << elevation << " "
-        << c.velocity << " ";
+        << (c.velocity - parent.velocity);
     };
   };
   return returnme.str();
