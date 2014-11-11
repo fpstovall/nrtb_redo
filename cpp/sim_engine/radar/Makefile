@@ -36,11 +36,11 @@ ${target}.o:	${target}.cpp ${target}.h Makefile
 	g++ -c -O3 ${target}.cpp -I ../include ${bargs} 
 
 clean:
-	@rm -vf *.o ../include/${target}.h ../obj/${target}.o ${target}_test
+	@rm -vf *.o *log ../include/${target}.h ../obj/${target}.o ${target}_test
 	@echo all objects and executables have been erased.
 
 switches=-std=gnu++11 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP 
-libs=../../common/lib/nrtb_common.a ../lib/sim_engine.a -lpthread
+libs=../lib/sim_engine.a ../../common/lib/nrtb_common.a -lpthread
 include=-I../../common/include -I../include
 bargs=${switches} ${include}
 largs=${switches} ${libs}

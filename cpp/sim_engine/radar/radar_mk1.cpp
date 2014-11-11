@@ -24,3 +24,28 @@
 
 using namespace nrtb;
 
+radar_mk1::radar_mk1(base_object & o)
+  : sim(global_sim_core::get_reference()),
+    parent(o)
+{};
+
+std::string radar_mk1::contacts()
+{
+  std::stringstream returnme;
+  // for now, update every time.
+  c_list = sim.contact_list();
+  // assemble the return string
+  for(auto c : *c_list)
+  {
+    float range = parent.location.range(c.location);
+    // TODO: get xy azimuth
+    // TODO: get yz elevation
+    // TODO: assemble return string
+  };
+  return returnme.str();
+};
+
+std::string radar_mk1::status()
+{
+  return "1";
+};
