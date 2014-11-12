@@ -17,21 +17,54 @@
  **********************************************/
 
 #include "radar_mk1.h"
-#include <bot_mk1.h>
+#include <base_object.h>
 #include <iostream>
 #include <string>
 
 using namespace nrtb;
 using namespace std;
 
+struct my_object : public base_object
+{
+  my_object() : radar(radar_mk1(*this)) {};
+  
+  radar_mk1 radar;
+  
+  bool apply_collision(object_p o) 
+  {
+    return true;
+  };
+  
+  base_object * clone()
+  {
+    my_object * returnme = new my_object(*this);
+    returnme->pre_attribs = get_pre_attribs_copy();
+    returnme->post_attribs = get_post_attribs_copy();
+    return returnme;
+  };
+};
 
 int main()
 {
   bool failed = false;
   cout << "========== radar_mk1 test ============="
     << endl;
-
+ 
+  // get a couple target objects.
+  my_object * o1 = new my_object;
+  my_object * o2 = new my_object;
+  o2->location = triplet(0,1,1);
     
+  // start a sim_core;
+  sim_core & w = global_sim_core::get_reference();
+  w.start_sim();
+  
+  // TODO: Insert objects in the sim.
+  
+  // TODO: Verify they see each other properly.
+
+  
+  w.stop_sim();  
     cout << "=========== radar_mk1 test complete ============="
     << endl;
   
