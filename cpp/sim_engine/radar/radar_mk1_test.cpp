@@ -59,13 +59,22 @@ int main()
   sim_core & w = global_sim_core::get_reference();
   w.start_sim();
   
-  // TODO: Insert objects in the sim.
+  // Insert objects in the sim.
+  w.add_object(object_p(o1));
+  w.add_object(object_p(o2));
+  chrono::milliseconds pause(50);
+  this_thread::sleep_for(pause);
   
-  // TODO: Verify they see each other properly.
+  // Verify they see each other properly.
+  string o1c = o1->radar.contacts();
+  string o2c = o2->radar.contacts();  
+  
+  w.stop_sim();
 
+  cout << "from o1: " << o1c << endl;
+  cout << "from o2: " << o2c << endl;
   
-  w.stop_sim();  
-    cout << "=========== radar_mk1 test complete ============="
+  cout << "=========== radar_mk1 test complete ============="
     << endl;
   
   return failed;
