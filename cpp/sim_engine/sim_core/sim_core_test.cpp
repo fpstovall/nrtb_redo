@@ -306,6 +306,10 @@ int main()
   t = (l1->size() != 0) or (l2->size() != 1);
   t = log_test(log,"contact_list()",t);
   failed = failed or t;
+  // output l2
+  for (auto i : *l2)
+    cout << i.id << ":" << i.type << ":"
+      << i.location << ":" << i.velocity << endl;
   // check metrics again
   metrics = get_sim_metrics();
   log.info("Second run data");

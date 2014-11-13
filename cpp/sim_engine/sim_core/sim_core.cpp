@@ -406,8 +406,8 @@ void sim_core::run_sim(sim_core & w)
         base_object & o = *i.second;
         s.type = 1;
         s.id = o.id;
-        s.location = o.location;
-        s.velocity = o.velocity;
+        s.location = triplet(o.location);
+        s.velocity = triplet(o.velocity);
         w.public_list.add(s);
       };
       w.public_list.done_adding();
