@@ -290,15 +290,16 @@ int main()
   t = log_test(log,"Quanta usec limit", (metrics["max_usec"]>1.5e4));
   failed = failed or t;
 
-  cout << "Dynamic add test (0.2 secs)" << endl;
+  cout << "Dynamic add test (0.3 secs)" << endl;
   sim_core w1(1/50.0);
   w1.start_sim();
   while (!(w1.running())) usleep(10);
   usleep(1e5);
   contacts_p l1 = w1.contact_list();
-  w1.add_object(object_p(new my_object));
+  w1.add_object(object_p(new rocket_ball));
   usleep(1e5);
   contacts_p l2 = w1.contact_list();
+  usleep(1e5);
   w1.stop_sim();
   object_list objs = w1.get_obj_copies();
   t = log_test(log,"Dynamic object add", (objs.size() != 1));
@@ -309,7 +310,8 @@ int main()
   // output l2
   for (auto i : *l2)
     cout << i.id << ":" << i.type << ":"
-      << i.location << ":" << i.velocity << endl;
+      << i.location << ":" << i.velocity
+      << ":" << i.radius << endl;
   // check metrics again
   metrics = get_sim_metrics();
   log.info("Second run data");
