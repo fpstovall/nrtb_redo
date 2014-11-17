@@ -309,9 +309,9 @@ int main()
   failed = failed or t;
   // output l2
   for (auto i : *l2)
-    cout << i.id << ":" << i.type << ":"
-      << i.location << ":" << i.velocity
-      << ":" << i.radius << endl;
+    cout << i->id << ":" << i->type << ":"
+      << i->location << ":" << i->velocity
+      << ":" << i->radius << endl;
   // check metrics again
   metrics = get_sim_metrics();
   log.info("Second run data");
