@@ -39,8 +39,14 @@ void panopticon::start_new()
   t_list.reset(new contacts);
 };
 
-void panopticon::add(sensor_rec_p s)
+void panopticon::add(const base_object & o)
 {
+  sensor_rec s;
+  s.type = 1;
+  s.id = o.id;
+  s.location = o.location;
+  s.velocity = o.velocity;
+  s.radius = o.bounding_sphere.radius;
   t_list->push_back(s);
 };
 
@@ -401,14 +407,7 @@ void sim_core::run_sim(sim_core & w)
       w.public_list.start_new();
       for(auto i: w.all_objects)
       {
-        sensor_rec_p s(new sensor_rec);
-        base_object & o = *i.second;
-        s->type = 1;
-        s->id = o.id;
-        s->location = o.location;
-        s->velocity = o.velocity;
-        s->radius = o.bounding_sphere.radius;
-        w.public_list.add(s);
+        w.public_list.add(*i.second);
       };
       w.public_list.done_adding();
       // output turn status

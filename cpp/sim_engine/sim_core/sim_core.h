@@ -47,8 +47,7 @@ struct sensor_rec
   float radius; 
 };
 
-typedef std::shared_ptr<sensor_rec> sensor_rec_p;
-typedef std::vector<sensor_rec_p> contacts;
+typedef std::vector<sensor_rec> contacts;
 typedef std::shared_ptr<contacts> contacts_p;
 
 class panopticon
@@ -58,7 +57,7 @@ public:
   contacts_p get();
   // used only by sim_core;
   void start_new();
-  void add(sensor_rec_p s);
+  void add(const base_object & o);
   void done_adding();
 private:
   contacts_p c_list;
