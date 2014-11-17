@@ -38,6 +38,13 @@ std::string radar_mk1::contacts()
   returnme << (c_list->size()-1);
   for(auto c : *c_list)
   {
+std::cout << parent.id 
+<< "**" <<  c.type
+<< ":" << c.id
+<< ":" << c.location
+<< ":" << c.velocity
+<< ":" << c.radius 
+<< std::endl;
     if (c.id != parent.id)
     {
       float range = parent.location.range(c.location);

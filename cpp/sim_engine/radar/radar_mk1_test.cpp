@@ -26,7 +26,13 @@ using namespace std;
 
 struct my_object : public base_object
 {
-  my_object() : radar(radar_mk1(*this)) {};
+  my_object() : radar(radar_mk1(*this))
+  {
+    location = triplet(0,0,0);
+    velocity = triplet(0,0,0);
+    bounding_sphere.center = triplet(0,0,0);
+    bounding_sphere.radius = 1;
+  };
   
   radar_mk1 radar;
   
