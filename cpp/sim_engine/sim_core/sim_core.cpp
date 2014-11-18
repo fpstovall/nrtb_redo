@@ -28,7 +28,7 @@
 using namespace std;
 using namespace nrtb;
 
-contacts_p panopticon::get()
+contacts panopticon::get()
 {
   std::unique_lock<std::mutex>(list_lock);
   return c_list;
@@ -36,7 +36,7 @@ contacts_p panopticon::get()
 
 void panopticon::start_new()
 {
-  t_list.reset(new contacts);
+  t_list.clear();
 };
 
 void panopticon::add(const base_object & o)
@@ -47,7 +47,7 @@ void panopticon::add(const base_object & o)
   s.location = o.location;
   s.velocity = o.velocity;
   s.radius = o.bounding_sphere.radius;
-  t_list->push_back(s);
+  t_list.push_back(s);
 };
 
 void panopticon::done_adding()
@@ -109,7 +109,7 @@ object_list sim_core::get_obj_copies()
   return returnme;
 };
 
-contacts_p sim_core::contact_list()
+contacts sim_core::contact_list()
 {
   return public_list.get();
 };

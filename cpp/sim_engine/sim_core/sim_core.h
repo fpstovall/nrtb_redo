@@ -54,14 +54,14 @@ class panopticon
 {
 public:
   // public accessor
-  contacts_p get();
+  contacts get();
   // used only by sim_core;
   void start_new();
   void add(const base_object & o);
   void done_adding();
 private:
-  contacts_p c_list;
-  contacts_p t_list;
+  contacts c_list;
+  contacts t_list;
   std::mutex list_lock;
 };
   
@@ -94,7 +94,7 @@ public:
   };
   strlist obj_status();
   object_list get_obj_copies();
-  contacts_p contact_list();
+  contacts contact_list();
   
 private:
   ipc_queue messages;

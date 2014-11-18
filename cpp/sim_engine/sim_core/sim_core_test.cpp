@@ -295,20 +295,20 @@ int main()
   w1.start_sim();
   while (!(w1.running())) usleep(10);
   usleep(1e5);
-  contacts_p l1 = w1.contact_list();
+  contacts l1 = w1.contact_list();
   w1.add_object(object_p(new rocket_ball));
   usleep(1e5);
-  contacts_p l2 = w1.contact_list();
+  contacts l2 = w1.contact_list();
   usleep(1e5);
   w1.stop_sim();
   object_list objs = w1.get_obj_copies();
   t = log_test(log,"Dynamic object add", (objs.size() != 1));
   failed = failed or t;
-  t = (l1->size() != 0) or (l2->size() != 1);
+  t = (l1.size() != 0) or (l2.size() != 1);
   t = log_test(log,"contact_list()",t);
   failed = failed or t;
   // output l2
-  for (auto i : *l2)
+  for (auto i : l2)
     cout << i.id << ":" << i.type << ":"
       << i.location << ":" << i.velocity
       << ":" << i.radius << endl;
