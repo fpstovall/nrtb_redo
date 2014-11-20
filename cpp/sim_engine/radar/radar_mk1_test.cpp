@@ -71,6 +71,8 @@ int main()
   // start a sim_core;
   sim_core & w = global_sim_core::get_reference();
   w.start_sim();
+  chrono::milliseconds nap(10);
+  //while (!w.running()) this_thread::sleep_for(nap); 
   
   // Insert objects in the sim.
   w.add_object(object_p(o1));
