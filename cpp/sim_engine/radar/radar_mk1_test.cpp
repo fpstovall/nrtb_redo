@@ -32,6 +32,7 @@ struct my_object : public base_object
     velocity = triplet(0,0,0);
     bounding_sphere.center = triplet(0,0,0);
     bounding_sphere.radius = 1;
+    mass = 1;
   };
   
   radar_mk1 radar;
@@ -65,7 +66,7 @@ int main()
   // get a couple target objects.
   my_object * o1 = new my_object;
   my_object * o2 = new my_object;
-  o2->location = triplet(0,1,1);
+  o2->location = triplet(0,5,5);
     
   // start a sim_core;
   sim_core & w = global_sim_core::get_reference();
