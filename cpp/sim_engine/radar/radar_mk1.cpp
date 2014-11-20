@@ -29,22 +29,15 @@ radar_mk1::radar_mk1(base_object & o)
     parent(o)
 {};
 
-std::string radar_mk1::contacts()
+std::string radar_mk1::get_contacts()
 {
   std::stringstream returnme;
   // for now, update every time.
-  c_list = sim.contact_list();
+  contacts c_list = sim.contact_list();
   // assemble the return string
-  returnme << (c_list->size()-1);
-  for(auto c : *c_list)
+  returnme << (c_list.size()-1);
+  for(auto c : c_list)
   {
-std::cout << parent.id 
-<< "**" <<  c.type
-<< ":" << c.id
-<< ":" << c.location
-<< ":" << c.velocity
-<< ":" << c.radius 
-<< std::endl;
     if (c.id != parent.id)
     {
       float range = parent.location.range(c.location);

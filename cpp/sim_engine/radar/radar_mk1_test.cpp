@@ -40,6 +40,12 @@ struct my_object : public base_object
   {
     return true;
   };
+
+  bool tick(int quanta)
+  {
+    cout << quanta << "|" << id << ":" << radar.get_contacts() << endl;
+    return base_object::tick(quanta);
+  };
   
   base_object * clone()
   {
@@ -72,8 +78,8 @@ int main()
   this_thread::sleep_for(pause);
   
   // Verify they see each other properly.
-  string o1c = o1->radar.contacts();
-  string o2c = o2->radar.contacts();  
+  string o1c = o1->radar.get_contacts();
+  string o2c = o2->radar.get_contacts();  
   
   w.stop_sim();
 

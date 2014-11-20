@@ -30,12 +30,11 @@ class radar_mk1
 public:
   radar_mk1(base_object & o);
   virtual ~radar_mk1() {};
-  std::string contacts();
+  std::string get_contacts();
   std::string status();
 private:
   base_object & parent;
   sim_core & sim;
-  contacts_p c_list;
 };
 
 } // namepace nrtb
