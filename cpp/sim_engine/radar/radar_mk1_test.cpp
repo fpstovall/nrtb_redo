@@ -41,13 +41,13 @@ struct my_object : public base_object
   {
     return true;
   };
-
+/*
   bool tick(int quanta)
   {
     cout << quanta << "|" << id << ":" << radar.get_contacts() << endl;
     return base_object::tick(quanta);
   };
-  
+*/  
   base_object * clone()
   {
     my_object * returnme = new my_object(*this);
@@ -67,6 +67,9 @@ int main()
   my_object * o1 = new my_object;
   my_object * o2 = new my_object;
   o2->location = triplet(0,5,5);
+  my_object * o3 = new my_object;
+  o3->location = triplet(0,-5,5);
+  o3->attitude.set(triplet(0,0,pi/2.0));
     
   // start a sim_core;
   sim_core & w = global_sim_core::get_reference();
@@ -77,17 +80,20 @@ int main()
   // Insert objects in the sim.
   w.add_object(object_p(o1));
   w.add_object(object_p(o2));
+  w.add_object(object_p(o3));
   chrono::milliseconds pause(50);
   this_thread::sleep_for(pause);
   
   // Verify they see each other properly.
   string o1c = o1->radar.get_contacts();
   string o2c = o2->radar.get_contacts();  
+  string o3c = o3->radar.get_contacts();  
   
   w.stop_sim();
 
   cout << "from o1: " << o1c << endl;
   cout << "from o2: " << o2c << endl;
+  cout << "from o3: " << o3c << endl;
   
   cout << "=========== radar_mk1 test complete ============="
     << endl;

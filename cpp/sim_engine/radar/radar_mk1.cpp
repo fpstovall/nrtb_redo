@@ -46,6 +46,7 @@ std::string radar_mk1::get_contacts()
         // get xy azimuth
         triplet offset = c.location - parent.location;
         float azimuth = atan2(offset.y, offset.x);
+        azimuth -= parent.attitude.angles().z;
         // get yz elevation
         float elevation = atan2(offset.z, offset.y);
         // assemble return string
