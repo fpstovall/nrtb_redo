@@ -28,6 +28,34 @@
 using namespace std;
 using namespace nrtb;
 
+contacts panopticon::get()
+{
+  std::unique_lock<std::mutex>(list_lock);
+  return c_list;
+};
+
+void panopticon::start_new()
+{
+  t_list.clear();
+};
+
+void panopticon::add(const base_object & o)
+{
+  sensor_rec s;
+  s.type = 1;
+  s.id = o.id;
+  s.location = o.location;
+  s.velocity = o.velocity;
+  s.radius = o.bounding_sphere.radius;
+  t_list.push_back(s);
+};
+
+void panopticon::done_adding()
+{
+  std::unique_lock<std::mutex>(list_lock);
+  c_list = t_list;
+};
+
 sim_core::sim_core(float time_slice)
   : quanta(0), 
     quanta_duration(time_slice),
@@ -35,6 +63,20 @@ sim_core::sim_core(float time_slice)
     is_running(false),
     q(gp_sim_message_adapter(messages))
 {};
+
+void sim_core::set_quanta(float time_slice)
+{
+  if (!is_running and quanta==0)
+  {
+    quanta_duration = time_slice;
+  }
+  else
+  {
+    base_exception e;
+    e.store("Invalid call to sim_core::set_quanta()");
+    throw e; 
+  };
+};
 
 sim_core::report sim_core::get_report(unsigned long long ticks, double wt)
 {
@@ -66,6 +108,12 @@ object_list sim_core::get_obj_copies()
   };
   return returnme;
 };
+
+contacts sim_core::contact_list()
+{
+  return public_list.get();
+};
+
 
 void sim_core::tick()
 {
@@ -355,6 +403,13 @@ void sim_core::run_sim(sim_core & w)
       w.tick();
       w.collision_check();
       w.resolve_collisions();
+      // populate public sensor list;
+      w.public_list.start_new();
+      for(auto i: w.all_objects)
+      {
+        w.public_list.add(*i.second);
+      };
+      w.public_list.done_adding();
       // output turn status
       unsigned long long elapsed = turnclock.interval_as_usec();
       void_p r(new report(w.get_report(elapsed,wallclock.interval())));

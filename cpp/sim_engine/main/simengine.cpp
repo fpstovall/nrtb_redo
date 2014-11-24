@@ -82,7 +82,8 @@ int main(int argc, char * argv[])
   
   // start the sim_core.
   float quanta = config.get<float>("quanta",1.0/50.0); 
-  sim_core world(quanta);
+  sim_core & world = global_sim_core::get_reference();
+  world.set_quanta(quanta);
   world.start_sim();
   
   // start the bcp_server

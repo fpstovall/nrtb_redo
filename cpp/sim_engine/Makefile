@@ -39,6 +39,7 @@ doit:
 	cd gravity_effector; make ${action}
 	cd hover_effector; make ${action}
 	cd diff_steer_effector; make ${action}
+	cd radar; make ${action}
 	cd bot_mk1; make ${action}
 	cd bcp_server; make ${action}
 	cd main; make ${action}

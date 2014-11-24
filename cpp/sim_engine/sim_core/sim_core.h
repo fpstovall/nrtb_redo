@@ -37,14 +37,42 @@ struct clsn_rec
   object_p a;
   object_p b;
 };
+
+struct sensor_rec
+{
+  int type;
+  unsigned long long id;
+  triplet location;
+  triplet velocity;
+  float radius; 
+};
+
+typedef std::vector<sensor_rec> contacts;
+typedef std::shared_ptr<contacts> contacts_p;
+
+class panopticon
+{
+public:
+  // public accessor
+  contacts get();
+  // used only by sim_core;
+  void start_new();
+  void add(const base_object & o);
+  void done_adding();
+private:
+  contacts c_list;
+  contacts t_list;
+  std::mutex list_lock;
+};
   
 class sim_core
 {
 public:
-  sim_core(float time_slice);
+  sim_core(float time_slice=1.0/50.0);
   /***************************************
    * control methods.
    **************************************/
+  void set_quanta(float time_slice);
   bool running();
   void start_sim();
   void stop_sim();
@@ -66,6 +94,7 @@ public:
   };
   strlist obj_status();
   object_list get_obj_copies();
+  contacts contact_list();
   
 private:
   ipc_queue messages;
@@ -78,6 +107,7 @@ private:
   object_list all_objects;
   std::vector<clsn_rec> collisions;
   std::vector<unsigned long long> deletions;
+  panopticon public_list;
   void turn_init();
   void tick();
   void collision_check();
