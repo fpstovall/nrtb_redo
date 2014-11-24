@@ -57,6 +57,27 @@ struct my_object : public base_object
   };
 };
 
+typedef vector<sensor_rec> my_contacts;
+
+my_contacts parse_contacts(string s)
+{
+  my_contacts returnme;
+  stringstream in(s);
+  int count;
+  in >> count;
+  int worked = 0;
+  while (worked < count)
+  {
+    sensor_rec c;
+    in >> c.type;
+    in >> c.location.x >> c.location.y >> c.location.z;
+    in >> c.velocity;
+    returnme.push_back(c);
+    worked++;
+  };
+  return returnme;
+};
+
 int main()
 {
   bool failed = false;
@@ -70,6 +91,7 @@ int main()
   my_object * o3 = new my_object;
   o3->location = triplet(0,-5,5);
   o3->attitude.set(triplet(0,0,pi/2.0));
+  o3->velocity = triplet(1.0,0,0);
     
   // start a sim_core;
   sim_core & w = global_sim_core::get_reference();
@@ -95,13 +117,29 @@ int main()
   cout << "from o2: " << o2c << endl;
   cout << "from o3: " << o3c << endl;
 
-  failed = 
-    (o1c != "2 1 7.07107 1.5708 0.785398 (0,0,0) 1 7.07107 -1.5708 2.35619 (0,0,0)")
-    or 
-    (o2c != "2 1 7.07107 -1.5708 -2.35619 (0,0,0) 1 10 -1.5708 3.14159 (0,0,0)")
-    or 
-    (o3c != "2 1 7.07107 1.3113e-06 -0.785398 (0,0,0) 1 10 1.3113e-06 0 (0,0,0)");
+  my_contacts o1l = parse_contacts(o1c);
+  my_contacts o2l = parse_contacts(o2c);
+  my_contacts o3l = parse_contacts(o3c);
 
+  failed = (o1l.size() !=2) or (o2l.size() != 2) or (o3l.size() != 2);  
+  bool o1t = (o1l[0].location != triplet(7.07107,1.5708,0.785398))
+    or (o1l[0].velocity != triplet(0,0,0))
+    or (o1l[1].location != triplet(7.07132,-1.5588,2.35619))
+    or (o1l[1].velocity != triplet(1,0,0));
+
+  if (o1t)
+    cout << "  ** " << o1l[0].location << o1l[0].velocity 
+      << o1l[1].location << o1l[1].velocity << endl;
+
+//  failed = 
+//    (o1c != "2 1 7.07107 1.5708 0.785398 (0,0,0) 1 7.07107 -1.5708 2.35619 (0,0,0)")
+//    or 
+//    (o2c != "2 1 7.07107 -1.5708 -2.35619 (0,0,0) 1 10 -1.5708 3.14159 (0,0,0)")
+//    or 
+//    (o3c != "2 1 7.07107 1.3113e-06 -0.785398 (0,0,0) 1 10 1.3113e-06 0 (0,0,0)");
+
+
+  failed = failed or o1t;
   
   if (failed)
     cout << " *** Unit test failed" << endl;
