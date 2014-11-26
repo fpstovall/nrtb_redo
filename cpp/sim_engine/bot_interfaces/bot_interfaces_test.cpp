@@ -17,6 +17,7 @@
  **********************************************/
 
 #include "bot_interfaces.h"
+#include <hires_timer.h>
 #include <base_object.h>
 #include <iostream>
 #include <string>
@@ -25,13 +26,40 @@
 using namespace nrtb;
 using namespace std;
 
+template <class T>
+class test_module
+{
+public:
+  test_module(T & p) : parent(p) {};
+  void test_send_to_bcp()
+  {
+    parent.send_to_bcp("BCP message");
+  }
+  void test_bot_cmd()
+  {
+    parent.bot_cmd("Bot command");
+  }
+  void test_wait_for_tick()
+  {
+    hirez_timer clock;
+    clock.start();
+    parent.wait_for_tick();
+    cout << "Slept for " << clock.stop() << " seconds." << endl;
+  }
+private:
+  T & parent;
+};
+
 struct my_object
 : public base_object, 
   public bcp_sender,
   public cmd_interface,
   public tickable
 {
+  test_module<my_object> module;
+  
   my_object() 
+    : module(*this)
   {
     location = triplet(0,0,0);
     velocity = triplet(0,0,0);
@@ -41,6 +69,7 @@ struct my_object
   };
 
   my_object(my_object & o)
+    : module(*this)
   {
     location = o.location;
     velocity = o.velocity;
@@ -57,10 +86,13 @@ struct my_object
   virtual string bot_cmd(string cmd)
   {
     cout << "CMD: " << cmd << endl;
+    return "";
   };
   
   virtual void wait_for_tick()
   {
+    // this tickable implementation simply plugs
+    // into the object's tick method.
     unique_lock<mutex> lock(tick_lock);
     ticker.wait(lock);
   };
@@ -72,7 +104,9 @@ struct my_object
 
   bool tick(int quanta)
   {
+    // release threads waiting on tick.
     ticker.notify_all();
+    // call original tick method.
     return base_object::tick(quanta);
   };
   
@@ -84,6 +118,7 @@ struct my_object
     return returnme;
   };
 private:
+  // variables for ticker implementation.
   condition_variable ticker;
   mutex tick_lock;
 };
@@ -93,7 +128,14 @@ int main()
   bool failed = false;
   cout << "========== bot_interfaces test ============="
     << endl;
- 
+
+  my_object o1;
+
+  o1.module.test_send_to_bcp();  
+
+  o1.module.test_bot_cmd();
+  
+  // TODO: unit test for the tickable interface.
   
   if (failed)
     cout << " *** Unit test failed" << endl;

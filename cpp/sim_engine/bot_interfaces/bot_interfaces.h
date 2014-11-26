@@ -37,7 +37,10 @@ class cmd_interface
   virtual std::string bot_cmd(std::string cmd) = 0;
 };
 
-/// Allows a module to sleep until the next tick.
+/// Allows a module to sleep until woke up by the object.
+/// typically this would be the next game cycle, but 
+/// nothing prevents a bot from implementing it's own
+/// unique ticker mechanism.
 class tickable
 {
   virtual void wait_for_tick() = 0;
