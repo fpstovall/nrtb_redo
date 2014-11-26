@@ -19,7 +19,7 @@
 #ifndef bot_interfaces_header
 #define bot_interfaces_header
 
-#include <string>
+#include <base_object.h>
 
 namespace nrtb
 {
@@ -34,7 +34,7 @@ class bcp_sender
 /// bot's BCP command stream.
 class cmd_interface
 {
-  virtual std::string bot_cmd(std::string cmd) = 0;
+  virtual void bot_cmd(std::string cmd) = 0;
 };
 
 /// Allows a module to sleep until woke up by the object.
@@ -45,6 +45,13 @@ class tickable
 {
   virtual void wait_for_tick() = 0;
 };
+
+struct abs_bot
+: public base_object,
+  public bcp_sender,
+  public cmd_interface,
+  public tickable
+{};
 
 } // namepace nrtb
 

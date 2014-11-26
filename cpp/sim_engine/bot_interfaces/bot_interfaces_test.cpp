@@ -22,6 +22,7 @@
 #include <iostream>
 #include <string>
 #include <condition_variable>
+#include <future>
 
 using namespace nrtb;
 using namespace std;
@@ -51,10 +52,7 @@ private:
 };
 
 struct my_object
-: public base_object, 
-  public bcp_sender,
-  public cmd_interface,
-  public tickable
+: public abs_bot
 {
   test_module<my_object> module;
   
@@ -80,13 +78,12 @@ struct my_object
   
   virtual void send_to_bcp(string msg)
   {
-    cout << "TO BCP: " << msg << endl;
+    cout << "send_to_bcp(): " << msg << endl;
   };  
   
-  virtual string bot_cmd(string cmd)
+  virtual void bot_cmd(string cmd)
   {
-    cout << "CMD: " << cmd << endl;
-    return "";
+    cout << "bot_cmd(): " << cmd << endl;
   };
   
   virtual void wait_for_tick()
@@ -123,6 +120,12 @@ private:
   mutex tick_lock;
 };
 
+void tick_test(int loop, my_object &o)
+{
+  for(int i=0; i<loop; i++)
+    o.module.test_wait_for_tick();
+};
+
 int main()
 {
   bool failed = false;
@@ -135,7 +138,16 @@ int main()
 
   o1.module.test_bot_cmd();
   
-  // TODO: unit test for the tickable interface.
+  int iterations(5);
+  chrono::milliseconds pause(20);
+  auto task = async(launch::async,tick_test,iterations,std::ref(o1));
+  for(int i=0; i<iterations; i++)
+  {
+    this_thread::sleep_for(pause);
+    o1.tick(i);
+  };
+    
+  task.wait();
   
   if (failed)
     cout << " *** Unit test failed" << endl;
