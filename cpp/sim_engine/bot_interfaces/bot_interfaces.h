@@ -12,17 +12,37 @@
  GNU General Public License for more details.
  
  You should have received a copy of the GNU General Public License
- along with NRTB.  If not, see <http://www.gnu.org/licenses/>.
+ along with NRTB.  If not, see <htttp://www.gnu.org/licenses/>.
  
  **********************************************/
  
 #ifndef bot_interfaces_header
 #define bot_interfaces_header
 
+#include <string>
+
 namespace nrtb
 {
-  
-\
+
+/// allows a module to send to the bot's BCP  
+class bcp_sender
+{
+  virtual void send_to_bcp(std::string msg) = 0;
+};
+
+/// allows a module to insert a command into the
+/// bot's BCP command stream.
+class cmd_interface
+{
+  virtual std::string bot_cmd(std::string cmd) = 0;
+};
+
+/// Allows a module to sleep until the next tick.
+class tickable
+{
+  virtual void wait_for_tick() = 0;
+};
+
 } // namepace nrtb
 
 #endif // bot_interfaces_header

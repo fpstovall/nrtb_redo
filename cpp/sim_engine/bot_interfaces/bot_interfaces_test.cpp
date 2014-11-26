@@ -20,11 +20,16 @@
 #include <base_object.h>
 #include <iostream>
 #include <string>
+#include <condition_variable>
 
 using namespace nrtb;
 using namespace std;
 
-struct my_object : public base_object
+struct my_object
+: public base_object, 
+  public bcp_sender,
+  public cmd_interface,
+  public tickable
 {
   my_object() 
   {
@@ -34,18 +39,43 @@ struct my_object : public base_object
     bounding_sphere.radius = 1;
     mass = 1;
   };
-    
+
+  my_object(my_object & o)
+  {
+    location = o.location;
+    velocity = o.velocity;
+    bounding_sphere = o.bounding_sphere;
+    attitude.set(o.attitude);
+    rotation.set(o.rotation);
+  };
+  
+  virtual void send_to_bcp(string msg)
+  {
+    cout << "TO BCP: " << msg << endl;
+  };  
+  
+  virtual string bot_cmd(string cmd)
+  {
+    cout << "CMD: " << cmd << endl;
+  };
+  
+  virtual void wait_for_tick()
+  {
+    unique_lock<mutex> lock(tick_lock);
+    ticker.wait(lock);
+  };
+  
   bool apply_collision(object_p o) 
   {
     return true;
   };
-/*
+
   bool tick(int quanta)
   {
-    cout << quanta << "|" << id << ":" << radar.get_contacts() << endl;
+    ticker.notify_all();
     return base_object::tick(quanta);
   };
-*/  
+  
   base_object * clone()
   {
     my_object * returnme = new my_object(*this);
@@ -53,6 +83,9 @@ struct my_object : public base_object
     returnme->post_attribs = get_post_attribs_copy();
     return returnme;
   };
+private:
+  condition_variable ticker;
+  mutex tick_lock;
 };
 
 int main()
