@@ -19,13 +19,46 @@
 #ifndef rail_gun_header
 #define rail_gun_header
 
+#include <bot_mk1.h>
 #include <sim_core.h>
 #include <hires_timer.h>
 
 namespace nrtb
 {
   
-
+class rail_gun_mk1
+{
+public:
+  rail_gun_mk1(bot_mk1 & p);
+  virtual ~rail_gun_mk1();
+  std::string cmd_processor(std::string cmd);
+private:
+  // parent base_object
+  bot_mk1 & parent;
+  // current state
+  float azimuth;
+  float elevation;
+  float power;
+  // rate of change limits
+  float max_traverse_rate;
+  float max_elevation_rate;
+  float max_power_rate;
+  // selected rate of change
+  float set_traverse_rate;
+  float set_elevation_rate;
+  // user established goals.
+  float azimuth_goal;
+  float elevation_goal;
+  float power_goal;
+  // auto fire on goal achievement
+  bool fire_on_ready;
+  // number of rounds remaining.
+  int magazine;
+  // -- methods
+  // moves towards goals
+  
+};
+  
 } // namepace nrtb
 
 #endif // rail_gun_header
