@@ -19,7 +19,7 @@
 #ifndef bot_mk1_header
 #define bot_mk1_header
 
-#include <base_object.h>
+#include <bot_interfaces.h>
 #include <base_socket.h>
 #include <confreader.h>
 #include <common_log.h>
@@ -31,7 +31,7 @@
 namespace nrtb
 {
 
-struct bot_mk1: public base_object
+struct bot_mk1: public abs_bot
 {
   bot_mk1(tcp_socket_p link, triplet where);
   bot_mk1(triplet where);
@@ -58,6 +58,12 @@ struct bot_mk1: public base_object
   void receiver();
   void transmitter();
   void msg_router(std::string s);
+  // bot_interfaces stuff;
+  void send_to_bcp(std::string msg);
+  void bot_cmd(std::string cmd);
+  void wait_for_tick();
+  std::mutex t_lock;
+  std::condition_variable t_var;
 };
 
 } // namepace nrtb

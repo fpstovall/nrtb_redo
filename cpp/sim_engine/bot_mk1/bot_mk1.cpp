@@ -81,6 +81,7 @@ bool bot_mk1::tick(int time)
 {
   if (ImAlive)
   {
+    t_var.notify_all();
     std::unique_lock<std::mutex> lock(cooking_lock);
     return nrtb::base_object::tick(time);
   }
@@ -237,3 +238,20 @@ void bot_mk1::msg_router(std::string s)
   };
 };
 
+void bot_mk1::send_to_bcp(std::string msg)
+{
+  to_BCP.push(msg);
+};
+
+void bot_mk1::bot_cmd(std::string cmd)
+{
+  auto log(common_log::get_reference()(name));
+  log.trace("++ "+cmd);
+  msg_router(cmd);
+};
+
+void bot_mk1::wait_for_tick()
+{
+  std::unique_lock<std::mutex> lock(t_lock);
+  t_var.wait(lock);
+};
