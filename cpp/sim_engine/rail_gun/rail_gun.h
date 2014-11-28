@@ -19,8 +19,9 @@
 #ifndef rail_gun_header
 #define rail_gun_header
 
-#include <bot_mk1.h>
+#include <bot_interfaces.h>
 #include <sim_core.h>
+#include <confreader.h>
 #include <hires_timer.h>
 
 namespace nrtb
@@ -29,34 +30,41 @@ namespace nrtb
 class rail_gun_mk1
 {
 public:
-  rail_gun_mk1(bot_mk1 & p);
+  rail_gun_mk1(abs_bot & p);
   virtual ~rail_gun_mk1();
-  std::string cmd_processor(std::string cmd);
-private:
+  virtual void cmd_processor(std::string cmd);
+protected:
   // parent base_object
-  bot_mk1 & parent;
+  abs_bot & parent;
+  // Simulation Engine
+  sim_core & sim;
   // current state
-  float azimuth;
-  float elevation;
-  float power;
+  float azimuth {0.0};
+  float elevation {0.0};
+  float power {0.0};
   // rate of change limits
-  float max_traverse_rate;
-  float max_elevation_rate;
-  float max_power_rate;
-  // selected rate of change
-  float set_traverse_rate;
-  float set_elevation_rate;
+  float max_traverse_rate {0.0};
+  float max_elevation_rate {0.0};
+  float max_power_rate {0.0};
   // user established goals.
-  float azimuth_goal;
-  float elevation_goal;
-  float power_goal;
+  float azimuth_goal {0.0};
+  float elevation_goal {0.0};
+  float power_goal {0.0};
   // auto fire on goal achievement
-  bool fire_on_ready;
+  bool fire_on_ready {0};
   // number of rounds remaining.
-  int magazine;
+  int magazine {100};
+  // operation mutex.
+  std::mutex tick_lock;
+  // thread handle
+  std::thread control;
   // -- methods
-  // moves towards goals
-  
+  // ticker; moves towards goals
+  virtual void auto_control();
+  // various control methods
+  virtual void fire(bool stable=true);
+  virtual void train(float az, float el);
+  virtual void set_power(float p);
 };
   
 } // namepace nrtb

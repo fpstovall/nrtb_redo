@@ -23,3 +23,23 @@
 #include <iostream>
 
 using namespace nrtb;
+
+rail_gun_mk1::rail_gun_mk1(abs_bot& p)
+  : parent(p), sim(global_sim_core::get_reference())
+{
+  conf_reader & conf = global_conf_reader::get_reference();
+  max_traverse_rate = conf.get<float>("rg_traverse",pi*8);
+  max_elevation_rate = conf.get<float>("rg_elevation",pi*8);
+  max_power_rate = conf.get<float>("rg_pwr_rate",100.0);
+  magazine = conf.get<int>("rg_rounds",100);
+  control = std::thread(&rail_gun_mk1::auto_control,this);
+};
+
+rail_gun_mk1::~rail_gun_mk1()
+{
+  // order control to shut down;
+  // TODO: How do I do this?
+  // wait for control to shut down;
+  if (control.joinable()) control.join();
+};
+
