@@ -27,34 +27,37 @@
 using namespace nrtb;
 using namespace std;
 
-template <class T>
-class test_module
+class test_module : public tickable
 {
 public:
-  test_module(T & p) : parent(p) {};
+  test_module(abs_bot & p) : my_parent(p) 
+  {
+    my_parent.register_ticker(*this);
+  };
   void test_send_to_bcp()
   {
-    parent.send_to_bcp("BCP message");
+    my_parent.send_to_bcp("BCP message");
   }
   void test_bot_cmd()
   {
-    parent.bot_cmd("Bot command");
+    my_parent.bot_cmd("Bot command");
   }
-  void test_wait_for_tick()
+  void operator()()
   {
-    hirez_timer clock;
-    clock.start();
-    parent.wait_for_tick();
-    cout << "Slept for " << clock.stop() << " seconds." << endl;
+    stringstream out;
+    out << "tick at " << clock.interval() 
+      << " seconds.";
+    my_parent.send_to_bcp(out.str());
   }
 private:
-  T & parent;
+  abs_bot & my_parent;
+  hirez_timer clock;
 };
 
 struct my_object
 : public abs_bot
 {
-  test_module<my_object> module;
+  test_module module;
   
   my_object() 
     : module(*this)
@@ -85,26 +88,10 @@ struct my_object
   {
     cout << "bot_cmd(): " << cmd << endl;
   };
-  
-  virtual void wait_for_tick()
-  {
-    // this tickable implementation simply plugs
-    // into the object's tick method.
-    unique_lock<mutex> lock(tick_lock);
-    ticker.wait(lock);
-  };
-  
+    
   bool apply_collision(object_p o) 
   {
     return true;
-  };
-
-  bool tick(int quanta)
-  {
-    // release threads waiting on tick.
-    ticker.notify_all();
-    // call original tick method.
-    return base_object::tick(quanta);
   };
   
   base_object * clone()
@@ -114,16 +101,7 @@ struct my_object
     returnme->post_attribs = get_post_attribs_copy();
     return returnme;
   };
-private:
-  // variables for ticker implementation.
-  condition_variable ticker;
-  mutex tick_lock;
-};
-
-void tick_test(int loop, my_object &o)
-{
-  for(int i=0; i<loop; i++)
-    o.module.test_wait_for_tick();
+  
 };
 
 int main()
@@ -140,15 +118,12 @@ int main()
   
   int iterations(5);
   chrono::milliseconds pause(20);
-  auto task = async(launch::async,tick_test,iterations,std::ref(o1));
   for(int i=0; i<iterations; i++)
   {
     this_thread::sleep_for(pause);
     o1.tick(i);
   };
-    
-  task.wait();
-  
+      
   if (failed)
     cout << " *** Unit test failed" << endl;
     

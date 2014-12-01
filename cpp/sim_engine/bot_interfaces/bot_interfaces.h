@@ -27,6 +27,7 @@ namespace nrtb
 /// allows a module to send to the bot's BCP  
 class bcp_sender
 {
+public:
   virtual void send_to_bcp(std::string msg) = 0;
 };
 
@@ -34,6 +35,7 @@ class bcp_sender
 /// bot's BCP command stream.
 class cmd_interface
 {
+public:
   virtual void bot_cmd(std::string cmd) = 0;
 };
 
@@ -41,17 +43,33 @@ class cmd_interface
 /// typically this would be the next game cycle, but 
 /// nothing prevents a bot from implementing it's own
 /// unique ticker mechanism.
+
+// -- functor to be supplied by module
 class tickable
 {
-  virtual void wait_for_tick() = 0;
+public:
+  virtual ~tickable() {};
+  virtual void operator()() = 0;
+};
+
+// scheduling methods provided by the bot.
+class ticker
+{
+public:
+  std::map<unsigned long long,tickable &> tickees;
+  void register_ticker(tickable & t);
+  void deregister_ticker(tickable & t);
+  void tick_all();
 };
 
 struct abs_bot
 : public base_object,
   public bcp_sender,
   public cmd_interface,
-  public tickable
-{};
+  public ticker
+{
+  bool tick(int quanta);
+};
 
 } // namepace nrtb
 
