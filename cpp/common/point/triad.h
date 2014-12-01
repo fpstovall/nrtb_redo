@@ -96,6 +96,10 @@ struct triad
   T dot_product(const triad<T> & a);
   /// Returns the vector product of two triads
   triad<T> vector_product(const triad<T> & a);
+  /// Returns this (assumed) cartesian as polar.
+  triad<T> to_polar();
+  /// Returns an (assumed) polar as cartesian.
+  // TODO: Define to_cartesian()
   bool operator == (const triad<T> & a);
   bool operator != (const triad<T> & a);
   /// Loads from a std::string.
@@ -322,6 +326,16 @@ triad<T> triad<T>::vector_product(const triad<T> & a)
   rv.y = (z * a.x) - (x * a.z);
   rv.z = (x * a.y) - (y * a.x);
   return rv;
+};
+
+template <class T>
+triad<T> triad<T>::to_polar()
+{
+  triad<T> returnme;
+  returnme.x = *this.magnitude();
+  returnme.y = atan2(y, x);
+  returnme.z = atan2(z, y);
+  return returnme;
 };
 
 template <class T>
