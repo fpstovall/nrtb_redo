@@ -69,6 +69,8 @@ base_object * bot_mk1::clone()
 bot_mk1::~bot_mk1()
 {
   ImAlive = false;
+  // release any waiting tick processes.
+  t_var.notify_all();
   // unconditionally shutdown the queue and close the socket.
   try { to_BCP.shutdown(); } catch (...) {};
   if (BCP) try { BCP->close(); } catch (...) {};
@@ -252,6 +254,23 @@ void bot_mk1::bot_cmd(std::string cmd)
 
 void bot_mk1::wait_for_tick()
 {
-  std::unique_lock<std::mutex> lock(t_lock);
-  t_var.wait(lock);
+  if (ImAlive)
+  {
+    std::unique_lock<std::mutex> lock(t_lock);
+    t_var.wait(lock);
+    if (!ImAlive)
+    {
+      // not alive on wakeup... throw.
+      base_exception e;
+      e.store("bot_mk1 shutdown");
+      throw e;
+    };
+  }
+  else 
+  {
+    // not alive at call.. throw.
+    base_exception e;
+    e.store("bot_mk1 shutdown");
+    throw e;    
+  };
 };
