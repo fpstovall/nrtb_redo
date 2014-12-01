@@ -82,8 +82,7 @@ bool bot_mk1::tick(int time)
   if (ImAlive)
   {
     std::unique_lock<std::mutex> lock(cooking_lock);
-    tick_all();
-    return nrtb::base_object::tick(time);
+    return nrtb::abs_bot::tick(time);
   }
   else
   {
