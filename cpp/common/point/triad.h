@@ -332,7 +332,7 @@ template <class T>
 triad<T> triad<T>::to_polar()
 {
   triad<T> returnme;
-  returnme.x = *this.magnitude();
+  returnme.x = magnatude();
   returnme.y = atan2(y, x);
   returnme.z = atan2(z, y);
   return returnme;
