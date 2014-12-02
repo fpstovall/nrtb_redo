@@ -99,7 +99,7 @@ struct triad
   /// Returns this (assumed) cartesian as polar.
   triad<T> to_polar();
   /// Returns an (assumed) polar as cartesian.
-  // TODO: Define to_cartesian()
+  triad<T> to_cartesian();
   bool operator == (const triad<T> & a);
   bool operator != (const triad<T> & a);
   /// Loads from a std::string.
@@ -337,6 +337,16 @@ triad<T> triad<T>::to_polar()
   returnme.z = atan2(z, y);
   return returnme;
 };
+
+template <class T>
+triad<T> triad<T>::to_cartesian()
+{
+  triad<T> returnme;
+  returnme.x = x * sin(y) * cos(z);
+  returnme.y = x * sin(y) * sin(z);
+  returnme.z = x * cos(y);
+  return returnme;
+};  
 
 template <class T>
 bool triad<T>::operator == (const triad<T> & a)
