@@ -342,9 +342,12 @@ template <class T>
 triad<T> triad<T>::to_cartesian()
 {
   triad<T> returnme;
-  returnme.x = x * sin(y) * cos(z);
-  returnme.y = x * sin(y) * sin(z);
-  returnme.z = x * cos(y);
+  returnme.x = cos(y);
+  returnme.y = sin(y);
+  returnme.z = sin(z);
+std::cout << "\n** pre-normal " << returnme << std::endl;
+  returnme = returnme.normalize();
+  returnme *= x;
   return returnme;
 };  
 
