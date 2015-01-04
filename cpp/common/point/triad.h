@@ -97,6 +97,7 @@ struct triad
   /// Returns the vector product of two triads
   triad<T> vector_product(const triad<T> & a);
   /// Returns this (assumed) cartesian as polar.
+  /// order: Magitude, azimuth, declination
   triad<T> to_polar();
   /// Returns an (assumed) polar as cartesian.
   triad<T> to_cartesian();
@@ -334,7 +335,7 @@ triad<T> triad<T>::to_polar()
   triad<T> returnme;
   returnme.x = magnatude();
   returnme.y = atan2(y, x);
-  returnme.z = atan2(z, y);
+  returnme.z = atan2(x*x+y*y, z);
   return returnme;
 };
 
@@ -342,12 +343,13 @@ template <class T>
 triad<T> triad<T>::to_cartesian()
 {
   triad<T> returnme;
-  returnme.x = cos(y);
-  returnme.y = sin(y);
-  returnme.z = sin(z);
-std::cout << "\n** pre-normal " << returnme << std::endl;
-  returnme = returnme.normalize();
-  returnme *= x;
+  returnme.x = sin(z) * cos(y) * x;
+  returnme.y = sin(z) * sin(y) * x;
+  returnme.z = cos(z) * x;
+  // cleanup
+  returnme.x = returnme.x > 1e-10 ? returnme.x : 0.0;
+  returnme.y = returnme.y > 1e-10 ? returnme.y : 0.0;
+  returnme.z = returnme.z > 1e-10 ? returnme.z : 0.0;
   return returnme;
 };  
 
