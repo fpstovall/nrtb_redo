@@ -346,10 +346,10 @@ triad<T> triad<T>::to_cartesian()
   returnme.x = sin(z) * cos(y) * x;
   returnme.y = sin(z) * sin(y) * x;
   returnme.z = cos(z) * x;
-  // cleanup
-  returnme.x = returnme.x > 1e-10 ? returnme.x : 0.0;
-  returnme.y = returnme.y > 1e-10 ? returnme.y : 0.0;
-  returnme.z = returnme.z > 1e-10 ? returnme.z : 0.0;
+  // cleanup really tiny results.
+  returnme.x = fabs(returnme.x) > 1e-10 ? returnme.x : 0.0;
+  returnme.y = fabs(returnme.y) > 1e-10 ? returnme.y : 0.0;
+  returnme.z = fabs(returnme.z) > 1e-10 ? returnme.z : 0.0;
   return returnme;
 };  
 
