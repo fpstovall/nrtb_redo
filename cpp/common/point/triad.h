@@ -335,7 +335,7 @@ triad<T> triad<T>::to_polar()
   triad<T> returnme;
   returnme.x = magnatude();
   returnme.y = atan2(y, x);
-  returnme.z = atan2(x*x+y*y, z);
+  returnme.z = atan2(sqrt(x*x+y*y), z);
   return returnme;
 };
 
