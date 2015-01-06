@@ -96,6 +96,11 @@ struct triad
   T dot_product(const triad<T> & a);
   /// Returns the vector product of two triads
   triad<T> vector_product(const triad<T> & a);
+  /// Returns this (assumed) cartesian as polar.
+  /// order: Magitude, azimuth, declination
+  triad<T> to_polar();
+  /// Returns an (assumed) polar as cartesian.
+  triad<T> to_cartesian();
   bool operator == (const triad<T> & a);
   bool operator != (const triad<T> & a);
   /// Loads from a std::string.
@@ -323,6 +328,30 @@ triad<T> triad<T>::vector_product(const triad<T> & a)
   rv.z = (x * a.y) - (y * a.x);
   return rv;
 };
+
+template <class T>
+triad<T> triad<T>::to_polar()
+{
+  triad<T> returnme;
+  returnme.x = magnatude();
+  returnme.y = atan2(y, x);
+  returnme.z = atan2(sqrt(x*x+y*y), z);
+  return returnme;
+};
+
+template <class T>
+triad<T> triad<T>::to_cartesian()
+{
+  triad<T> returnme;
+  returnme.x = sin(z) * cos(y) * x;
+  returnme.y = sin(z) * sin(y) * x;
+  returnme.z = cos(z) * x;
+  // cleanup really tiny results.
+  returnme.x = fabs(returnme.x) > 1e-10 ? returnme.x : 0.0;
+  returnme.y = fabs(returnme.y) > 1e-10 ? returnme.y : 0.0;
+  returnme.z = fabs(returnme.z) > 1e-10 ? returnme.z : 0.0;
+  return returnme;
+};  
 
 template <class T>
 bool triad<T>::operator == (const triad<T> & a)
