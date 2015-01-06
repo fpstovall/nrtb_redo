@@ -54,7 +54,7 @@ int main()
   ld_triad a(1,2,3);
   ld_triad b(3,2,1);
   int returnme = 0;
-/*
+
   cout << setprecision(10);
   cout << "=== nrtb::triad Unit Test ===" << endl;
   cout << "\ta = " << a << "; b = " << b << endl;
@@ -104,70 +104,81 @@ int main()
   returnme = test_triad("b",b,ld_triad(2,3.5,7),returnme);
   returnme = test_triad("b.from_str(b.to_str(10))",
 				  b.from_str(b.to_str(10)),ld_triad(2,3.5,7),returnme);
-*/
+
+  cout << "\tto_polor()/to_cartesian() tests: ";
+  bool cpc_fail{false};
+  
   ld_triad original(1,1,1);
   ld_triad polar(original.to_polar());
   ld_triad cartesian(polar.to_cartesian());
-  cout << original << polar << cartesian << endl;
-
-  original = ld_triad(0,1,1);
-  polar = original.to_polar();
-  cartesian  = polar.to_cartesian();
-  cout << original << polar << cartesian << endl;
-
-  original = ld_triad(1,0,1);
-  polar = original.to_polar();
-  cartesian  =polar.to_cartesian();
-  cout << original << polar << cartesian << endl;
-
-  original = ld_triad(1,1,0);
-  polar = original.to_polar();
-  cartesian  =polar.to_cartesian();
-  cout << original << polar << cartesian << endl;
-
-  //==========
+  if (original.to_str() != cartesian.to_str())
+  {
+    returnme++;
+    cpc_fail = true;
+    cout << "Failure: " << original << " != " << cartesian << endl;
+  };
+    
   
   original = ld_triad(0,0,0);
   polar = original.to_polar();
   cartesian  =polar.to_cartesian();
-  cout << original << polar << cartesian << endl;
+  if (original.to_str() != cartesian.to_str())
+  {
+    returnme++;
+    cpc_fail = true;
+    cout << "Failure: " << original << " != " << cartesian << endl;
+  };
 
   original = ld_triad(1,0,0);
   polar = original.to_polar();
   cartesian  =polar.to_cartesian();
-  cout << original << polar << cartesian << endl;
+  if (original.to_str() != cartesian.to_str())
+  {
+    returnme++;
+    cpc_fail = true;
+    cout << "Failure: " << original << " != " << cartesian << endl;
+  };
 
   original = ld_triad(0,1,0);
   polar = original.to_polar();
   cartesian  =polar.to_cartesian();
-  cout << original << polar << cartesian << endl;
+  if (original.to_str() != cartesian.to_str())
+  {
+    returnme++;
+    cpc_fail = true;
+    cout << "Failure: " << original << " != " << cartesian << endl;
+  };
 
   original = ld_triad(0,0,1);
   polar = original.to_polar();
   cartesian  =polar.to_cartesian();
-  cout << original << polar << cartesian << endl;
-
-  //==========
-  
-  original = ld_triad(0,0,0);
-  polar = original.to_polar();
-  cartesian  =polar.to_cartesian();
-  cout << original << polar << cartesian << endl;
+  if (original.to_str() != cartesian.to_str())
+  {
+    returnme++;
+    cpc_fail = true;
+    cout << "Failure: " << original << " != " << cartesian << endl;
+  };
 
   original = ld_triad(-1,0,0);
   polar = original.to_polar();
   cartesian  =polar.to_cartesian();
-  cout << original << polar << cartesian << endl;
-
-  original = ld_triad(0,-1,0);
-  polar = original.to_polar();
-  cartesian  =polar.to_cartesian();
-  cout << original << polar << cartesian << endl;
+  if (original.to_str() != cartesian.to_str())
+  {
+    returnme++;
+    cpc_fail = true;
+    cout << "Failure: " << original << " != " << cartesian << endl;
+  };
 
   original = ld_triad(0,0,-1);
   polar = original.to_polar();
   cartesian  =polar.to_cartesian();
-  cout << original << polar << cartesian << endl;
+  if (original.to_str() != cartesian.to_str())
+  {
+    returnme++;
+    cpc_fail = true;
+    cout << "Failure: " << original << " != " << cartesian << endl;
+  };
+  cout << (cpc_fail ? "** FAILED" : "PASSED") << endl;
   
   // report errors, if any
   if (returnme)
