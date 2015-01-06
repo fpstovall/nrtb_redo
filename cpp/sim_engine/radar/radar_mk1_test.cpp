@@ -70,7 +70,7 @@ my_contacts parse_contacts(string s)
   {
     sensor_rec c;
     in >> c.type;
-    in >> c.location.x >> c.location.y >> c.location.z;
+    in >> c.location;
     in >> c.velocity;
     returnme.push_back(c);
     worked++;
@@ -124,7 +124,7 @@ int main()
   failed = (o1l.size() !=2) or (o2l.size() != 2) or (o3l.size() != 2);  
   bool o1t = (o1l[0].location != triplet(7.07107,1.5708,0.785398))
     or (o1l[0].velocity != triplet(0,0,0))
-    or (o1l[1].location != triplet(7.07132,-1.5588,2.35619))
+    or (o1l[1].location != triplet(7.07132,-1.5588,0.785434))
     or (o1l[1].velocity != triplet(1,0,0));
 
   if (o1t)
