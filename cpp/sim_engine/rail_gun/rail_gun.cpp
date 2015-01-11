@@ -28,9 +28,10 @@ rail_gun_mk1::rail_gun_mk1(abs_bot& p)
   : parent(p), sim(global_sim_core::get_reference())
 {
   conf_reader & conf = global_conf_reader::get_reference();
-  max_traverse_rate = conf.get<float>("rg_traverse",pi*8);
-  max_elevation_rate = conf.get<float>("rg_elevation",pi*8);
-  max_power_rate = conf.get<float>("rg_pwr_rate",100.0);
+  max_roc.y = conf.get<float>("rg_traverse",pi);
+  max_roc.z = conf.get<float>("rg_elevation",pi);
+  max_roc.x = conf.get<float>("rg_pwr_rate",400.0);
+  max_power = conf.get<float>("rg_max_pwr",2000);
   magazine = conf.get<int>("rg_rounds",100);
   control = std::thread(&rail_gun_mk1::auto_control,this);
 };
@@ -41,5 +42,45 @@ rail_gun_mk1::~rail_gun_mk1()
   // TODO: How do I do this?
   // wait for control to shut down;
   if (control.joinable()) control.join();
+};
+
+void rail_gun_mk1::fire(bool stable)
+{
+
+};
+
+void rail_gun_mk1::train(triplet settings)
+{
+
+};
+
+void rail_gun_mk1::auto_control()
+{
+
+};
+
+rg_round::rg_round(triplet loc, triplet vel)
+{
+
+};
+
+rg_round::~rg_round()
+{
+
+};
+
+base_object * rg_round::clone()
+{
+  
+};
+
+bool rg_round::apply_collision(object_p o)
+{
+
+};
+
+bool rg_round::check_collision(object_p o)
+{
+    return nrtb::base_object::check_collision(o);
 };
 

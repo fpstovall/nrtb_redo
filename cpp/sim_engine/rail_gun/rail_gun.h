@@ -32,24 +32,23 @@ class rail_gun_mk1
 public:
   rail_gun_mk1(abs_bot & p);
   virtual ~rail_gun_mk1();
-  virtual void cmd_processor(std::string cmd);
+  // various control methods
+  virtual void fire(bool stable=true);
+  // triplets are encoded as power, azimuth, delination
+  virtual void train(triplet settings);
 protected:
   // parent base_object
   abs_bot & parent;
   // Simulation Engine
   sim_core & sim;
+  // triplets are encoded as power, azimuth, delination
   // current state
-  float azimuth {0.0};
-  float elevation {0.0};
-  float power {0.0};
+  triplet current;
   // rate of change limits
-  float max_traverse_rate {0.0};
-  float max_elevation_rate {0.0};
-  float max_power_rate {0.0};
+  triplet max_roc;
+  float max_power;
   // user established goals.
-  float azimuth_goal {0.0};
-  float elevation_goal {0.0};
-  float power_goal {0.0};
+  triplet goals;
   // auto fire on goal achievement
   bool fire_on_ready {0};
   // number of rounds remaining.
@@ -61,10 +60,17 @@ protected:
   // -- methods
   // ticker; moves towards goals
   virtual void auto_control();
-  // various control methods
-  virtual void fire(bool stable=true);
-  virtual void train(float az, float el);
-  virtual void set_power(float p);
+};
+
+class rg_round : public base_object
+{
+public:
+  rg_round(triplet loc, triplet vel);
+  virtual ~rg_round();
+  base_object * clone();
+  bool apply_collision(object_p o); 
+  virtual bool check_collision(object_p o);
+
 };
   
 } // namepace nrtb
