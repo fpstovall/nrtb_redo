@@ -181,6 +181,13 @@ bool base_object::apply(int time, float quanta)
 
 bool base_object::check_collision(object_p o)
 {
+  /* TODO: Need to revise this to use the following algorithm:
+   *   1. get the travel vector (based on velocity)
+   *   2. base the ray at current location and project push_back
+   *   3. move the bounding sphere along the ray to the distance
+   *      the other object is, or to the limit if range is too far.
+   *   4. Check for bounding sphere overlap.
+   */
   float r = o->bounding_sphere.radius + bounding_sphere.radius;
   triplet adjusted = o->bounding_sphere.center;
   adjusted += o->location;
