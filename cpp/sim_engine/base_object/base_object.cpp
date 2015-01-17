@@ -188,7 +188,22 @@ bool base_object::check_collision(object_p o)
    *      the other object is, or to the limit if range is too far.
    *   4. Check for bounding sphere overlap.
    */
+  // get the min safe distance
   float r = o->bounding_sphere.radius + bounding_sphere.radius;
+  // get the true location of each objects sphere
+  triplet o1 = bounding_sphere.center + location;
+  triplet o2 = o->bounding_sphere.center + o->location;
+  // get the range seperating the objects.
+  float range = o1.range(o2);
+  // get velocities
+  float v1 = velocity.magnatude();
+  float v2 = o->velocity.magnatude();
+  //-- TODO: not sure we need this; remove if not needed.
+  float vc = (velocity+o->velocity).magnatude();
+  // TODO: First check; using range and velocities, could they interact?
+  
+  
+  // TODO: remove old stuff below.
   triplet adjusted = o->bounding_sphere.center;
   adjusted += o->location;
   return (r >= adjusted.range(bounding_sphere.center+location));
