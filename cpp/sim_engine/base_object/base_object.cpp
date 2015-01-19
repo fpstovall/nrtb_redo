@@ -181,6 +181,7 @@ bool base_object::apply(int time, float quanta)
 
 bool base_object::check_collision(object_p o)
 {
+  bool returnme{0};
   /* TODO: Need to revise this to use the following algorithm:
    *   1. get the travel vector (based on velocity)
    *   2. base the ray at current location and project push_back
@@ -195,18 +196,22 @@ bool base_object::check_collision(object_p o)
   triplet o2 = o->bounding_sphere.center + o->location;
   // get the range seperating the objects.
   float range = o1.range(o2);
-  // get velocities
-  float v1 = velocity.magnatude();
-  float v2 = o->velocity.magnatude();
-  //-- TODO: not sure we need this; remove if not needed.
+  // get the realative velocity.
   float vc = (velocity+o->velocity).magnatude();
+std::cout << vc << " " <<  r+range << std::endl;
   // TODO: First check; using range and velocities, could they interact?
-  
-  
-  // TODO: remove old stuff below.
-  triplet adjusted = o->bounding_sphere.center;
-  adjusted += o->location;
-  return (r >= adjusted.range(bounding_sphere.center+location));
+  if (vc > r+range)
+  {
+    // okay, the are close enough to interact. Now what?
+    if (range <= r) returnme=true;
+    // get velocities
+    float v1 = velocity.magnatude();
+    float v2 = o->velocity.magnatude();
+    
+
+    
+  };
+  return returnme;
 };
 
 void base_object::add_pre(abs_effector* e)
