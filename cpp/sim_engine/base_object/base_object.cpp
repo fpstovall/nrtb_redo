@@ -182,35 +182,11 @@ bool base_object::apply(int time, float quanta)
 bool base_object::check_collision(object_p o)
 {
   bool returnme{0};
-  /* TODO: Need to revise this to use the following algorithm:
-   *   1. get the travel vector (based on velocity)
-   *   2. base the ray at current location and project push_back
-   *   3. move the bounding sphere along the ray to the distance
-   *      the other object is, or to the limit if range is too far.
-   *   4. Check for bounding sphere overlap.
-   */
-  // get the min safe distance
-  float r = o->bounding_sphere.radius + bounding_sphere.radius;
-  // get the true location of each objects sphere
-  triplet o1 = bounding_sphere.center + location;
-  triplet o2 = o->bounding_sphere.center + o->location;
-  // get the range seperating the objects.
-  float range = o1.range(o2);
-  // get the realative velocity.
-  float vc = (velocity+o->velocity).magnatude();
-std::cout << vc << " " <<  r+range << std::endl;
-  // TODO: First check; using range and velocities, could they interact?
-  if (vc > r+range)
-  {
-    // okay, the are close enough to interact. Now what?
-    if (range <= r) returnme=true;
-    // get velocities
-    float v1 = velocity.magnatude();
-    float v2 = o->velocity.magnatude();
-    
+  // get relative velocity and position
+  rel_vel = o->velocity - velocity;
+  rel_pos = o->location - location;
+  // TODO: Complete adapting the example code here
 
-    
-  };
   return returnme;
 };
 
