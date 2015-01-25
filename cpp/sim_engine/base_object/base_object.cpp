@@ -179,15 +179,37 @@ bool base_object::apply(int time, float quanta)
   return killme;
 };
 
-bool base_object::check_collision(object_p o)
+bool base_object::check_collision(object_p o, float quanta)
 {
-  bool returnme{0};
   // get relative velocity and position
-  rel_vel = o->velocity - velocity;
-  rel_pos = o->location - location;
-  // TODO: Complete adapting the example code here
+  triplet rel_vel = o->velocity - velocity;
+  triplet rel_pos = o->location - location;
+  // adjust rel_vel for time quanta
+  rel_vel *= quanta;
+  // contact distance
+  float r = bounding_sphere.radius + o->bounding_sphere.radius;
+  // dP^2-r^2
+  float pp = (rel_pos.x*rel_pos.x) + (rel_pos.y*rel_pos.y) 
+    + (rel_pos.z*rel_pos.z) - (r*r);
+  // Are we already interescting?
+  if (pp < 0.0) return true;
+  
+  // DP*dV
+  float pv = (rel_pos.x*rel_vel.x) + (rel_pos.y*rel_vel.y)
+    + (rel_pos.z*rel_vel.z);
+  // check to see if the objects are moving apart.
+  if (pv >= 0.0) return false;
+    
+  // dv ^2
+  float vv = (rel_vel.x*rel_vel.x) + (rel_vel.y*rel_vel.y)
+    + (rel_vel.z*rel_vel.z);
+  // do we have contact within the quanta?
+  if (((pv+vv) <= 0.0) and ((vv+2*pv+pp) >= 0.0)) return false;
+  
+  // What time are these closest?
+  float min_time = pv/vv;
 
-  return returnme;
+  return (pp + pv * min_time > 0.0);
 };
 
 void base_object::add_pre(abs_effector* e)

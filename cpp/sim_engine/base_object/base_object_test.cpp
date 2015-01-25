@@ -93,7 +93,7 @@ struct my_object : public base_object
     return returnme;
   };
 
-  bool apply_collision(object_p o) 
+  bool apply_collision(object_p o, float quanta) 
   {
     return false;
   };
@@ -196,22 +196,22 @@ int main()
   
   // check at various distances.
   mobile->location = triplet(0,2,0);
-  bool t = fixed.check_collision(mobile);
+  bool t = fixed.check_collision(mobile,1.0/50.0);
   results << fixed.location.range(mobile->location)
     << "=" << t << ",";
   
   mobile->location = triplet(0,1.01,0);
-  t = fixed.check_collision(mobile);
+  t = fixed.check_collision(mobile,1.0/50.0);
   results << fixed.location.range(mobile->location)
     << "=" << t << ",";
 
   mobile->location = triplet(0,1,0);
-  t = fixed.check_collision(mobile);
+  t = fixed.check_collision(mobile,1.0/50.0);
   results << fixed.location.range(mobile->location)
     << "=" << t << ",";
 
   mobile->location = triplet(0);
-  t = fixed.check_collision(mobile);
+  t = fixed.check_collision(mobile,1.0/50.0);
   results << fixed.location.range(mobile->location)
     << "=" << t;
   
