@@ -192,7 +192,7 @@ bool base_object::check_collision(object_p o, float quanta)
   float pp = (rel_pos.x*rel_pos.x) + (rel_pos.y*rel_pos.y) 
     + (rel_pos.z*rel_pos.z) - (r*r);
   // Are we already interescting?
-  if (pp < 0.0) return true;
+  if (pp <= 0.0) return true;
   
   // DP*dV
   float pv = (rel_pos.x*rel_vel.x) + (rel_pos.y*rel_vel.y)

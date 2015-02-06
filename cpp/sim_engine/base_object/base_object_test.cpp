@@ -190,7 +190,9 @@ int main()
   // ********* collision tests ***********
   my_object fixed = rocket_ball;
   fixed.location = 0;
+  fixed.velocity = 0;
   object_p mobile(rocket_ball.clone());
+  mobile->velocity = 0;
   mobile->bounding_sphere = fixed.bounding_sphere;
   stringstream results;
   
