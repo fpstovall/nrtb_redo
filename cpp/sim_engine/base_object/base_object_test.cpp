@@ -198,6 +198,9 @@ int main()
   
   // check at various distances.
   mobile->location = triplet(0,2,0);
+  mobile->velocity = triplet(0,-2,0);
+
+
   bool t = fixed.check_collision(mobile,1.0/50.0);
   results << fixed.location.range(mobile->location)
     << "=" << t << ",";
@@ -217,11 +220,12 @@ int main()
   results << fixed.location.range(mobile->location)
     << "=" << t;
   
-  bool c = results.str() != "2=0,1.01=0,1=1,0=1";
+  bool c = results.str() != "2=0,1.01=1,1=1,0=1";
   cout << results.str() << endl;
   cout << "** Collision Test: " << (c ? "Failed" : "Passed") << endl;
   
-  bool cl = mobile->as_str() != "ID=0:loc=(0,0,0):att=(0,0,0):vel=(0,0,0):rot=(0,0,0):f=(0,0,0):t=(0,0,0):acc_mod=(0,-9.81,0):r_mod=(0,0,0):mass=100:mass_mod=0:b_sphere=(0,0,0),0.5:pre=gravity_0=(0,-9.81,0);:posts=";
+  bool cl = mobile->as_str() != "ID=0:loc=(0,0,0):att=(0,0,0):vel=(0,-2,0):rot=(0,0,0):f=(0,0,0):t=(0,0,0):acc_mod=(0,-9.81,0):r_mod=(0,0,0):mass=100:mass_mod=0:b_sphere=(0,0,0),0.5:pre=gravity_0=(0,-9.81,0);:posts=";
+  
   cout << "** clone() test: " << (cl ? "Failed" : "Passed") << endl;
 
   failed = failed or c or cl;
