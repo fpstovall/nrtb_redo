@@ -188,9 +188,10 @@ int main()
   failed = failed or rf;
   
   // ********* collision tests ***********
+  // -- fixed v. mobile test.
   my_object fixed = rocket_ball;
-  fixed.location = 0;
-  fixed.velocity = 0;
+  fixed.location = triplet(1,0,0);
+  fixed.velocity = triplet(-50,0,0);
   object_p mobile(rocket_ball.clone());
   mobile->velocity = 0;
   mobile->bounding_sphere = fixed.bounding_sphere;
@@ -220,9 +221,11 @@ int main()
   results << fixed.location.range(mobile->location)
     << "=" << t;
   
-  bool c = results.str() != "2=0,1.01=1,1=1,0=1";
+  bool c = results.str() != "2.23607=0,1.4213=1,1.41421=1,1=1";
   cout << results.str() << endl;
   cout << "** Collision Test: " << (c ? "Failed" : "Passed") << endl;
+  
+  // == quick clone test
   
   bool cl = mobile->as_str() != "ID=0:loc=(0,0,0):att=(0,0,0):vel=(0,-2,0):rot=(0,0,0):f=(0,0,0):t=(0,0,0):acc_mod=(0,-9.81,0):r_mod=(0,0,0):mass=100:mass_mod=0:b_sphere=(0,0,0),0.5:pre=gravity_0=(0,-9.81,0);:posts=";
   
