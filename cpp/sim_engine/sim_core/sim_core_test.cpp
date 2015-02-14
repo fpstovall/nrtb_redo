@@ -376,6 +376,9 @@ int main()
   w3.start_sim();
   sleep(1);
   w3.stop_sim();
+  while (w3.running()) usleep(50);
+  for (auto o : w3.get_obj_copies())
+    cout << o.second->as_str() << endl;
   // verify ending count (all should have been distroyed.
   t = log_test(log,"Collision test", (w3.obj_status().size()));
   failed = failed or t;
