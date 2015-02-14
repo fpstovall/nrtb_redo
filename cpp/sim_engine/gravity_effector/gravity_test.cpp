@@ -66,7 +66,7 @@ struct faller : public base_object
     t->post_attribs = get_post_attribs_copy();
     return t;
   };
-  bool apply_collision(object_p o) {return false;};
+  bool apply_collision(object_p o,float duration) {return false;};
 };
 
 int main()
@@ -77,11 +77,12 @@ int main()
 
   int counter = 0;
   faller icarus;
+  float d = 1.0/50.0;
   while (icarus.location.z > 0.0)
   {
     counter++;
-    icarus.tick(counter);
-    icarus.apply(counter,1/50.0);
+    icarus.tick(counter,d);
+    icarus.apply(counter,d);
   };
   
   cout << "Icarus fell " << counter/50.0 << " seconds" << endl;
