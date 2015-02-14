@@ -114,22 +114,24 @@ contacts sim_core::contact_list()
   return public_list.get();
 };
 
-
 void sim_core::tick()
 {
   // call the local tick and apply for each object in the simulation.
   for(auto & a: all_objects)
   {
-    // have to use this method to make sure the apply step is not
-    // optimized out by the compiler in some conditions.
-    bool killme = a.second->tick(quanta);
-    bool killme2 = a.second->apply(quanta, quanta_duration);
-    // mark the object for deletion if appropriate.
-    if (killme or killme2)
+    if (a.second->tick(quanta,quanta_duration))
+      deletions.push_back(a.first);
+  };
+  // check for bumps in the night.
+  collision_check();
+  for (auto & a: all_objects)
+  {
+    if (a.second->apply(quanta, quanta_duration))
       deletions.push_back(a.first);
   };
   // at the end of this method, all objects are either
-  // at their final state ignorning collisions or deleted.
+  // at their final state, listed as deleted, or pending
+  // collision resolution. They may be several states at once.
 };
 
 void sim_core::collision_check()
@@ -144,7 +146,7 @@ void sim_core::collision_check()
     b++;
     while (b != e)
     {
-      if (c->second->check_collision(b->second))
+      if (c->second->check_collision(b->second, quanta_duration))
       {
         // a collision has been found.
         clsn_rec crec;
@@ -158,7 +160,6 @@ void sim_core::collision_check()
   };
   // at exit, all colliions have been recorded.
 };
-
 
 void sim_core::turn_init()
 {
@@ -271,8 +272,8 @@ void sim_core::resolve_collisions()
   for (auto crec : collisions)
   {
     // call each object's collision routine
-    bool killa = crec.a->apply_collision(crec.b);
-    bool killb = crec.b->apply_collision(crec.a);
+    bool killa = crec.a->apply_collision(crec.b, quanta_duration);
+    bool killb = crec.b->apply_collision(crec.a, quanta_duration);
     // move out of conflict if alive and intersecting.
     if (!(killa or killb))
     {
@@ -401,7 +402,7 @@ void sim_core::run_sim(sim_core & w)
       w.quanta++;
       w.turn_init();
       w.tick();
-      w.collision_check();
+//      w.collision_check();
       w.resolve_collisions();
       // populate public sensor list;
       w.public_list.start_new();

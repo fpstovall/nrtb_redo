@@ -132,7 +132,7 @@ struct rocket : public abs_effector
 
 struct my_object : public base_object
 {
-  bool apply_collision(object_p o) 
+  bool apply_collision(object_p o, float duration) 
   {
     return true;
   };
