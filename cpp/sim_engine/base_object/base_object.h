@@ -115,7 +115,7 @@ struct base_object
   // returns true if a collision is detected.
   virtual bool check_collision(object_p o, float quanta);
   // the following return true if the object is destroyed.
-  virtual bool tick(int time);
+  virtual bool tick(int time, float quanta);
   virtual bool apply(int time, float quanta);
   virtual bool apply_collision(object_p o, float quanta) = 0;
 protected:

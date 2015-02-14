@@ -83,6 +83,35 @@ struct rocket : public abs_effector
   };  
 };
 
+struct torquer : public abs_effector
+{
+  rotatable torque;
+  
+  virtual torquer * clone()
+  {
+    return new torquer(*this);
+  };
+  
+  torquer()
+  {
+    handle = "torquer";
+    torque.set(triplet(0,0,100));
+  };
+  
+  string as_str()
+  {
+    stringstream returnme;
+    returnme << handle << "_" << id << "=" << torque.angles();
+    return returnme.str();
+  };
+  
+  bool tick(base_object & o, int time)
+  {
+    o.torque.set(torque);
+    return false;
+  };
+};
+
 struct my_object : public base_object
 {
   my_object * clone() 
@@ -104,6 +133,7 @@ int main()
   bool failed = false;
   cout << "========== base_object test ============="
     << endl;
+  float quanta = 1.0/50.0;
 
 //  cout << "Object setup:" << endl;
   my_object rocket_ball;
@@ -126,8 +156,8 @@ int main()
   for (time; time<5; time++)
   {
 //    cout << time*0.02 << " sec."<< endl;
-    rocket_ball.tick(time);
-    rocket_ball.apply(time,0.02);
+    rocket_ball.tick(time,quanta);
+    rocket_ball.apply(time,quanta);
 //    cout << rocket_ball.as_str() << endl;
   };
   
@@ -135,8 +165,8 @@ int main()
   while (rocket_ball.velocity.y > 0.0)
   {
     time++;
-    rocket_ball.tick(time);
-    rocket_ball.apply(time,0.02);    
+    rocket_ball.tick(time,quanta);
+    rocket_ball.apply(time,quanta);    
   };
   cout << "Peak:" << time*0.02 << " sec."<< endl;
 //  cout << rocket_ball.as_str() << endl;
@@ -146,8 +176,8 @@ int main()
   while (rocket_ball.location.y > 0.0)
   {
     time++;
-    rocket_ball.tick(time);
-    rocket_ball.apply(time,0.02);    
+    rocket_ball.tick(time,quanta);
+    rocket_ball.apply(time,quanta);    
   };
   cout << "Impact:" << time*0.02<< " sec." << endl;
 //  cout << rocket_ball.as_str() << endl;
@@ -160,12 +190,12 @@ int main()
   my_object spinner;
   spinner.mass = 100;
   spinner.bounding_sphere.radius = 1;
+  spinner.add_pre(new torquer);
   float q = 1.0/50.0;
   int tm = 0;
   for (;tm<50;tm++)
   {
-    spinner.tick(tm);
-    spinner.torque.set(triplet(0,0,100));
+    spinner.tick(tm,q);
     spinner.apply(tm,q);    
   };
   bool rf = false;

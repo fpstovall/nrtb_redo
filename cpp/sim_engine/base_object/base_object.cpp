@@ -128,7 +128,7 @@ std::string base_object::as_str()
   return returnme.str();
 };
 
-bool base_object::tick(int time)
+bool base_object::tick(int time, float quanta)
 {
   // clean up for next pass
   accel_mod = 0;
@@ -153,23 +153,25 @@ bool base_object::tick(int time)
   for (auto e : pre_attribs)
     if (e.second->tick(*this, time))
       killme = true;
+  // apply forces to rotation, mass, and velocity.
+  mass += mass_mod;
+  triplet a = force / mass;
+  triplet ev = velocity + (((a + accel_mod)/2.0) * quanta);
+  velocity += (a  + accel_mod) * quanta;
+  rotatable rbase(rotation);
+  rotation.add(rotation_mod.angles() * quanta);
+  rotation.apply_force(mass, bounding_sphere.radius,
+                       torque.angles(),quanta);
+  rotation_mod.set((rotation.angles() + rbase.angles()) / 2.0);
   return killme;
 };
 
 bool base_object::apply(int time, float quanta)
 {
   // move acording to forces
-  float tmass = mass + mass_mod;
-  triplet a = force / tmass;
-  triplet ev = velocity + (((a + accel_mod)/2.0) * quanta);
-  velocity += (a  + accel_mod) * quanta;
-  location += ev * quanta;
+  location += velocity * quanta;
   // rotate according to the forces
-  rotatable rbase = rotation;
-  rotation.add(rotation_mod.angles() * quanta);
-  rotation.apply_force(tmass, bounding_sphere.radius,
-                       torque.angles(),quanta);
-  attitude.add(((rotation.angles() + rbase.angles())/2.0)*quanta);
+  attitude.add(rotation_mod.angles() * quanta);
   attitude.trim();
   // apply post-effectors
   bool killme (false);
