@@ -37,7 +37,7 @@ struct my_object : public base_object
   
   radar_mk1 radar;
   
-  bool apply_collision(object_p o) 
+  bool apply_collision(object_p o, float duration) 
   {
     return true;
   };
