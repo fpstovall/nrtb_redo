@@ -94,17 +94,17 @@ struct my_object
     ticker.wait(lock);
   };
   
-  bool apply_collision(object_p o) 
+  bool apply_collision(object_p o, float duration) 
   {
     return true;
   };
 
-  bool tick(int quanta)
+  bool tick(int quanta, float duration)
   {
     // release threads waiting on tick.
     ticker.notify_all();
     // call original tick method.
-    return base_object::tick(quanta);
+    return base_object::tick(quanta, duration);
   };
   
   base_object * clone()
@@ -144,7 +144,7 @@ int main()
   for(int i=0; i<iterations; i++)
   {
     this_thread::sleep_for(pause);
-    o1.tick(i);
+    o1.tick(i,1.0/50.0);
   };
     
   task.wait();
