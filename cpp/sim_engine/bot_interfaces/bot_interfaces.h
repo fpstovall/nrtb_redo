@@ -68,7 +68,7 @@ struct abs_bot
   public cmd_interface,
   public ticker
 {
-  bool tick(int quanta);
+  bool tick(int quanta, float duration);
 };
 
 } // namepace nrtb

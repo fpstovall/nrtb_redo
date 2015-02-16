@@ -83,6 +83,35 @@ struct rocket : public abs_effector
   };  
 };
 
+struct torquer : public abs_effector
+{
+  rotatable torque;
+  
+  virtual torquer * clone()
+  {
+    return new torquer(*this);
+  };
+  
+  torquer()
+  {
+    handle = "torquer";
+    torque.set(triplet(0,0,100));
+  };
+  
+  string as_str()
+  {
+    stringstream returnme;
+    returnme << handle << "_" << id << "=" << torque.angles();
+    return returnme.str();
+  };
+  
+  bool tick(base_object & o, int time)
+  {
+    o.torque.set(torque);
+    return false;
+  };
+};
+
 struct my_object : public base_object
 {
   my_object * clone() 
@@ -93,7 +122,7 @@ struct my_object : public base_object
     return returnme;
   };
 
-  bool apply_collision(object_p o) 
+  bool apply_collision(object_p o, float quanta) 
   {
     return false;
   };
@@ -104,6 +133,7 @@ int main()
   bool failed = false;
   cout << "========== base_object test ============="
     << endl;
+  float quanta = 1.0/50.0;
 
 //  cout << "Object setup:" << endl;
   my_object rocket_ball;
@@ -126,8 +156,8 @@ int main()
   for (time; time<5; time++)
   {
 //    cout << time*0.02 << " sec."<< endl;
-    rocket_ball.tick(time);
-    rocket_ball.apply(time,0.02);
+    rocket_ball.tick(time,quanta);
+    rocket_ball.apply(time,quanta);
 //    cout << rocket_ball.as_str() << endl;
   };
   
@@ -135,8 +165,8 @@ int main()
   while (rocket_ball.velocity.y > 0.0)
   {
     time++;
-    rocket_ball.tick(time);
-    rocket_ball.apply(time,0.02);    
+    rocket_ball.tick(time,quanta);
+    rocket_ball.apply(time,quanta);    
   };
   cout << "Peak:" << time*0.02 << " sec."<< endl;
 //  cout << rocket_ball.as_str() << endl;
@@ -146,8 +176,8 @@ int main()
   while (rocket_ball.location.y > 0.0)
   {
     time++;
-    rocket_ball.tick(time);
-    rocket_ball.apply(time,0.02);    
+    rocket_ball.tick(time,quanta);
+    rocket_ball.apply(time,quanta);    
   };
   cout << "Impact:" << time*0.02<< " sec." << endl;
 //  cout << rocket_ball.as_str() << endl;
@@ -160,12 +190,12 @@ int main()
   my_object spinner;
   spinner.mass = 100;
   spinner.bounding_sphere.radius = 1;
+  spinner.add_pre(new torquer);
   float q = 1.0/50.0;
   int tm = 0;
   for (;tm<50;tm++)
   {
-    spinner.tick(tm);
-    spinner.torque.set(triplet(0,0,100));
+    spinner.tick(tm,q);
     spinner.apply(tm,q);    
   };
   bool rf = false;
@@ -188,38 +218,47 @@ int main()
   failed = failed or rf;
   
   // ********* collision tests ***********
+  // -- fixed v. mobile test.
   my_object fixed = rocket_ball;
-  fixed.location = 0;
+  fixed.location = triplet(1,0,0);
+  fixed.velocity = triplet(-50,0,0);
   object_p mobile(rocket_ball.clone());
+  mobile->velocity = 0;
   mobile->bounding_sphere = fixed.bounding_sphere;
   stringstream results;
   
   // check at various distances.
   mobile->location = triplet(0,2,0);
-  bool t = fixed.check_collision(mobile);
+  mobile->velocity = triplet(0,-2,0);
+
+
+  bool t = fixed.check_collision(mobile,1.0/50.0);
   results << fixed.location.range(mobile->location)
     << "=" << t << ",";
   
   mobile->location = triplet(0,1.01,0);
-  t = fixed.check_collision(mobile);
+  t = fixed.check_collision(mobile,1.0/50.0);
   results << fixed.location.range(mobile->location)
     << "=" << t << ",";
 
   mobile->location = triplet(0,1,0);
-  t = fixed.check_collision(mobile);
+  t = fixed.check_collision(mobile,1.0/50.0);
   results << fixed.location.range(mobile->location)
     << "=" << t << ",";
 
   mobile->location = triplet(0);
-  t = fixed.check_collision(mobile);
+  t = fixed.check_collision(mobile,1.0/50.0);
   results << fixed.location.range(mobile->location)
     << "=" << t;
   
-  bool c = results.str() != "2=0,1.01=0,1=1,0=1";
+  bool c = results.str() != "2.23607=0,1.4213=1,1.41421=1,1=1";
   cout << results.str() << endl;
   cout << "** Collision Test: " << (c ? "Failed" : "Passed") << endl;
   
-  bool cl = mobile->as_str() != "ID=0:loc=(0,0,0):att=(0,0,0):vel=(0,-7.69599,0):rot=(0,0,0):f=(0,0,0):t=(0,0,0):acc_mod=(0,-9.81,0):r_mod=(0,0,0):mass=100:mass_mod=0:b_sphere=(0,0,0),0.5:pre=gravity_0=(0,-9.81,0);:posts=";
+  // == quick clone test
+  
+  bool cl = mobile->as_str() != "ID=0:loc=(0,0,0):att=(0,0,0):vel=(0,-2,0):rot=(0,0,0):f=(0,0,0):t=(0,0,0):acc_mod=(0,-9.81,0):r_mod=(0,0,0):mass=100:mass_mod=0:b_sphere=(0,0,0),0.5:pre=gravity_0=(0,-9.81,0);:posts=";
+  
   cout << "** clone() test: " << (cl ? "Failed" : "Passed") << endl;
 
   failed = failed or c or cl;

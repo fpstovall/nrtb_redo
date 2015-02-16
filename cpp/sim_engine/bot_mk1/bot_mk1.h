@@ -49,11 +49,11 @@ struct bot_mk1: public abs_bot
   std::thread t_thread;
   // sim methods
   // returns true if a collision is detected.
-  virtual bool check_collision(object_p o);
+  virtual bool check_collision(object_p o, float duration);
   // the following return true if the object is destroyed.
-  virtual bool tick(int time);
-  virtual bool apply(int time, float quanta);
-  virtual bool apply_collision(object_p o);
+  virtual bool tick(int time, float duration);
+  virtual bool apply(int time, float duration);
+  virtual bool apply_collision(object_p o, float duration);
   // BCP communications managers;
   void receiver();
   void transmitter();

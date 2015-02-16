@@ -93,7 +93,7 @@ struct driver : public base_object
     return t;
   };
   // nop collision application.
-  bool apply_collision(object_p o) {return false;};
+  bool apply_collision(object_p o, float duration) {return false;};
 };
 
 typedef map<std::string,double> rtype;
@@ -139,10 +139,11 @@ int main()
     cout << "Initial state test: ";
     driver test_ob;
     triplet startL = test_ob.location;
+    float d = 1.0/50.0;
     for(int i=0; i<50; i++)
     {
-      test_ob.tick(i);
-      test_ob.apply(i,1/50.0);
+      test_ob.tick(i,d);
+      test_ob.apply(i,d);
     };
     bool test_failed = (test_ob.location.x != 0.0)
                     or (test_ob.location.y != 0.0)
@@ -159,8 +160,8 @@ int main()
     int i = 0;
     while (!done)
     {
-      test_ob.tick(i);
-      test_ob.apply(i,1/50.0);
+      test_ob.tick(i,d);
+      test_ob.apply(i,d);
       i++;
       done = (test_ob.location.x >= 1.0) or (i > 80);
     };
@@ -178,8 +179,8 @@ int main()
     i=0;
     while ((test_ob.velocity.x > 0.0) or (test_ob.velocity.y > 0.0))
     {
-      test_ob.tick(i);
-      test_ob.apply(i,1/50.0);
+      test_ob.tick(i,d);
+      test_ob.apply(i,d);
       i++;
       if (i > 29) break;
     }; 
@@ -196,8 +197,8 @@ int main()
     // rotate 90 degrees in 1/2 second.
     while (test_ob.attitude.angles().z < (pi/2.0))
     {
-      test_ob.tick(i);
-      test_ob.apply(i,1/50.0);
+      test_ob.tick(i,d);
+      test_ob.apply(i,d);
       i++;
       if (i > 49) break;
     }; 
@@ -214,8 +215,8 @@ int main()
     // rotate 90 degrees in 5 second.
     while (test_ob.attitude.angles().z > 0.0)
     {
-      test_ob.tick(i);
-      test_ob.apply(i,1/50.0);
+      test_ob.tick(i,d);
+      test_ob.apply(i,d);
       i++;
       if (i > 300) break;
     }; 

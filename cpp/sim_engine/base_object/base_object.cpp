@@ -128,7 +128,7 @@ std::string base_object::as_str()
   return returnme.str();
 };
 
-bool base_object::tick(int time)
+bool base_object::tick(int time, float quanta)
 {
   // clean up for next pass
   accel_mod = 0;
@@ -153,23 +153,25 @@ bool base_object::tick(int time)
   for (auto e : pre_attribs)
     if (e.second->tick(*this, time))
       killme = true;
+  // apply forces to rotation, mass, and velocity.
+  mass += mass_mod;
+  triplet a = force / mass;
+  triplet ev = velocity + (((a + accel_mod)/2.0) * quanta);
+  velocity += (a  + accel_mod) * quanta;
+  rotatable rbase(rotation);
+  rotation.add(rotation_mod.angles() * quanta);
+  rotation.apply_force(mass, bounding_sphere.radius,
+                       torque.angles(),quanta);
+  rotation_mod.set((rotation.angles() + rbase.angles()) / 2.0);
   return killme;
 };
 
 bool base_object::apply(int time, float quanta)
 {
   // move acording to forces
-  float tmass = mass + mass_mod;
-  triplet a = force / tmass;
-  triplet ev = velocity + (((a + accel_mod)/2.0) * quanta);
-  velocity += (a  + accel_mod) * quanta;
-  location += ev * quanta;
+  location += velocity * quanta;
   // rotate according to the forces
-  rotatable rbase = rotation;
-  rotation.add(rotation_mod.angles() * quanta);
-  rotation.apply_force(tmass, bounding_sphere.radius,
-                       torque.angles(),quanta);
-  attitude.add(((rotation.angles() + rbase.angles())/2.0)*quanta);
+  attitude.add(rotation_mod.angles() * quanta);
   attitude.trim();
   // apply post-effectors
   bool killme (false);
@@ -179,12 +181,37 @@ bool base_object::apply(int time, float quanta)
   return killme;
 };
 
-bool base_object::check_collision(object_p o)
+bool base_object::check_collision(object_p o, float quanta)
 {
-  float r = o->bounding_sphere.radius + bounding_sphere.radius;
-  triplet adjusted = o->bounding_sphere.center;
-  adjusted += o->location;
-  return (r >= adjusted.range(bounding_sphere.center+location));
+  // get relative velocity and position
+  triplet rel_vel = o->velocity - velocity;
+  triplet rel_pos = o->location - location;
+  // adjust rel_vel for time quanta
+  rel_vel *= quanta;
+  // contact distance
+  float r = bounding_sphere.radius + o->bounding_sphere.radius;
+  // dP^2-r^2
+  float pp = (rel_pos.x*rel_pos.x) + (rel_pos.y*rel_pos.y) 
+    + (rel_pos.z*rel_pos.z) - (r*r);
+  // Are we already interescting?
+  if (pp <= 0.0) return true;
+  
+  // DP*dV
+  float pv = (rel_pos.x*rel_vel.x) + (rel_pos.y*rel_vel.y)
+    + (rel_pos.z*rel_vel.z);
+  // check to see if the objects are moving apart.
+  if (pv >= 0.0) return false;
+    
+  // dv ^2
+  float vv = (rel_vel.x*rel_vel.x) + (rel_vel.y*rel_vel.y)
+    + (rel_vel.z*rel_vel.z);
+  // do we have contact within the quanta?
+  if (((pv+vv) <= 0.0) and ((vv+2*pv+pp) >= 0.0)) return false;
+  
+  // What time are these closest?
+  float min_time = pv/vv;
+
+  return (pp + pv * min_time > 0.0);
 };
 
 void base_object::add_pre(abs_effector* e)

@@ -69,7 +69,7 @@ struct floater : public base_object
     t->post_attribs = get_post_attribs_copy();
     return t;
   };
-  bool apply_collision(object_p o) {return false;};
+  bool apply_collision(object_p o, float duration) {return false;};
 };
 
 typedef map<std::string,double> rtype;
@@ -111,12 +111,13 @@ int main()
     << endl;
 
   int counter = 0;
+  float d = 1.0/50.0;
   floater zepplin;
   while (counter < 500)
   {
     counter++;
-    zepplin.tick(counter);
-    zepplin.apply(counter,1/50.0);
+    zepplin.tick(counter,d);
+    zepplin.apply(counter,d);
     if (counter == 449)
     {
       locations.clear();
@@ -139,8 +140,8 @@ int main()
   while (counter < 500)
   {
     counter++;
-    zepplin.tick(counter);
-    zepplin.apply(counter,1/50.0);
+    zepplin.tick(counter,d);
+    zepplin.apply(counter,d);
     if (counter == 449)
     {
       locations.clear();
@@ -163,8 +164,8 @@ int main()
   while (counter < 500)
   {
     counter++;
-    zepplin.tick(counter);
-    zepplin.apply(counter,1/50.0);
+    zepplin.tick(counter,d);
+    zepplin.apply(counter,d);
     if (counter == 449)
     {
       locations.clear();

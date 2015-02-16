@@ -89,11 +89,11 @@ struct my_object
     cout << "bot_cmd(): " << cmd << endl;
   };
     
-  bool apply_collision(object_p o) 
+  bool apply_collision(object_p o, float duration) 
   {
     return true;
   };
-  
+    
   base_object * clone()
   {
     my_object * returnme = new my_object(*this);
@@ -121,7 +121,7 @@ int main()
   for(int i=0; i<iterations; i++)
   {
     this_thread::sleep_for(pause);
-    o1.tick(i);
+    o1.tick(i,1.0/50.0);
   };
       
   if (failed)

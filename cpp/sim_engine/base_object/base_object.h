@@ -113,11 +113,11 @@ struct base_object
   virtual effector_list get_post_attribs_copy();
   // sim methods
   // returns true if a collision is detected.
-  virtual bool check_collision(object_p o);
+  virtual bool check_collision(object_p o, float quanta);
   // the following return true if the object is destroyed.
-  virtual bool tick(int time);
+  virtual bool tick(int time, float quanta);
   virtual bool apply(int time, float quanta);
-  virtual bool apply_collision(object_p o) = 0;
+  virtual bool apply_collision(object_p o, float quanta) = 0;
 protected:
   effector_list pre_attribs;
   effector_list post_attribs; 

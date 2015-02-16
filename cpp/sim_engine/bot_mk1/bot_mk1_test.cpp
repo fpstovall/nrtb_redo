@@ -144,14 +144,15 @@ int main()
       << " '" << msg << "'" << endl;
       
     // verify running statuses.
-    bad = test_bot->tick(0) or test_bot->apply(0,1.0/50.0);
+    float d = 1.0/50.0;
+    bad = test_bot->tick(0,d) or test_bot->apply(0,d);
     failed = failed or bad;
     cout << "tick and apply: " << ( bad ? "FAILED" : "Passed" ) 
       << endl;
     
     // clone test.
     object_p cobj(test_bot->clone());
-    bad = cobj->as_str() !="ID=0:loc=(0,0,2.49804):att=(0,0,0):vel=(0,0,-0.196133):rot=(0,0,0):f=(0,0,0):t=(0,0,0):acc_mod=(0,0,0):r_mod=(0,0,0):mass=30000:mass_mod=0:b_sphere=(0,0,0),2.25:pre=gravity=(0,0,-9.80665);hover=2.5,0.1,2;diff_steer::pre=100000,0,200000,1,12.5664,0;:posts=diff_steer::post=10,8;";
+    bad = cobj->as_str() !="ID=0:loc=(0,0,2.49608):att=(0,0,0):vel=(0,0,-0.196133):rot=(0,0,0):f=(0,0,0):t=(0,0,0):acc_mod=(0,0,0):r_mod=(0,0,0):mass=30000:mass_mod=0:b_sphere=(0,0,0),2.25:pre=gravity=(0,0,-9.80665);hover=2.5,0.1,2;diff_steer::pre=100000,0,200000,1,12.5664,0;:posts=diff_steer::post=10,8;";
     cout << "clone(): " << ( bad ? "FAILED" : "Passed" )
       << endl;
     failed = failed or bad;
@@ -166,7 +167,7 @@ int main()
       << endl;
       
     // verify stopped statuses.
-    bad = !test_bot->tick(0) or !test_bot->apply(0,1.0/50.0);
+    bad = !test_bot->tick(0,d) or !test_bot->apply(0,d);
     failed = failed or bad;
     cout << "tick and apply: " << ( bad ? "FAILED" : "Passed" ) 
       << endl;    

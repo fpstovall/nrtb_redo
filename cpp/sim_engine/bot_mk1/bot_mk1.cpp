@@ -77,12 +77,12 @@ bot_mk1::~bot_mk1()
   if (t_thread.joinable()) t_thread.join();
 };
 
-bool bot_mk1::tick(int time)
+bool bot_mk1::tick(int time, float duration)
 {
   if (ImAlive)
   {
     std::unique_lock<std::mutex> lock(cooking_lock);
-    return nrtb::abs_bot::tick(time);
+    return nrtb::abs_bot::tick(time, duration);
   }
   else
   {
@@ -105,12 +105,12 @@ bool bot_mk1::apply(int time, float quanta)
   };
 };
 
-bool bot_mk1::check_collision(object_p o)
+bool bot_mk1::check_collision(object_p o, float duration)
 {
   if (ImAlive)
   {
     std::unique_lock<std::mutex> lock(cooking_lock);
-    return nrtb::base_object::check_collision(o);
+    return nrtb::base_object::check_collision(o, duration);
   }
   else
   {
@@ -119,7 +119,7 @@ bool bot_mk1::check_collision(object_p o)
   };
 };
 
-bool bot_mk1::apply_collision(object_p o)
+bool bot_mk1::apply_collision(object_p o, float duration)
 {
   return false;
 };
