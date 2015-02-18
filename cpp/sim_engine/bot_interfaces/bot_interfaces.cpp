@@ -33,14 +33,14 @@ void ticker::deregister_ticker(tickable& t)
   tickees.erase((unsigned long long) &t);
 };
 
-void ticker::tick_all()
+void ticker::tick_all(float duration)
 {
   for(auto p : tickees) 
-    p.second();
+    p.second(duration);
 };
 
 bool abs_bot::tick(int quanta, float duration)
 {
-  tick_all();
+  tick_all(duration);
   return nrtb::base_object::tick(quanta, duration);
 }

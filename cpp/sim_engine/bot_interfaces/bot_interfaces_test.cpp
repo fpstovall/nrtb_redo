@@ -42,11 +42,11 @@ public:
   {
     my_parent.bot_cmd("Bot command");
   }
-  void operator()()
+  void operator()(float duration)
   {
     stringstream out;
     out << "tick at " << clock.interval() 
-      << " seconds.";
+      << " seconds. d=" << duration ;
     my_parent.send_to_bcp(out.str());
   }
 private:

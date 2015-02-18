@@ -49,7 +49,7 @@ class tickable
 {
 public:
   virtual ~tickable() {};
-  virtual void operator()() = 0;
+  virtual void operator()(float duration) = 0;
 };
 
 // scheduling methods provided by the bot.
@@ -59,7 +59,7 @@ public:
   std::map<unsigned long long,tickable &> tickees;
   void register_ticker(tickable & t);
   void deregister_ticker(tickable & t);
-  void tick_all();
+  void tick_all(float duration);
 };
 
 struct abs_bot
