@@ -33,15 +33,14 @@ rail_gun_mk1::rail_gun_mk1(abs_bot& p)
   max_roc.x = conf.get<float>("rg_pwr_rate",400.0);
   max_power = conf.get<float>("rg_max_pwr",2000);
   magazine = conf.get<int>("rg_rounds",100);
-  control = std::thread(&rail_gun_mk1::auto_control,this);
+  // TODO: insert into parent's tick list.
+  parent.register_ticker(*this);
 };
 
 rail_gun_mk1::~rail_gun_mk1()
 {
-  // order control to shut down;
-  // TODO: How do I do this?
-  // wait for control to shut down;
-  if (control.joinable()) control.join();
+  // TODO: remove from parent's tick list.
+  parent.deregister_ticker(*this);
 };
 
 void rail_gun_mk1::fire(bool stable)

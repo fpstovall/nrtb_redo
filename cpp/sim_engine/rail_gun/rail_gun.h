@@ -27,7 +27,7 @@
 namespace nrtb
 {
   
-class rail_gun_mk1
+class rail_gun_mk1 : public tickable
 {
 public:
   rail_gun_mk1(abs_bot & p);
@@ -36,6 +36,7 @@ public:
   virtual void fire(bool stable=true);
   // triplets are encoded as power, azimuth, delination
   virtual void train(triplet settings);
+  operator ()(float duration); 
 protected:
   // parent base_object
   abs_bot & parent;
@@ -55,11 +56,6 @@ protected:
   int magazine {100};
   // operation mutex.
   std::mutex tick_lock;
-  // thread handle
-  std::thread control;
-  // -- methods
-  // ticker; moves towards goals
-  virtual void auto_control();
 };
 
 class rg_round : public base_object
