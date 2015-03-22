@@ -36,7 +36,7 @@ public:
   virtual void fire(bool stable=true);
   // triplets are encoded as power, azimuth, delination
   virtual void train(triplet settings);
-  operator ()(float duration); 
+  void operator ()(float duration); 
 protected:
   // parent base_object
   abs_bot & parent;
@@ -64,9 +64,7 @@ public:
   rg_round(triplet loc, triplet vel);
   virtual ~rg_round();
   base_object * clone();
-  bool apply_collision(object_p o); 
-  virtual bool check_collision(object_p o);
-
+  bool apply_collision(object_p o, float duration); 
 };
   
 } // namepace nrtb
