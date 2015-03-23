@@ -46,11 +46,15 @@ rail_gun_mk1::~rail_gun_mk1()
 void rail_gun_mk1::fire(bool stable)
 {
   // if stable set fire_on_ready;
-  // if not, unconditionally fire
-  // == create new rg_round
-  // == add to global_sim_core
-  // == zero current.x (power vector);
-  // == remove one round from the magazine;
+  if (stable) { fire_on_ready = true; }
+  else
+  {
+    // if not, unconditionally fire
+    // == create new rg_round
+    // == add to global_sim_core
+    // == zero current.x (power vector);
+    // == remove one round from the magazine;
+  }
 };
 
 void rail_gun_mk1::train(triplet settings)
