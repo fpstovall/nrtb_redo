@@ -19,6 +19,7 @@
 #ifndef rail_gun_header
 #define rail_gun_header
 
+#include <base_object.h>
 #include <bot_interfaces.h>
 #include <sim_core.h>
 #include <confreader.h>
@@ -58,9 +59,8 @@ protected:
   std::mutex tick_lock;
 };
 
-class rg_round : public base_object
+struct rg_round : public base_object
 {
-public:
   rg_round(triplet loc, triplet vel);
   virtual ~rg_round();
   base_object * clone();

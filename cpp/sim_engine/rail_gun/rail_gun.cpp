@@ -19,6 +19,7 @@
 // see rail_gun.h for documentation
 
 #include "rail_gun.h"
+#include <gravity.h>
 #include <sstream>
 #include <iostream>
 
@@ -67,7 +68,6 @@ void rail_gun_mk1::operator()(float duration)
   /*******************************
    * Assumes the following:
    *    goals are within limits.
-   *    
    ******************************/
   triplet d_roc = max_roc * duration;
   // step power towards goal.
@@ -95,24 +95,34 @@ void rail_gun_mk1::operator()(float duration)
   if (fire_on_ready and (current == goals)) fire(false);
 };
 
+// rg_round.. the rail_gun bullet.
+
 rg_round::rg_round(triplet loc, triplet vel)
 {
-
+  location = loc;
+  velocity = vel;
+  mass = 0.1;
+  bounding_sphere.radius = 0.01;
+  bounding_sphere.center = triplet(0.0);
+  add_pre(new norm_gravity);
 };
 
 rg_round::~rg_round()
 {
-
+  // NOP for clean deallocation only.
 };
 
 base_object * rg_round::clone()
 {
-  
+  rg_round * returnme = new rg_round(*this);
+  returnme->pre_attribs = get_pre_attribs_copy();
+  returnme->post_attribs = get_post_attribs_copy();
+  return returnme;  
 };
 
 bool rg_round::apply_collision(object_p o, float duration)
 {
-
+  return true;
 };
 
 
