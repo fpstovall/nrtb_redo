@@ -16,27 +16,32 @@
  
  **********************************************/
 
+#include <sim_core.h>
 #include "rail_gun.h"
 #include <base_object.h>
+#include <bot_interfaces.h>
 #include <iostream>
 #include <string>
 
 using namespace nrtb;
 using namespace std;
 
-struct my_object : public base_object
+struct my_object : public abs_bot
 {
+  shared_ptr<rail_gun_mk1> cannon;
+  
   my_object()
   {
     location = triplet(0,0,0);
     velocity = triplet(0,0,0);
     bounding_sphere.center = triplet(0,0,0);
     bounding_sphere.radius = 1;
+    cannon.reset(new rail_gun_mk1(*this));
     mass = 1;
   };
   
   
-  bool apply_collision(object_p o) 
+  bool apply_collision(object_p o, float quanta) 
   {
     return true;
   };
@@ -47,6 +52,13 @@ struct my_object : public base_object
     returnme->pre_attribs = get_pre_attribs_copy();
     returnme->post_attribs = get_post_attribs_copy();
     return returnme;
+  };
+  
+  void bot_cmd(string cmd) {};
+  
+  void send_to_bcp(string msg) 
+  {
+    cout << "stb: " << msg << endl;
   };
 };
 
