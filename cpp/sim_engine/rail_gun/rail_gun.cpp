@@ -40,6 +40,7 @@ rail_gun_mk1::rail_gun_mk1(abs_bot& p)
 
 rail_gun_mk1::~rail_gun_mk1()
 {
+  std::unique_lock<std::mutex> lock(tick_lock);
   // remove from parent's tick list.
   parent.deregister_ticker(*this);
 };
@@ -50,12 +51,29 @@ void rail_gun_mk1::fire(bool stable)
   if (stable) { fire_on_ready = true; }
   else
   {
-    // if not, unconditionally fire
-    // == create new rg_round
-    // == add to global_sim_core
-    // == zero current.x (power vector);
-    // == remove one round from the magazine;
-  }
+    std::unique_lock<std::mutex> lock(tick_lock);
+    // shoot only if there are rounds to fire.
+    if (magazine)
+    {
+      // if not, unconditionally fire
+      // set up initlal conditions for the round
+      triplet l = parent.location;
+      triplet v = current.to_cartesian();
+      // move the round outside of the shooter's bounding_sphere
+      triplet offset = current;
+      offset.x = parent.bounding_sphere.radius + 0.1;
+      l += offset.to_cartesian();
+      // Create the new round object.
+      rg_round * round = new rg_round(l,v);
+      // add to global_sim_core
+      sim.add_object(object_p(round));
+      // == zero current.x (power vector);
+      current.x = 0.0;
+      // == remove one round from the magazine;
+      magazine -= 1;
+    };
+    fire_on_ready = false;
+  };
 };
 
 void rail_gun_mk1::train(triplet settings)
@@ -63,8 +81,17 @@ void rail_gun_mk1::train(triplet settings)
   goals = settings;
 };
 
+void rail_gun_mk1::get_status(triplet & c, triplet & g, int & r)
+{
+  std::unique_lock<std::mutex> lock(tick_lock);
+  c = current;
+  g = goals;
+  r = magazine;
+};
+
 void rail_gun_mk1::operator()(float duration)
 {
+  std::unique_lock<std::mutex> lock(tick_lock);
   /*******************************
    * Assumes the following:
    *    goals are within limits.
@@ -95,7 +122,7 @@ void rail_gun_mk1::operator()(float duration)
   if (fire_on_ready and (current == goals)) fire(false);
 };
 
-// rg_round.. the rail_gun bullet.
+// ******** rg_round.. the rail_gun bullet. *******************
 
 rg_round::rg_round(triplet loc, triplet vel)
 {

@@ -37,6 +37,9 @@ public:
   virtual void fire(bool stable=true);
   // triplets are encoded as power, azimuth, delination
   virtual void train(triplet settings);
+  // returns current status, goals, rounds remaining
+  virtual void get_status(triplet & c, triplet & g, int & r);
+  // the "tick" method
   void operator ()(float duration); 
 protected:
   // parent base_object
