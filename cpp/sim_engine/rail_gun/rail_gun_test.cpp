@@ -54,7 +54,10 @@ struct my_object : public abs_bot
     return returnme;
   };
   
-  void bot_cmd(string cmd) {};
+  void bot_cmd(string cmd) 
+  {
+    cout << "cmd: " << cmd << endl;
+  };
   
   void send_to_bcp(string msg) 
   {
@@ -69,6 +72,22 @@ int main()
   cout << "========== rail_gun test ============="
     << endl;
  
+  // create sim engine
+  sim_core & sim = global_sim_core::get_reference();
+    
+  // Create test bot.
+  object_p b1(new my_object);
+    
+  // test goal seek
+    
+  
+  // test unconditional fire.
+    
+  // test fire on stable.
+    
+  // kill another object
+    
+
     
   cout << "=========== rail_gun test complete ============="
     << endl;

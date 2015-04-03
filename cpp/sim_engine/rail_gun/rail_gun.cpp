@@ -53,16 +53,18 @@ void rail_gun_mk1::fire(bool stable)
   {
     std::unique_lock<std::mutex> lock(tick_lock);
     // shoot only if there are rounds to fire.
-    if (magazine)
+    if (magazine > 0)
     {
-      // if not, unconditionally fire
-      // set up initlal conditions for the round
+      // set up launch point.
       triplet l = parent.location;
-      triplet v = current.to_cartesian();
       // move the round outside of the shooter's bounding_sphere
       triplet offset = current;
       offset.x = parent.bounding_sphere.radius + 0.1;
       l += offset.to_cartesian();
+      // set up initial velocity vector.
+      triplet v = current;
+      v.y =+ parent.rotation.angles().z;
+      v = v.to_cartesian() + parent.velocity;
       // Create the new round object.
       rg_round * round = new rg_round(l,v);
       // add to global_sim_core
