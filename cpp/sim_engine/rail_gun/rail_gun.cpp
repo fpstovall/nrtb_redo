@@ -69,7 +69,7 @@ void rail_gun_mk1::fire(bool stable)
       rg_round * round = new rg_round(l,v);
       // add to global_sim_core
       sim.add_object(object_p(round));
-      // == zero current.x (power vector);
+      // == zero current.x (power);
       current.x = 0.0;
       // == remove one round from the magazine;
       magazine -= 1;

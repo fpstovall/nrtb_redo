@@ -26,9 +26,46 @@
 using namespace nrtb;
 using namespace std;
 
+typedef shared_ptr<rail_gun_mk1> rail_p;
+
+class gun_mon : public tickable
+{
+  rail_p rg;
+  triplet current;
+  triplet goal;
+  abs_bot & parent;
+  int rounds {0};
+  gun_mon(rail_p gun, abs_bot & p) 
+    : rg(gun), parent(p) 
+  {
+    parent.register_ticker(*this);
+  };
+  virtual ~gun_mon() 
+  {
+    parent.deregister_ticker(*this);
+  };
+  void operator ()(float duration)
+  {
+    triplet c; 
+    triplet g;
+    int r;
+    rg->get_status(c,g,r);
+    if ((c != current) 
+      or (g != goal)
+      or (r != rounds))
+    {
+      cout << "rg : " << c << g << r << endl;
+      current = c;
+      goal = g;
+      rounds = r;
+    };
+  };
+};
+
 struct my_object : public abs_bot
 {
   shared_ptr<rail_gun_mk1> cannon;
+  
   
   my_object()
   {
@@ -72,13 +109,16 @@ int main()
   cout << "========== rail_gun test ============="
     << endl;
  
-  // create sim engine
+  // create and start sim engine
   sim_core & sim = global_sim_core::get_reference();
+  sim.start_sim();
     
   // Create test bot.
   object_p b1(new my_object);
-    
+  sim.add_object(b1);
+  
   // test goal seek
+  //b1->cannon->train(triplet(4000,pi,pi/4));
     
   
   // test unconditional fire.
