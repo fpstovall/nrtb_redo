@@ -30,20 +30,25 @@ typedef shared_ptr<rail_gun_mk1> rail_p;
 
 class gun_mon : public tickable
 {
+private:
   rail_p rg;
   triplet current;
   triplet goal;
   abs_bot & parent;
   int rounds {0};
+
+public:
   gun_mon(rail_p gun, abs_bot & p) 
     : rg(gun), parent(p) 
   {
     parent.register_ticker(*this);
   };
+  
   virtual ~gun_mon() 
   {
     parent.deregister_ticker(*this);
   };
+  
   void operator ()(float duration)
   {
     triplet c; 
@@ -60,11 +65,13 @@ class gun_mon : public tickable
       rounds = r;
     };
   };
+  
 };
 
 struct my_object : public abs_bot
 {
-  shared_ptr<rail_gun_mk1> cannon;
+  rail_p cannon;
+  shared_ptr<gun_mon> monitor;
   
   
   my_object()
@@ -74,6 +81,7 @@ struct my_object : public abs_bot
     bounding_sphere.center = triplet(0,0,0);
     bounding_sphere.radius = 1;
     cannon.reset(new rail_gun_mk1(*this));
+    monitor.reset(new gun_mon(cannon,*this));
     mass = 1;
   };
   
@@ -114,11 +122,11 @@ int main()
   sim.start_sim();
     
   // Create test bot.
-  object_p b1(new my_object);
-  sim.add_object(b1);
+  my_object * b1 = new my_object;
+  sim.add_object(object_p(b1));
   
   // test goal seek
-  //b1->cannon->train(triplet(4000,pi,pi/4));
+  b1->cannon->train(triplet(100,pi,pi/4));
     
   
   // test unconditional fire.
@@ -128,6 +136,9 @@ int main()
   // kill another object
     
 
+  this_thread::sleep_for(chrono::milliseconds(5000));
+  
+  sim.stop_sim();
     
   cout << "=========== rail_gun test complete ============="
     << endl;
