@@ -31,7 +31,7 @@ rail_gun_mk1::rail_gun_mk1(abs_bot& p)
   conf_reader & conf = global_conf_reader::get_reference();
   max_roc.y = conf.get<float>("rg_traverse",pi*8);
   max_roc.z = conf.get<float>("rg_elevation",pi*8);
-  max_roc.x = conf.get<float>("rg_pwr_rate",400.0);
+  max_roc.x = conf.get<float>("rg_pwr_rate",1250);
   max_power = conf.get<float>("rg_max_pwr",4000);
   magazine = conf.get<int>("rg_rounds",100);
   // insert into parent's tick list.

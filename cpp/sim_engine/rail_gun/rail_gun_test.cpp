@@ -36,8 +36,11 @@ private:
   triplet goal;
   abs_bot & parent;
   int rounds {0};
+  bool moving {false};
+  int steps {0};
 
 public:
+  string last_result; 
   gun_mon(rail_p gun, abs_bot & p) 
     : rg(gun), parent(p) 
   {
@@ -59,10 +62,19 @@ public:
       or (g != goal)
       or (r != rounds))
     {
-      cout << "rg : " << c << g << r << endl;
       current = c;
       goal = g;
       rounds = r;
+      moving = true;
+      steps++;
+    }
+    else if (moving)
+    {
+      stringstream output;
+      output << "stop(" << steps << "):" << c << g << r;
+      last_result = output.str();
+      moving = false;
+      steps = 0;
     };
   };
   
@@ -128,9 +140,20 @@ int main()
   // test goal seek
   b1->cannon->train(triplet(0,-pi,pi/4));
   this_thread::sleep_for(chrono::milliseconds(500));
-  cout << "---------------------" << endl;
+  cout << b1->monitor->last_result << endl;
+
   b1->cannon->train(triplet(0,pi,pi/4));
+  this_thread::sleep_for(chrono::milliseconds(500));
+  cout << b1->monitor->last_result << endl;
     
+  b1->cannon->train(triplet(0,0,0));
+  this_thread::sleep_for(chrono::milliseconds(500));
+  cout << b1->monitor->last_result << endl;
+
+  b1->cannon->train(triplet(100,0,0));
+  this_thread::sleep_for(chrono::milliseconds(500));
+  cout << b1->monitor->last_result << endl;
+
   
   // test unconditional fire.
     
