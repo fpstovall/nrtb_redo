@@ -126,7 +126,10 @@ int main()
   sim.add_object(object_p(b1));
   
   // test goal seek
-  b1->cannon->train(triplet(100,pi,pi/4));
+  b1->cannon->train(triplet(0,-pi,pi/4));
+  this_thread::sleep_for(chrono::milliseconds(500));
+  cout << "---------------------" << endl;
+  b1->cannon->train(triplet(0,pi,pi/4));
     
   
   // test unconditional fire.
@@ -136,7 +139,7 @@ int main()
   // kill another object
     
 
-  this_thread::sleep_for(chrono::milliseconds(5000));
+  this_thread::sleep_for(chrono::milliseconds(500));
   
   sim.stop_sim();
     

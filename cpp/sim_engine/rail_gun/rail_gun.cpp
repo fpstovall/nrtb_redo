@@ -79,8 +79,18 @@ void rail_gun_mk1::fire(bool stable)
 };
 
 void rail_gun_mk1::train(triplet settings)
-{
-  goals = settings;
+{   
+  // Reject azimuth and elevation -pi < x > 2pi
+  const float hilim = pi;
+  const float lolim = -pi;
+  if (
+    (settings.y <= hilim) and (settings.y >= lolim)
+    and (settings.z <= hilim) and (settings.z >= lolim)
+  )
+  {
+    // store the values.
+    goals = settings;
+  };
 };
 
 void rail_gun_mk1::get_status(triplet & c, triplet & g, int & r)
@@ -97,7 +107,9 @@ void rail_gun_mk1::operator()(float duration)
   /*******************************
    * Assumes the following:
    *    goals are within limits.
+   *  -pi <= angle <= pi
    ******************************/
+  const float adjustment = 2 * pi;
   triplet d_roc = max_roc * duration;
   // step power towards goal.
   if (current.x != goals.x)
@@ -111,14 +123,22 @@ void rail_gun_mk1::operator()(float duration)
   {
     float sign = (current.y < goals.y) ? 1 : -1;
     float delta  = fabs(goals.y - current.y);
-    current.y = (delta > d_roc.y) ? (current.y + (d_roc.y*sign)) : goals.y;    
+    sign = (delta > pi) ? sign * -1 : sign;
+    current.y = (delta > d_roc.y) ? (current.y + (d_roc.y*sign)) : goals.y;
+    // adjust to range limits if needed.
+    if (current.y < -pi) { current.y += adjustment; }
+    else if (current.y > pi) { current.y -= adjustment; };
   };
   // step elevation towards goal.
   if (current.z != goals.z)
   {
     float sign = (current.z < goals.z) ? 1 : -1;
     float delta  = fabs(goals.z - current.z);
-    current.z = (delta > d_roc.z) ? (current.z + (d_roc.z*sign)) : goals.z;    
+    sign = (delta > pi) ? sign * -1 : sign;
+    current.z = (delta > d_roc.z) ? (current.z + (d_roc.z*sign)) : goals.z;
+    // adjust to range limits if needed.
+    if (current.z < -pi) { current.z += adjustment; }
+    else if (current.z > pi) { current.z -= adjustment; };
   };
   // at goal and fire on ready?
   if (fire_on_ready and (current == goals)) fire(false);
