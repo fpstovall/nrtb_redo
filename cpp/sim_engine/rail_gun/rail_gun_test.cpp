@@ -139,20 +139,32 @@ int main()
   
   // test goal seek
   b1->cannon->train(triplet(0,-pi,pi/4));
-  this_thread::sleep_for(chrono::milliseconds(500));
+  this_thread::sleep_for(chrono::milliseconds(200));
   cout << b1->monitor->last_result << endl;
+  failed = failed 
+    or (b1->monitor->last_result 
+      != "stop(7):(0,-3.14159,0.785398)(0,-3.14159,0.785398)100");
 
   b1->cannon->train(triplet(0,pi,pi/4));
-  this_thread::sleep_for(chrono::milliseconds(500));
+  this_thread::sleep_for(chrono::milliseconds(200));
   cout << b1->monitor->last_result << endl;
+  failed = failed 
+    or (b1->monitor->last_result 
+      != "stop(2):(0,3.14159,0.785398)(0,3.14159,0.785398)100");
     
   b1->cannon->train(triplet(0,0,0));
-  this_thread::sleep_for(chrono::milliseconds(500));
+  this_thread::sleep_for(chrono::milliseconds(200));
   cout << b1->monitor->last_result << endl;
+  failed = failed 
+    or (b1->monitor->last_result 
+      != "stop(7):(0,0,0)(0,0,0)100");
 
   b1->cannon->train(triplet(100,0,0));
-  this_thread::sleep_for(chrono::milliseconds(500));
+  this_thread::sleep_for(chrono::milliseconds(200));
   cout << b1->monitor->last_result << endl;
+  failed = failed 
+    or (b1->monitor->last_result 
+      != "stop(4):(100,0,0)(100,0,0)100");
 
   
   // test unconditional fire.
@@ -161,12 +173,12 @@ int main()
     
   // kill another object
     
-
-  this_thread::sleep_for(chrono::milliseconds(500));
   
   sim.stop_sim();
+  
     
-  cout << "=========== rail_gun test complete ============="
+  cout << "=========== rail_gun test " 
+    << (failed ? "FAILED" : "PASSED") << " ============="
     << endl;
   
   return failed;
