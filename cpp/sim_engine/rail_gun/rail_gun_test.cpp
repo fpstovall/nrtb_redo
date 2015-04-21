@@ -165,9 +165,21 @@ int main()
   failed = failed 
     or (b1->monitor->last_result 
       != "stop(4):(100,0,0)(100,0,0)100");
+  
+  cout << "\n-------------------" << endl;
 
   
   // test unconditional fire.
+  cout << endl;
+  int start = sim.obj_status().size();
+  cout << "fire(false)" << endl;
+  b1->cannon->fire(false);
+  this_thread::sleep_for(chrono::milliseconds(30));
+  cout << b1->monitor->last_result << endl;
+  int end = sim.obj_status().size();
+  for (auto a : sim.obj_status()) cout << a << endl;
+  failed = failed or (end != ++start);
+  cout << endl;
     
   // test fire on stable.
     
