@@ -140,46 +140,36 @@ int main()
   // test goal seek
   b1->cannon->train(triplet(0,-pi,pi/4));
   this_thread::sleep_for(chrono::milliseconds(200));
-  cout << b1->monitor->last_result << endl;
   failed = failed 
     or (b1->monitor->last_result 
       != "stop(7):(0,-3.14159,0.785398)(0,-3.14159,0.785398)100");
 
   b1->cannon->train(triplet(0,pi,pi/4));
   this_thread::sleep_for(chrono::milliseconds(200));
-  cout << b1->monitor->last_result << endl;
   failed = failed 
     or (b1->monitor->last_result 
       != "stop(2):(0,3.14159,0.785398)(0,3.14159,0.785398)100");
     
   b1->cannon->train(triplet(0,0,0));
   this_thread::sleep_for(chrono::milliseconds(200));
-  cout << b1->monitor->last_result << endl;
   failed = failed 
     or (b1->monitor->last_result 
       != "stop(7):(0,0,0)(0,0,0)100");
 
   b1->cannon->train(triplet(100,0,0));
   this_thread::sleep_for(chrono::milliseconds(200));
-  cout << b1->monitor->last_result << endl;
   failed = failed 
     or (b1->monitor->last_result 
       != "stop(4):(100,0,0)(100,0,0)100");
-  
-  cout << "\n-------------------" << endl;
-
+  cout << "goal seeking : " << (failed ? "FAIL" : "PASS") << endl;
   
   // test unconditional fire.
-  cout << endl;
   int start = sim.obj_status().size();
-  cout << "fire(false)" << endl;
   b1->cannon->fire(false);
   this_thread::sleep_for(chrono::milliseconds(30));
-  cout << b1->monitor->last_result << endl;
   int end = sim.obj_status().size();
-  for (auto a : sim.obj_status()) cout << a << endl;
   failed = failed or (end != ++start);
-  cout << endl;
+  cout << "fire(false) : " << ((end == start) ? "PASS" : "FAIL") << endl;
     
   // test fire on stable.
     
