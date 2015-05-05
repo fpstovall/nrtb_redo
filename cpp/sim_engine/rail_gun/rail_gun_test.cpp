@@ -67,11 +67,13 @@ public:
       rounds = r;
       moving = true;
       steps++;
+      last_result = "Moving";
     }
     else if (moving)
     {
       stringstream output;
       output << "stop(" << steps << "):" << c << g << r;
+      cout << output.str() << endl;
       last_result = output.str();
       moving = false;
       steps = 0;
