@@ -38,9 +38,11 @@ private:
   int rounds {0};
   bool moving {false};
   int steps {0};
-
+  condition_variable done_moving;
+  mutex move_lock;
 public:
-  string last_result; 
+  string last_result;
+  
   gun_mon(rail_p gun, abs_bot & p) 
     : rg(gun), parent(p) 
   {
@@ -77,9 +79,18 @@ public:
       last_result = output.str();
       moving = false;
       steps = 0;
+      unique_lock<mutex> lock(move_lock);
+      done_moving.notify_all();
     };
   };
-  
+ 
+  string wait_for_move()
+  {
+    unique_lock<mutex> lock(move_lock);
+    done_moving.wait(lock);
+    return last_result;
+  };
+
 };
 
 struct my_object : public abs_bot
@@ -141,42 +152,41 @@ int main()
   
   // test goal seek
   b1->cannon->train(triplet(0,-pi,pi/4));
-  this_thread::sleep_for(chrono::milliseconds(200));
   failed = failed 
-    or (b1->monitor->last_result 
+    or (b1->monitor->wait_for_move() 
       != "stop(7):(0,-3.14159,0.785398)(0,-3.14159,0.785398)100");
 
   b1->cannon->train(triplet(0,pi,pi/4));
-  this_thread::sleep_for(chrono::milliseconds(200));
   failed = failed 
-    or (b1->monitor->last_result 
+    or (b1->monitor->wait_for_move() 
       != "stop(2):(0,3.14159,0.785398)(0,3.14159,0.785398)100");
     
   b1->cannon->train(triplet(0,0,0));
-  this_thread::sleep_for(chrono::milliseconds(200));
   failed = failed 
-    or (b1->monitor->last_result 
+    or (b1->monitor->wait_for_move() 
       != "stop(7):(0,0,0)(0,0,0)100");
 
   b1->cannon->train(triplet(100,0,0));
-  this_thread::sleep_for(chrono::milliseconds(200));
   failed = failed 
-    or (b1->monitor->last_result 
+    or (b1->monitor->wait_for_move() 
       != "stop(4):(100,0,0)(100,0,0)100");
   cout << "goal seeking : " << (failed ? "FAIL" : "PASS") << endl;
   
   // test unconditional fire.
   int start = sim.obj_status().size();
   b1->cannon->fire(false);
-  this_thread::sleep_for(chrono::milliseconds(30));
+  b1->monitor->wait_for_move();
   int end = sim.obj_status().size();
   failed = failed or (end != ++start);
   cout << "fire(false) : " << ((end == start) ? "PASS" : "FAIL") << endl;
     
   // test fire on stable.
+  //-- point to new location
+  //-- set fire on stable while we are moving.
+  //-- wait on stable.
+  //-- see if we fired.
     
   // kill another object
-    
   
   sim.stop_sim();
   
