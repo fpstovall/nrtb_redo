@@ -81,9 +81,8 @@ bool bot_mk1::tick(int time, float duration)
 {
   if (ImAlive)
   {
-    t_var.notify_all();
     std::unique_lock<std::mutex> lock(cooking_lock);
-    return nrtb::base_object::tick(time, duration);
+    return nrtb::abs_bot::tick(time, duration);
   }
   else
   {
@@ -250,8 +249,3 @@ void bot_mk1::bot_cmd(std::string cmd)
   msg_router(cmd);
 };
 
-void bot_mk1::wait_for_tick()
-{
-  std::unique_lock<std::mutex> lock(t_lock);
-  t_var.wait(lock);
-};

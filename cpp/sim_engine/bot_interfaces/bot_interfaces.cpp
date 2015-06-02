@@ -22,3 +22,25 @@
 #include <iostream>
 
 using namespace nrtb;
+
+void ticker::register_ticker(tickable& t)
+{
+  tickees.emplace((unsigned long long) &t, t);
+};
+
+void ticker::deregister_ticker(tickable& t)
+{
+  tickees.erase((unsigned long long) &t);
+};
+
+void ticker::tick_all(float duration)
+{
+  for(auto p : tickees) 
+    p.second(duration);
+};
+
+bool abs_bot::tick(int quanta, float duration)
+{
+  tick_all(duration);
+  return nrtb::base_object::tick(quanta, duration);
+}

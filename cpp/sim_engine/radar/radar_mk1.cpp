@@ -44,16 +44,10 @@ std::string radar_mk1::get_contacts()
       {
         float range = parent.location.range(c.location);
         // get xy azimuth
-        triplet offset = c.location - parent.location;
-        float azimuth = atan2(offset.y, offset.x);
-        azimuth -= parent.attitude.angles().z;
-        // get yz elevation
-        float elevation = atan2(offset.z, offset.y);
+        triplet offset = (c.location - parent.location).to_polar();
         // assemble return string
         returnme << " " << c.type << " "
-          << range << " "
-          << azimuth << " "
-          << elevation << " "
+          << offset << " "
           << (c.velocity - parent.velocity);
       }
     };

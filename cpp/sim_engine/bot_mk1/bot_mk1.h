@@ -61,9 +61,6 @@ struct bot_mk1: public abs_bot
   // bot_interfaces stuff;
   void send_to_bcp(std::string msg);
   void bot_cmd(std::string cmd);
-  void wait_for_tick();
-  std::mutex t_lock;
-  std::condition_variable t_var;
 };
 
 } // namepace nrtb
