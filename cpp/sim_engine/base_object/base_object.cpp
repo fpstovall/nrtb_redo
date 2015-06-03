@@ -128,7 +128,7 @@ std::string base_object::as_str()
   return returnme.str();
 };
 
-bool base_object::tick(int time, float quanta)
+bool base_object::tick(float quanta)
 {
   // clean up for next pass
   accel_mod = 0;
@@ -151,7 +151,7 @@ bool base_object::tick(int time, float quanta)
   // execute the pre_attribs list.
   bool killme (false);
   for (auto e : pre_attribs)
-    if (e.second->tick(*this, time))
+    if (e.second->tick(*this, quanta))
       killme = true;
   // apply forces to rotation, mass, and velocity.
   mass += mass_mod;
@@ -166,7 +166,7 @@ bool base_object::tick(int time, float quanta)
   return killme;
 };
 
-bool base_object::apply(int time, float quanta)
+bool base_object::apply(float quanta)
 {
   // move acording to forces
   location += velocity * quanta;
@@ -176,7 +176,7 @@ bool base_object::apply(int time, float quanta)
   // apply post-effectors
   bool killme (false);
   for (auto e : post_attribs)
-    if (e.second->tick(*this, time))
+    if (e.second->tick(*this, quanta))
       killme = true;
   return killme;
 };

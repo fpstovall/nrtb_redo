@@ -68,11 +68,18 @@ struct abs_effector
   static serializer effector_num;
   virtual ~abs_effector() {};
   // polymorphic copier
+  // TODO: have the clone method return an effector_p.
   virtual abs_effector * clone() = 0;
   unsigned long long id = effector_num();
   std::string handle;
   virtual std::string as_str() = 0;
-  virtual bool tick(base_object & o, int time) = 0;
+  /** does the "time quanta" work of the effector.
+   * Returns true if the object should die.
+   * 
+   * o is the parent object
+   * quanta is the duration of this time-slice.
+   */
+  virtual bool tick(base_object & o, float quanta) = 0;
 };
   
 typedef std::shared_ptr<abs_effector> effector_p;
@@ -115,8 +122,8 @@ struct base_object
   // returns true if a collision is detected.
   virtual bool check_collision(object_p o, float quanta);
   // the following return true if the object is destroyed.
-  virtual bool tick(int time, float quanta);
-  virtual bool apply(int time, float quanta);
+  virtual bool tick(float quanta);
+  virtual bool apply(float quanta);
   virtual bool apply_collision(object_p o, float quanta) = 0;
 protected:
   effector_list pre_attribs;

@@ -44,7 +44,7 @@ struct gravity : public abs_effector
     return returnme.str();
   };
   
-  bool tick(base_object & o, int time)
+  bool tick(base_object & o, float quanta)
   {
     o.accel_mod += g;
     return false;
@@ -53,6 +53,8 @@ struct gravity : public abs_effector
 
 struct rocket : public abs_effector
 {
+  int time {0};
+  
   virtual rocket * clone()
   {
     return new rocket(*this);
@@ -68,11 +70,12 @@ struct rocket : public abs_effector
     return returnme.str();
   };
   
-  bool tick(base_object & o, int time)
+  bool tick(base_object & o, float quanta)
   {
     if (time <= burn_time)
     {
       o.force += impulse;
+      time++;
     }
     else
     {
@@ -105,7 +108,7 @@ struct torquer : public abs_effector
     return returnme.str();
   };
   
-  bool tick(base_object & o, int time)
+  bool tick(base_object & o, float quanta)
   {
     o.torque.set(torque);
     return false;
@@ -156,8 +159,8 @@ int main()
   for (time; time<5; time++)
   {
 //    cout << time*0.02 << " sec."<< endl;
-    rocket_ball.tick(time,quanta);
-    rocket_ball.apply(time,quanta);
+    rocket_ball.tick(quanta);
+    rocket_ball.apply(quanta);
 //    cout << rocket_ball.as_str() << endl;
   };
   
@@ -165,8 +168,8 @@ int main()
   while (rocket_ball.velocity.y > 0.0)
   {
     time++;
-    rocket_ball.tick(time,quanta);
-    rocket_ball.apply(time,quanta);    
+    rocket_ball.tick(quanta);
+    rocket_ball.apply(quanta);    
   };
   cout << "Peak:" << time*0.02 << " sec."<< endl;
 //  cout << rocket_ball.as_str() << endl;
@@ -176,8 +179,8 @@ int main()
   while (rocket_ball.location.y > 0.0)
   {
     time++;
-    rocket_ball.tick(time,quanta);
-    rocket_ball.apply(time,quanta);    
+    rocket_ball.tick(quanta);
+    rocket_ball.apply(quanta);    
   };
   cout << "Impact:" << time*0.02<< " sec." << endl;
 //  cout << rocket_ball.as_str() << endl;
@@ -195,8 +198,8 @@ int main()
   int tm = 0;
   for (;tm<50;tm++)
   {
-    spinner.tick(tm,q);
-    spinner.apply(tm,q);    
+    spinner.tick(q);
+    spinner.apply(q);    
   };
   bool rf = false;
   float dv = fabs(spinner.rotation.angles().z - 2);
