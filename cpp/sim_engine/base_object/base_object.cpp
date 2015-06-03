@@ -250,7 +250,7 @@ effector_list base_object::get_pre_attribs_copy()
   effector_list returnme;
   for (auto a: pre_attribs)
   {
-    returnme[a.first] = effector_p(a.second->clone());
+    returnme[a.first] = a.second->clone();
   };
   return returnme;
 };
@@ -260,7 +260,7 @@ effector_list base_object::get_post_attribs_copy()
   effector_list returnme;
   for (auto a: post_attribs)
   {
-    returnme[a.first] = effector_p(a.second->clone());
+    returnme[a.first] = a.second->clone();
   };
   return returnme;
 };

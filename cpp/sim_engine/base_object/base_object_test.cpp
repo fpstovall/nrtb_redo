@@ -27,9 +27,9 @@ struct gravity : public abs_effector
 {
   triplet g = triplet(0,-9.81,0);
 
-  virtual gravity * clone()
+  virtual effector_p clone()
   {
-    return new gravity(*this);
+    return effector_p(new gravity(*this));
   };
   
   gravity()
@@ -55,9 +55,9 @@ struct rocket : public abs_effector
 {
   int time {0};
   
-  virtual rocket * clone()
+  virtual effector_p clone()
   {
-    return new rocket(*this);
+    return effector_p(new rocket(*this));
   };
 
   triplet impulse = triplet(0.0,10000.0,0.0);
@@ -90,9 +90,9 @@ struct torquer : public abs_effector
 {
   rotatable torque;
   
-  virtual torquer * clone()
+  virtual effector_p clone()
   {
-    return new torquer(*this);
+    return effector_p(new torquer(*this));
   };
   
   torquer()

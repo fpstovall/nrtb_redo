@@ -69,13 +69,13 @@ struct abs_effector
   virtual ~abs_effector() {};
   // polymorphic copier
   // TODO: have the clone method return an effector_p.
-  virtual abs_effector * clone() = 0;
+  virtual std::shared_ptr<abs_effector> clone() = 0;
   unsigned long long id = effector_num();
   std::string handle;
   virtual std::string as_str() = 0;
   /** does the "time quanta" work of the effector.
    * Returns true if the object should die.
-   * 
+   * f3
    * o is the parent object
    * quanta is the duration of this time-slice.
    */
