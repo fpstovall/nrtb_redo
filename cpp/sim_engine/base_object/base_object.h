@@ -108,7 +108,7 @@ struct base_object
   static serializer object_num;
   virtual ~base_object() {};
   // polymophic copier
-  virtual base_object * clone() = 0;
+  virtual object_p clone() = 0;
   // data
   unsigned long long id = object_num();
   std::string handle;

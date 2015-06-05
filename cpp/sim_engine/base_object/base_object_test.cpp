@@ -117,12 +117,12 @@ struct torquer : public abs_effector
 
 struct my_object : public base_object
 {
-  my_object * clone() 
+  object_p clone() 
   {
     my_object * returnme = new my_object(*this);
     returnme->pre_attribs = get_pre_attribs_copy();
     returnme->post_attribs = get_post_attribs_copy();
-    return returnme;
+    return object_p(returnme);
   };
 
   bool apply_collision(object_p o, float quanta) 
