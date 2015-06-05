@@ -145,7 +145,7 @@ int main()
   rocket_ball.bounding_sphere.radius = 0.5;
 //  cout << rocket_ball.as_str() << endl;
   
-  rocket_ball.add_pre(new gravity);
+  rocket_ball.add_pre(effector_p(new gravity));
 //  cout << rocket_ball.as_str() << endl;
   
   // test effector_p add.
@@ -193,7 +193,7 @@ int main()
   my_object spinner;
   spinner.mass = 100;
   spinner.bounding_sphere.radius = 1;
-  spinner.add_pre(new torquer);
+  spinner.add_pre(effector_p(new torquer));
   float q = 1.0/50.0;
   int tm = 0;
   for (;tm<50;tm++)

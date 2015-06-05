@@ -65,17 +65,27 @@ typedef std::map<unsigned long long, object_p> object_list;
 
 struct abs_effector
 {
+  // provides a unique id for each effector.
   static serializer effector_num;
-  virtual ~abs_effector() {};
-  // polymorphic copier
-  // TODO: have the clone method return an effector_p.
-  virtual std::shared_ptr<abs_effector> clone() = 0;
+  // Populated from the serializer at allocation.
   unsigned long long id = effector_num();
+  // NOP destructor to ensure proper deallocation.
+  virtual ~abs_effector() {};
+  /** polymorphic copier
+  /* Returns a newly allocated copy of the effector.
+   * Must be overridden by each child class.
+   */
+  virtual std::shared_ptr<abs_effector> clone() = 0;
+  // name of the effector.
   std::string handle;
+  /** Reporting method
+   * Overridden by each descendent, this method 
+   * should return a string capturing the effector's 
+   * status at the time of the call.
+   */
   virtual std::string as_str() = 0;
   /** does the "time quanta" work of the effector.
    * Returns true if the object should die.
-   * f3
    * o is the parent object
    * quanta is the duration of this time-slice.
    */
@@ -83,7 +93,15 @@ struct abs_effector
 };
   
 typedef std::shared_ptr<abs_effector> effector_p;
-typedef std::map<unsigned long long, effector_p> effector_list;
+//typedef std::map<unsigned long long, effector_p> effector_list;
+
+class effector_list : public std::map<unsigned long long, effector_p>
+{
+public:
+  void add(effector_p e);
+  void remove(effector_p e);
+  void remove(unsigned long long key);
+};
 
 struct base_object
 {
@@ -108,12 +126,8 @@ struct base_object
   // reporting
   virtual std::string as_str();
   // effector management
-  virtual void add_pre(abs_effector * e);
-  virtual void add_pre(effector_p & e);
-  virtual abs_effector & get_pre(unsigned long long i);
-  virtual void add_post(abs_effector * e);
-  virtual void add_post(effector_p & e);
-  virtual abs_effector & get_post(unsigned long long i);
+  virtual void add_pre(effector_p e);
+  virtual void add_post(effector_p e);
   virtual void drop_attrib(unsigned long long i);
   // -- these return deep copies of the attribs list.
   virtual effector_list get_pre_attribs_copy();

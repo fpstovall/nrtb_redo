@@ -103,6 +103,21 @@ void rotatable::recalc()
   dirty=false;
 };
 
+void effector_list::add(effector_p e)
+{
+  insert(std::pair<unsigned long long, effector_p>(e->id, e));
+};
+
+void effector_list::remove(effector_p e)
+{
+  erase(e->id);
+};
+
+void effector_list::remove(long long unsigned int key)
+{
+  erase(key);
+};
+
 std::string base_object::as_str()
 {
   std::stringstream returnme;
@@ -142,8 +157,8 @@ bool base_object::tick(float quanta)
     // ignore errors here
     try
     {
-      pre_attribs.erase(i);
-      post_attribs.erase(i);
+      pre_attribs.remove(i);
+      post_attribs.remove(i);
     }
     catch (...) {};
   };
@@ -214,35 +229,16 @@ bool base_object::check_collision(object_p o, float quanta)
   return (pp + pv * min_time > 0.0);
 };
 
-void base_object::add_pre(abs_effector* e)
-{
-  pre_attribs[e->id] = effector_p(e);
-};
 
-void base_object::add_pre(effector_p & e)
+void base_object::add_pre(effector_p e)
 {
-  pre_attribs[e->id] = e;
+  pre_attribs.add(e);
 };
 
 
-abs_effector& base_object::get_pre(long long unsigned int i)
+void base_object::add_post(effector_p e)
 {
-  return *pre_attribs[i];
-};
-
-void base_object::add_post(abs_effector* e)
-{
-  post_attribs[e->id] = effector_p(e);
-};
-
-void base_object::add_post(effector_p & e)
-{
-  post_attribs[e->id] = e;
-};
-
-abs_effector& base_object::get_post(long long unsigned int i)
-{
-  return *post_attribs[i];
+  post_attribs.add(e);
 };
 
 effector_list base_object::get_pre_attribs_copy()
@@ -250,7 +246,7 @@ effector_list base_object::get_pre_attribs_copy()
   effector_list returnme;
   for (auto a: pre_attribs)
   {
-    returnme[a.first] = a.second->clone();
+    returnme.add(a.second->clone());
   };
   return returnme;
 };
@@ -260,7 +256,7 @@ effector_list base_object::get_post_attribs_copy()
   effector_list returnme;
   for (auto a: post_attribs)
   {
-    returnme[a.first] = a.second->clone();
+    returnme.add(a.second->clone());
   };
   return returnme;
 };
