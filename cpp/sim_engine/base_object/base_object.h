@@ -28,22 +28,46 @@ namespace nrtb
 {
 
 const float pi=3.14159;
-  
+
+// 3d vector used throughout NRTB
 typedef triad<float> triplet;
 
+/***************************************************************
+ * rotatable is sort of a specialized triplet designed to 
+ * handled rotation values, as in rate of rotate or attitude
+ * All input values are radians unless otherwise noted.
+ **************************************************************/
 struct rotatable
 {
+  // Construct from a triplet. All values are assumed to be radians.
   rotatable(triplet s=triplet(0.0));
+  // copy constructor.
   rotatable(rotatable& a);
+  // convienence const.. one full circle.
   const float period = 2.0 * pi;
+  // mods all values to 0 <= n < period.
   void trim();
+  /**** apply_force is used to alter rotation by linear force.
+   * mass is the mass of the impacting object.
+   * arm is the distance from the impact to the center of rotation
+   * vec is the cartesian motion vector of the impactor.
+   * t is the time in sections the force is applied. 
+   */
   void apply_force(float mass, float arm, triplet vec, float t);
+  // scale the rotatable by the triplet.
   void scale(triplet factor);
+  // add the triplet to the rotatable.
   void add(triplet value);
+  // Set the rotatable's values to match the triplet.
+  // Values are assumed to be radians.
   void set(triplet a);
+  // Set this rotatable to the one provided.
   void set(rotatable a);
+  // returns a triplet with 3 axis rotations.
   triplet angles();
+  // returns the cosines of all 3 axis.
   triplet get_cos();
+  // returns the signs of all 3 axis.
   triplet get_sin();
 private:
   std::atomic<bool> dirty;
