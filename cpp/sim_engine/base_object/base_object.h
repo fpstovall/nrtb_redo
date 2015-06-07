@@ -77,6 +77,10 @@ private:
   void recalc();
 };
 
+/*******************************************
+ * sphere is primarly used to manage 
+ * boundings spheres for collision detection.
+ ******************************************/
 struct sphere
 {
   triplet center;
@@ -87,6 +91,13 @@ struct base_object;
 typedef std::shared_ptr<base_object> object_p;
 typedef std::map<unsigned long long, object_p> object_list;
 
+/******************************************
+ * abs_effector defines the interface any
+ * effector must provide to be useful. 
+ * Effectors are attached to objects and 
+ * called automatically by the object
+ * during game cycle executions.
+ *****************************************/
 struct abs_effector
 {
   // provides a unique id for each effector.
@@ -117,36 +128,57 @@ struct abs_effector
 };
   
 typedef std::shared_ptr<abs_effector> effector_p;
-//typedef std::map<unsigned long long, effector_p> effector_list;
 
+/***********************************************
+ * effector_list is a specialization of std::map
+ * which stores effector_p by id number. Adds
+ * methods to simplify insertion and removal 
+ * of effector_p elements.
+ **********************************************/
 class effector_list : public std::map<unsigned long long, effector_p>
 {
 public:
+  // adds the effector to the map
   void add(effector_p e);
+  // removes the effector from the map
   void remove(effector_p e);
+  // removes an effector by id number, if present.
   void remove(unsigned long long key);
 };
 
+/***********************************************
+ * base_object is the abstract base for all 
+ * objects in the system. It provides all the 
+ * necessary basic functinality which may be
+ * needed by the simulation core. Several methods
+ * are abstract and will need to be overridden
+ * in descendent classes.
+ **********************************************/
 struct base_object
 {
+  // provides a unique sequence of id numbers for objects.
   static serializer object_num;
+  // NOP destructor to ensure clean deallocation.
   virtual ~base_object() {};
-  // polymophic copier
+  // polymophic copier, override for descendents.
   virtual object_p clone() = 0;
-  // data
+  // Unique object id, seeded from the serializer
   unsigned long long id = object_num();
+  // Name of this object, should set in constructor
   std::string handle;
+  // The following are automatically managed after creation.
   triplet location;
   rotatable attitude;
   triplet velocity;
   rotatable rotation;
+  float mass;
+  sphere bounding_sphere;
+  // effectors set these force here.
   triplet force;
   rotatable torque;
   triplet accel_mod;
   rotatable rotation_mod;
-  float mass;
   float mass_mod;
-  sphere bounding_sphere;
   // reporting
   virtual std::string as_str();
   // effector management
@@ -159,9 +191,12 @@ struct base_object
   // sim methods
   // returns true if a collision is detected.
   virtual bool check_collision(object_p o, float quanta);
-  // the following return true if the object is destroyed.
+  // --the following return true if the object is destroyed.
+  // Tick sets up for a turn and calles the pre-effector list.
   virtual bool tick(float quanta);
+  // apply is called to accumlate and apply forces after tick.
   virtual bool apply(float quanta);
+  // override apply_collision as needed; return true to kill the object.
   virtual bool apply_collision(object_p o, float quanta) = 0;
 protected:
   effector_list pre_attribs;

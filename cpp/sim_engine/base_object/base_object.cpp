@@ -27,7 +27,7 @@ serializer abs_effector::effector_num;
 serializer base_object::object_num;
 
 rotatable::rotatable(triplet s)
-  : axis(s), dirty(true) 
+  : axis(s), dirty(true)
 {};
 
 rotatable::rotatable(rotatable & a)
