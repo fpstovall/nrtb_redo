@@ -27,9 +27,9 @@ struct gravity : public abs_effector
 {
   triplet g = triplet(0,-9.81,0);
 
-  virtual gravity * clone()
+  virtual effector_p clone()
   {
-    return new gravity(*this);
+    return effector_p(new gravity(*this));
   };
   
   gravity()
@@ -44,7 +44,7 @@ struct gravity : public abs_effector
     return returnme.str();
   };
   
-  bool tick(base_object & o, int time)
+  bool tick(base_object & o, float quanta)
   {
     o.accel_mod += g;
     return false;
@@ -53,9 +53,11 @@ struct gravity : public abs_effector
 
 struct rocket : public abs_effector
 {
-  virtual rocket * clone()
+  int time {0};
+  
+  virtual effector_p clone()
   {
-    return new rocket(*this);
+    return effector_p(new rocket(*this));
   };
 
   triplet impulse = triplet(0.0,10000.0,0.0);
@@ -68,11 +70,12 @@ struct rocket : public abs_effector
     return returnme.str();
   };
   
-  bool tick(base_object & o, int time)
+  bool tick(base_object & o, float quanta)
   {
     if (time <= burn_time)
     {
       o.force += impulse;
+      time++;
     }
     else
     {
@@ -87,9 +90,9 @@ struct torquer : public abs_effector
 {
   rotatable torque;
   
-  virtual torquer * clone()
+  virtual effector_p clone()
   {
-    return new torquer(*this);
+    return effector_p(new torquer(*this));
   };
   
   torquer()
@@ -105,7 +108,7 @@ struct torquer : public abs_effector
     return returnme.str();
   };
   
-  bool tick(base_object & o, int time)
+  bool tick(base_object & o, float quanta)
   {
     o.torque.set(torque);
     return false;
@@ -114,12 +117,12 @@ struct torquer : public abs_effector
 
 struct my_object : public base_object
 {
-  my_object * clone() 
+  object_p clone() 
   {
     my_object * returnme = new my_object(*this);
     returnme->pre_attribs = get_pre_attribs_copy();
     returnme->post_attribs = get_post_attribs_copy();
-    return returnme;
+    return object_p(returnme);
   };
 
   bool apply_collision(object_p o, float quanta) 
@@ -142,7 +145,7 @@ int main()
   rocket_ball.bounding_sphere.radius = 0.5;
 //  cout << rocket_ball.as_str() << endl;
   
-  rocket_ball.add_pre(new gravity);
+  rocket_ball.add_pre(effector_p(new gravity));
 //  cout << rocket_ball.as_str() << endl;
   
   // test effector_p add.
@@ -156,8 +159,8 @@ int main()
   for (time; time<5; time++)
   {
 //    cout << time*0.02 << " sec."<< endl;
-    rocket_ball.tick(time,quanta);
-    rocket_ball.apply(time,quanta);
+    rocket_ball.tick(quanta);
+    rocket_ball.apply(quanta);
 //    cout << rocket_ball.as_str() << endl;
   };
   
@@ -165,8 +168,8 @@ int main()
   while (rocket_ball.velocity.y > 0.0)
   {
     time++;
-    rocket_ball.tick(time,quanta);
-    rocket_ball.apply(time,quanta);    
+    rocket_ball.tick(quanta);
+    rocket_ball.apply(quanta);    
   };
   cout << "Peak:" << time*0.02 << " sec."<< endl;
 //  cout << rocket_ball.as_str() << endl;
@@ -176,8 +179,8 @@ int main()
   while (rocket_ball.location.y > 0.0)
   {
     time++;
-    rocket_ball.tick(time,quanta);
-    rocket_ball.apply(time,quanta);    
+    rocket_ball.tick(quanta);
+    rocket_ball.apply(quanta);    
   };
   cout << "Impact:" << time*0.02<< " sec." << endl;
 //  cout << rocket_ball.as_str() << endl;
@@ -190,13 +193,13 @@ int main()
   my_object spinner;
   spinner.mass = 100;
   spinner.bounding_sphere.radius = 1;
-  spinner.add_pre(new torquer);
+  spinner.add_pre(effector_p(new torquer));
   float q = 1.0/50.0;
   int tm = 0;
   for (;tm<50;tm++)
   {
-    spinner.tick(tm,q);
-    spinner.apply(tm,q);    
+    spinner.tick(q);
+    spinner.apply(q);    
   };
   bool rf = false;
   float dv = fabs(spinner.rotation.angles().z - 2);
