@@ -26,17 +26,38 @@
 namespace nrtb
 {
 
+// Used by gp_sim_message to carry extra data.
 typedef std::shared_ptr<void> void_p;
 
+/****************************************************
+ * gp_sim_message is the format for all messages into
+ * and out of the simulation engine. 
+ *   msg_type : the message category
+ *   noun: What to work on.
+ *   verb: What to do with it.
+ *   data: a shared_ptr<void> to an optional data packet.
+ * None of the data elements may be changed after the
+ * message is created.
+ ****************************************************/
 class gp_sim_message : public abs_ipc_record
 {
 public:
+  // construct without a data package.
   gp_sim_message(ipc_queue & q, int t, int n, int v);
+  // construct with a data packet.
   gp_sim_message(ipc_queue & q, int t, int n, int v, void_p d);
+  // returns the message type  
   int msg_type();
+  // returns a string approximation of the message
+  // -- mostly for logging and testing.
   std::string as_str();
+  // returns the noun value of the message
   int noun();
+  // returns the verb value of the message
   int verb();
+  // returns a typed reference to the data packet.
+  // -- be careful to use the correct T, or the 
+  // -- results are undefined and probably BAD.
   template <class T>
     T & data();
 private:
@@ -63,7 +84,17 @@ protected:
 template <class T>
   T & gp_sim_message::data()
 {
-  return *(static_cast<T*>(_data.get()));
+  if (_data.get())
+  {
+    return *(static_cast<T*>(_data.get()));
+  }
+  else
+  {
+    // null pointer.. very bad juju!
+    base_exception e;
+    e.store("Null pointer in gp_sim_message::data()");
+    throw e;
+  };
 };
 
 
