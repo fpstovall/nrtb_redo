@@ -55,11 +55,11 @@ public:
   int noun();
   // returns the verb value of the message
   int verb();
-  // returns a typed reference to the data packet.
+  // returns a copy of the data packet.
   // -- be careful to use the correct T, or the 
   // -- results are undefined and probably BAD.
   template <class T>
-    T & data();
+    T data();
 private:
   int _noun;
   int _verb;
@@ -82,7 +82,7 @@ protected:
 
 
 template <class T>
-  T & gp_sim_message::data()
+  T gp_sim_message::data()
 {
   if (_data.get())
   {
