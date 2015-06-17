@@ -22,6 +22,10 @@
 #include <logger.h>
 #include <singleton.h>
 
+
+namespace nrtb
+{
+
 /***************************************
  * Provides easy access to log recorders 
  * for modules using the global sim_engine
@@ -32,11 +36,11 @@
  * 
  * See the unit test in common/logger for
  * more information on using the log facility.
+ * 
+ * Documentmentation on the log_recorder
+ * returned by the factory can be found 
+ * in the common libs at cpp/common/logger.h
  **************************************/
- 
-namespace nrtb
-{
-
 class log_factory
 {
 public:
