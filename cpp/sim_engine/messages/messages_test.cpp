@@ -35,8 +35,8 @@ int main()
     
   void_p s(new string("this is a test"));
   
-  gpsm_q.push(new gp_sim_message(queue, 1, 1, 0));
-  gpsm_q.push(new gp_sim_message(queue, 2, 1, 1, s));
+  gpsm_q.push(gp_sim_message_p(new gp_sim_message(queue, 1, 1, 0)));
+  gpsm_q.push(gp_sim_message_p(new gp_sim_message(queue, 2, 1, 1, s)));
   
   gp_sim_message_p msg(gpsm_q.pop());
   cout << msg->as_str() << endl;

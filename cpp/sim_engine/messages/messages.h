@@ -67,14 +67,23 @@ private:
   void_p _data;
 };
 
+// Pointer used to manage messages in a message queue.
 typedef std::unique_ptr<gp_sim_message> gp_sim_message_p;
 
+/***************************************************
+ * gp_sim_message_adapter is used to put gp_sim_messages
+ * into and remove them from an ipc_queue. It's just 
+ * a convienence class which handles the required type 
+ * casts for you.
+ **************************************************/
 class gp_sim_message_adapter
 {
 public:
+  // constructs the adaptor and attaches it to a queue
   gp_sim_message_adapter(ipc_queue & _q);
-  void push(gp_sim_message_p & m);
-  void push(gp_sim_message * m);
+  // Push a message pointer on the queue.
+  void push(gp_sim_message_p m);
+  // pop a message pointer off the queue.
   gp_sim_message_p pop();
 protected:
   ipc_queue & q;
