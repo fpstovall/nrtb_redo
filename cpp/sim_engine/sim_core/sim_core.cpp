@@ -119,14 +119,14 @@ void sim_core::tick()
   // call the local tick and apply for each object in the simulation.
   for(auto & a: all_objects)
   {
-    if (a.second->tick(quanta,quanta_duration))
+    if (a.second->tick(quanta_duration))
       deletions.push_back(a.first);
   };
   // check for bumps in the night.
   collision_check();
   for (auto & a: all_objects)
   {
-    if (a.second->apply(quanta, quanta_duration))
+    if (a.second->apply(quanta_duration))
       deletions.push_back(a.first);
   };
   // at the end of this method, all objects are either
@@ -302,12 +302,12 @@ void sim_core::resolve_collisions()
 
 void sim_core::put_message(gp_sim_message_p & m)
 {
-  q.push(m);
+  q.push(std::move(m));
 };
 
 gp_sim_message_p sim_core::next_out_message()
 {
-  return q.pop();
+  return std::move(q.pop());
 };
 
 void sim_core::add_object(object_p obj)
@@ -387,7 +387,7 @@ void sim_core::run_sim(sim_core & w)
     glog.trace("Storing inital model state");
     void_p r(new report(w.get_report(0,0.0)));
     // -- for init, type 1, noun 0, verb 0 carries a report struct.
-    output.push(new gp_sim_message(oq, 1, 0, 0, r));
+    output.push(gp_sim_message_p(new gp_sim_message(oq, 1, 0, 0, r)));
     glog.trace("Entering game cycle");
     // start wall-clock timer.
     hirez_timer wallclock; // governs the overall turn time
@@ -415,7 +415,7 @@ void sim_core::run_sim(sim_core & w)
       unsigned long long elapsed = turnclock.interval_as_usec();
       void_p r(new report(w.get_report(elapsed,wallclock.interval())));
       // -- for output, type 1, noun 1, verb 0 carries a report struct.
-      output.push(new gp_sim_message(oq, 1, 1, 0, r));
+      output.push(gp_sim_message_p(new gp_sim_message(oq, 1, 1, 0, r)));
       // check for overrun and report as needed.
       if (elapsed >= ticks)
       {

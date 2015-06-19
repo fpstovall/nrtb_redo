@@ -36,9 +36,9 @@ struct gravity : public abs_effector
     handle = "gravity";
   };
   
-  abs_effector * clone()
+  effector_p clone()
   {
-    return new gravity(*this);
+    return effector_p(new gravity(*this));
   };
   
   std::string as_str()
@@ -48,7 +48,7 @@ struct gravity : public abs_effector
     return returnme.str();
   };
   
-  bool tick(base_object & o, int time)
+  bool tick(base_object & o, float quanta)
   {
     o.accel_mod += g;
     return false;
@@ -59,9 +59,9 @@ struct impactor : public abs_effector
 {
   bool peak = false;
 
-  abs_effector * clone()
+  effector_p clone()
   {
-    return new impactor(*this);
+    return effector_p(new impactor(*this));
   };
   
   std::string as_str()
@@ -71,7 +71,7 @@ struct impactor : public abs_effector
     return returnme.str();
   };
   
-  bool tick(base_object & o, int time)
+  bool tick(base_object & o, float quanta)
   {
     if ((o.location.y <= 0.0) 
       and (o.velocity.y < 0.0))
@@ -102,9 +102,9 @@ struct rocket : public abs_effector
     burn_time = duration;
   };
   
-  abs_effector * clone()
+  effector_p clone()
   {
-    return new rocket(*this);
+    return effector_p(new rocket(*this));
   };
   
   std::string as_str()
@@ -114,13 +114,13 @@ struct rocket : public abs_effector
     return returnme.str();
   };
   
-  bool tick(base_object & o, int time)
+  bool tick(base_object & o, float quanta)
   {
     if ((burn_time > 0.0) and active)
     {
       // assumes a 50hz cycle.
       o.force += impulse;
-      burn_time -= (1/50.0);
+      burn_time -= quanta;
     }
     else
     {
@@ -137,12 +137,12 @@ struct my_object : public base_object
     return true;
   };
   
-  base_object * clone()
+  object_p clone()
   {
     my_object * returnme = new my_object(*this);
     returnme->pre_attribs = get_pre_attribs_copy();
     returnme->post_attribs = get_post_attribs_copy();
-    return returnme;
+    return object_p(returnme);
   };
 };
 
@@ -154,13 +154,13 @@ struct rocket_ball : public my_object
     bounding_sphere.center = triplet(0);
     bounding_sphere.radius = 0.5;
     // add gravity effects
-    add_pre(new gravity);
+    add_pre(effector_p(new gravity));
     // add an active rocket with a 3 second impulse
     rocket * r = new rocket(0.13);
     r->active = true;
-    add_pre(r);
+    add_pre(effector_p(r));
     // die when we hit the floor.
-    add_post(new impactor);
+    add_post(effector_p(new impactor));
   };
 };
 

@@ -31,25 +31,40 @@
 
 namespace nrtb
 {
-  
-struct clsn_rec
-{
-  object_p a;
-  object_p b;
-};
 
+/**************************************
+ * sensor_rec is the individual contact 
+ * in the list returned to callers 
+ * by panopticon::get().  Coordinates
+ * and velocity are world-relative.
+ *************************************/  
 struct sensor_rec
 {
+  // type of object
   int type;
+  // Object id
   unsigned long long id;
+  // where it is
   triplet location;
+  // how fast it's going
   triplet velocity;
+  // how large is it.
   float radius; 
 };
 
+/***************************************
+ * These define how the list of contacts
+ * is passed from panopticon::get() to
+ * the caller.
+ **************************************/
 typedef std::vector<sensor_rec> contacts;
 typedef std::shared_ptr<contacts> contacts_p;
 
+/******************************************
+ * panopticon provides the functionality 
+ * used by the simulation engine to provide
+ * contact information to external modules.
+ *****************************************/
 class panopticon
 {
 public:
@@ -65,6 +80,12 @@ private:
   std::mutex list_lock;
 };
   
+struct clsn_rec
+{
+  object_p a;
+  object_p b;
+};
+
 class sim_core
 {
 public:
@@ -80,7 +101,7 @@ public:
   void remove_obj(unsigned long long oid);
   // general purpose work thread interface.
   gp_sim_message_p next_out_message();
-  void put_message(nrtb::gp_sim_message_p & m);
+  void put_message(nrtb::gp_sim_message_p& m);
   /**************************************
    * Reporting methods.
    *************************************/
