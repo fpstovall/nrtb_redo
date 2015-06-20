@@ -64,15 +64,22 @@ typedef std::shared_ptr<contacts> contacts_p;
  * panopticon provides the functionality 
  * used by the simulation engine to provide
  * contact information to external modules.
+ * Truthful information is provided on all
+ * objects; it's up to caller to limit or 
+ * confuse things. :)
  *****************************************/
 class panopticon
 {
 public:
-  // public accessor
+  // Returns all objects in the system.
   contacts get();
-  // used only by sim_core;
+  /** the following should only be
+   ** used only by sim_core; */
+  // - flags the start of a list load operation.
   void start_new();
+  // - Add an object to the list.
   void add(const base_object & o);
+  // -- marks the list load operation complete.
   void done_adding();
 private:
   contacts c_list;
@@ -80,32 +87,33 @@ private:
   std::mutex list_lock;
 };
   
-struct clsn_rec
-{
-  object_p a;
-  object_p b;
-};
-
 class sim_core
 {
 public:
+  // constructor, default quanta is 50 hz.
   sim_core(float time_slice=1.0/50.0);
   /***************************************
    * control methods.
    **************************************/
+  // Override the quanta set at construction
+  // Note: NOP if the similation is running.
   void set_quanta(float time_slice);
+  // returns true if running.
   bool running();
+  // Starts the simulation. Throws if already running.
   void start_sim();
+  // Stops the the simulation. 
   void stop_sim();
+  // Inserts the object into the simulation.
   void add_object(object_p obj);
+  // Removes the object from the simulation.
   void remove_obj(unsigned long long oid);
-  // general purpose work thread interface.
-  gp_sim_message_p next_out_message();
-  void put_message(nrtb::gp_sim_message_p& m);
+  // returns the contact list (panopticon::get()).
+  contacts contact_list();
   /**************************************
    * Reporting methods.
    *************************************/
-  // -- reporting record
+  // reporting record to be stored on "sim_output" ipc_queue
   struct report
   {
     unsigned long long quanta;
@@ -113,27 +121,51 @@ public:
     double wallclock;
     object_list objects;
   };
+  /****************************************
+   * The following methods are provided for testing 
+   * and should not be used in "real" code.
+   ***************************************/
+  // returns the as_str() for each object in the simulation
   strlist obj_status();
+  // Returns clones of each opbject in the simulation.
   object_list get_obj_copies();
-  contacts contact_list();
-  
 private:
+  /****************************************
+  * clsn_rec is used to track interseting
+  * objects.
+  ***************************************/
+  struct clsn_rec
+  {
+    object_p a;
+    object_p b;
+  }; 
+  // message queue and adaptors.
   ipc_queue messages;
   gp_sim_message_adapter q;
+  // general purpose internal messaging interface.
+  gp_sim_message_p next_out_message();
+  void put_message(nrtb::gp_sim_message_p & m);
+  // General run data (self-descriptive.
   std::atomic<bool> end_run;
   std::atomic<bool> is_running;
   std::atomic<unsigned long long> quanta;
-  std::thread engine;
   float quanta_duration;
+  // Thread handle for simulation engine.
+  std::thread engine;
+  // Lists (self descriptive.
   object_list all_objects;
   std::vector<clsn_rec> collisions;
   std::vector<unsigned long long> deletions;
   panopticon public_list;
+  // these methods implement simulation steps.
   void turn_init();
   void tick();
   void collision_check();
   void resolve_collisions();
+  // Stores the current state to the "sim_output" ipc_queue
+  //  in a gp_sim_message with report struct as the data.
   report get_report(unsigned long long ticks, double wt);
+  // The actual simulation engine.. runs as a seperate thread.
   static void run_sim(sim_core & w);
 };
 
