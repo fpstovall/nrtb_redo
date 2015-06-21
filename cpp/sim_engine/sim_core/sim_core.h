@@ -96,7 +96,7 @@ public:
    * control methods.
    **************************************/
   // Override the quanta set at construction
-  // Note: NOP if the similation is running.
+  // Note: throws if the similation is running.
   void set_quanta(float time_slice);
   // returns true if running.
   bool running();
@@ -122,8 +122,9 @@ public:
     object_list objects;
   };
   /****************************************
-   * The following methods are provided for testing 
-   * and should not be used in "real" code.
+   * The following methods are exposed for 
+   * reporting and testing and should not be
+   * called directly in "real" code.
    ***************************************/
   // returns the as_str() for each object in the simulation
   strlist obj_status();
