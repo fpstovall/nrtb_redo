@@ -118,7 +118,6 @@ struct rocket : public abs_effector
   {
     if ((burn_time > 0.0) and active)
     {
-      // assumes a 50hz cycle.
       o.force += impulse;
       burn_time -= quanta;
     }
