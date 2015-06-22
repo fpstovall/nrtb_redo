@@ -118,6 +118,14 @@ void effector_list::remove(long long unsigned int key)
   erase(key);
 };
 
+base_object::base_object()
+  : location(triplet(0)), velocity(triplet(0)),
+    rotation(triplet(0)), attitude(triplet(0)),
+    force(triplet(0)), torque(triplet(0)),
+    accel_mod(triplet(0)), rotation_mod(triplet(0)),
+    mass(0), mass_mod(0)
+{};
+
 std::string base_object::as_str()
 {
   std::stringstream returnme;
