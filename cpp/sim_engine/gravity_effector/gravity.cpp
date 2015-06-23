@@ -23,9 +23,9 @@
 
 using namespace nrtb;
 
-abs_effector* norm_gravity::clone()
+effector_p norm_gravity::clone()
 {
-  return new norm_gravity(*this);
+  return effector_p(new norm_gravity(*this));
 };
 
 std::string norm_gravity::as_str()
@@ -35,7 +35,7 @@ std::string norm_gravity::as_str()
   return s.str();
 };
 
-bool norm_gravity::tick(base_object& o, int time)
+bool norm_gravity::tick(base_object& o, float quanta )
 {
   o.accel_mod += gn;
   return false;

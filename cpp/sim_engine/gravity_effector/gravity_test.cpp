@@ -39,11 +39,11 @@ vector<triplet> velocities;
 struct recorder : abs_effector
 {
   string as_str() { return "recorder"; };
-  abs_effector * clone()
+  effector_p clone()
   {
-    return new recorder(*this);
+    return effector_p( new recorder(*this) );
   };
-  bool tick(base_object & o, int time)
+  bool tick(base_object & o, float quanta)
   {
     locations.push_back(o.location);
     velocities.push_back(o.velocity);
@@ -52,19 +52,21 @@ struct recorder : abs_effector
 
 struct faller : public base_object
 {
-  faller()
+  faller() 
+    : base_object()
   {
-    add_pre(new norm_gravity);
-    add_post(new recorder);
+    mass = 1;
+    add_pre(effector_p(new norm_gravity));
+    add_post(effector_p(new recorder));
     // put it high enough to fall for 10 seconds
     location = triplet(0.0,0.0,((9.80665*100)/2));
   };
-  base_object * clone()
+  object_p clone()
   {
     faller * t = new faller(*this);
     t->pre_attribs = get_pre_attribs_copy();
     t->post_attribs = get_post_attribs_copy();
-    return t;
+    return object_p(t);
   };
   bool apply_collision(object_p o,float duration) {return false;};
 };
@@ -75,19 +77,25 @@ int main()
   cout << "========== gravity test ============="
     << endl;
 
-  int counter = 0;
   faller icarus;
   float d = 1.0/50.0;
+
+  cout << "Start from :" << icarus.location.z << endl;
+  
   while (icarus.location.z > 0.0)
   {
-    counter++;
-    icarus.tick(counter,d);
-    icarus.apply(counter,d);
+    icarus.tick(d);
+    icarus.apply(d);
   };
   
-  cout << "Icarus fell " << counter/50.0 << " seconds" << endl;
+  cout << "Splat! : " << icarus.location.z << endl;
+  
+  float ticks = floor(locations.size());
+    
+  cout << "Icarus fell " << ticks/50.0 
+    << " seconds." <<  endl;
 
-  failed = failed or ((counter/50.0) != 10.0);
+  failed = failed or ((locations.size()/50.0) != 10.0);
   
   cout << "=========== gravity test complete ============="
     << endl;
