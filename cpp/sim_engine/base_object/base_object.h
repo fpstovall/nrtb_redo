@@ -158,8 +158,6 @@ struct base_object
 {
   // provides a unique sequence of id numbers for objects.
   static serializer object_num;
-  // simple initializer
-  base_object();
   // NOP destructor to ensure clean deallocation.
   virtual ~base_object() {};
   // polymophic copier, override for descendents.
