@@ -40,11 +40,11 @@ vector<triplet> velocities;
 struct recorder : abs_effector
 {
   string as_str() { return "recorder"; };
-  abs_effector * clone()
+  effector_p clone()
   {
-    return new recorder(*this);
+    return effector_p(new recorder(*this));
   };
-  bool tick(base_object & o, int time)
+  bool tick(base_object & o, float quanta)
   {
     locations.push_back(o.location);
     velocities.push_back(o.velocity);
@@ -55,19 +55,20 @@ struct floater : public base_object
 {
   floater()
   {
-    add_pre(new hover(1.0,0.5,2.0));
-    add_pre(new norm_gravity);
-    add_post(new recorder);
+    add_pre(effector_p(new hover(1.0,0.5,2.0)));
+    add_pre(effector_p(new norm_gravity));
+    add_post(effector_p(new recorder));
     // start it at the set height.
+    mass=1.0;
     location = triplet(0.0,0.0,1.0);
     velocity = 0.0;
   };
-  base_object * clone()
+  object_p clone()
   {
     floater * t = new floater(*this);
     t->pre_attribs = get_pre_attribs_copy();
     t->post_attribs = get_post_attribs_copy();
-    return t;
+    return object_p(t);
   };
   bool apply_collision(object_p o, float duration) {return false;};
 };
@@ -116,8 +117,8 @@ int main()
   while (counter < 500)
   {
     counter++;
-    zepplin.tick(counter,d);
-    zepplin.apply(counter,d);
+    zepplin.tick(d);
+    zepplin.apply(d);
     if (counter == 449)
     {
       locations.clear();
@@ -140,8 +141,8 @@ int main()
   while (counter < 500)
   {
     counter++;
-    zepplin.tick(counter,d);
-    zepplin.apply(counter,d);
+    zepplin.tick(d);
+    zepplin.apply(d);
     if (counter == 449)
     {
       locations.clear();
@@ -164,8 +165,8 @@ int main()
   while (counter < 500)
   {
     counter++;
-    zepplin.tick(counter,d);
-    zepplin.apply(counter,d);
+    zepplin.tick(d);
+    zepplin.apply(d);
     if (counter == 449)
     {
       locations.clear();

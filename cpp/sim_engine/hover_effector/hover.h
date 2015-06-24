@@ -25,8 +25,24 @@
 namespace nrtb
 {
 
+/*******************************************
+ * hover provides an effector which strives 
+ * to keep the attached object at a specified
+ * altitude. Value set at construction control
+ * how much force the effector can apply and 
+ * how closely the effector tracks the set
+ * altitude. 
+ ******************************************/  
 struct hover: public abs_effector
 {
+  /*******************************************
+  * Constructs with the settings for altitude,
+  * allowed drift range, and a scaling factor 
+  * debounce.
+  * - set is the target altitude.
+  * - _range sets an allowable drift range.
+  * -  bias controls damping near the target.
+  *******************************************/
   hover(float set, float _range, float bias);
   // target ride height.
   float set_altitude;
@@ -35,9 +51,10 @@ struct hover: public abs_effector
   // exponent to bias response.
   float curve;
   // required overrides.
-  abs_effector * clone();
+  effector_p clone();
   std::string as_str();
-  bool tick(base_object & o, int time);
+  // tick() does the math.
+  bool tick(base_object & o, float quanta);
 };
   
 } // namepace nrtb

@@ -28,9 +28,9 @@ hover::hover(float set, float _range, float bias)
   : set_altitude(set), range(_range), curve(bias)
 {};
 
-abs_effector * hover::clone()
+effector_p hover::clone()
 {
-  return new hover(*this);
+  return effector_p(new hover(*this));
 };
 
 std::string hover::as_str()
@@ -41,7 +41,7 @@ std::string hover::as_str()
   return s.str();
 };
 
-bool hover::tick(base_object& o, int time)
+bool hover::tick(base_object& o, float quanta)
 {
   float deviation = fabs(set_altitude - o.location.z);
   // override assumed gravity if we are below setting.
