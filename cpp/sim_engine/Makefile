@@ -37,7 +37,7 @@ doit:
 	cd common_log; make ${action}
 	cd sim_core; make ${action}
 	cd gravity_effector; make ${action}
-#	cd hover_effector; make ${action}
+	cd hover_effector; make ${action}
 #	cd diff_steer_effector; make ${action}
 #	cd radar; make ${action}
 #	cd bot_interfaces; make ${action}
