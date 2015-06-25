@@ -55,9 +55,9 @@ public:
     std::atomic<float> set_t {0.0};
     std::atomic<float> set_b {1.0};
     // required overrides.
-    abs_effector * clone();
+    effector_p clone();
     std::string as_str();
-    bool tick(base_object & o, int time);
+    bool tick(base_object & o, float quanta);
   };
   struct post: public abs_effector
   {
@@ -68,9 +68,9 @@ public:
     float skid_threshold;
     float slide_friction;
     // required overrides.
-    abs_effector * clone();
+    effector_p clone();
     std::string as_str();
-    bool tick(base_object & o, int time);
+    bool tick(base_object & o, float quanta);
   };
   typedef std::shared_ptr<pre> pre_p;
   typedef std::shared_ptr<post> post_p;

@@ -106,9 +106,9 @@ diff_steer::pre::pre(const diff_steer::pre& t)
   set_p(t.set_p.load()), set_b(t.set_b.load()),set_t(t.set_t.load())
 {};
 
-abs_effector * diff_steer::pre::clone()
+effector_p diff_steer::pre::clone()
 {
-  return new diff_steer::pre(*this);
+  return effector_p(new diff_steer::pre(*this));
 };
 
 std::string diff_steer::pre::as_str()
@@ -121,7 +121,7 @@ std::string diff_steer::pre::as_str()
   return s.str();
 };
 
-bool diff_steer::pre::tick(base_object& o, int time)
+bool diff_steer::pre::tick(base_object& o, float quanta)
 {
   // are we in contact with the ground?
   float gl = o.location.z  - o.bounding_sphere.radius;
@@ -166,9 +166,9 @@ diff_steer::post::post(const diff_steer::post& t)
     skid_threshold(t.skid_threshold)
 {};
 
-abs_effector * diff_steer::post::clone()
+effector_p diff_steer::post::clone()
 {
-  return new diff_steer::post(*this);
+  return effector_p(new diff_steer::post(*this));
 };
 
 std::string diff_steer::post::as_str()
@@ -179,7 +179,7 @@ std::string diff_steer::post::as_str()
   return s.str();
 };
 
-bool diff_steer::post::tick(base_object& o, int time)
+bool diff_steer::post::tick(base_object& o, float time)
 {
   // are we in contact with the ground?
   float gl = o.location.z  - o.bounding_sphere.radius;
