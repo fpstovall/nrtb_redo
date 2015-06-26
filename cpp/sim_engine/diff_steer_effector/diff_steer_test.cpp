@@ -41,11 +41,11 @@ vector<triplet> velocities;
 struct recorder : abs_effector
 {
   string as_str() { return "recorder"; };
-  abs_effector * clone()
+  effector_p clone()
   {
-    return new recorder(*this);
+    return effector_p(new recorder(*this));
   };
-  bool tick(base_object & o, int time)
+  bool tick(base_object & o, float quanta)
   {
     locations.push_back(o.location);
     velocities.push_back(o.velocity);
@@ -77,20 +77,20 @@ struct driver : public base_object
   driver()
   {
     mobility.reset(new diff_steer(*this,100,1000,pi,10,8));
-    add_pre(new norm_gravity);
-    add_pre(new hover(1.25,0.10,2.0));
-    add_post(new recorder);
+    add_pre(effector_p(new norm_gravity));
+    add_pre(effector_p(new hover(1.25,0.10,2.0)));
+    add_post(effector_p(new recorder));
     mass=100.0;
     bounding_sphere.radius = 1.0;
     location.z = 1.25;
   };
   // clone method
-  base_object * clone()
+  object_p clone()
   {
     driver * t = new driver(*this);
     t->pre_attribs = get_pre_attribs_copy();
     t->post_attribs = get_post_attribs_copy();
-    return t;
+    return object_p(t);
   };
   // nop collision application.
   bool apply_collision(object_p o, float duration) {return false;};
@@ -142,8 +142,8 @@ int main()
     float d = 1.0/50.0;
     for(int i=0; i<50; i++)
     {
-      test_ob.tick(i,d);
-      test_ob.apply(i,d);
+      test_ob.tick(d);
+      test_ob.apply(d);
     };
     bool test_failed = (test_ob.location.x != 0.0)
                     or (test_ob.location.y != 0.0)
@@ -160,8 +160,8 @@ int main()
     int i = 0;
     while (!done)
     {
-      test_ob.tick(i,d);
-      test_ob.apply(i,d);
+      test_ob.tick(d);
+      test_ob.apply(d);
       i++;
       done = (test_ob.location.x >= 1.0) or (i > 80);
     };
@@ -179,8 +179,8 @@ int main()
     i=0;
     while ((test_ob.velocity.x > 0.0) or (test_ob.velocity.y > 0.0))
     {
-      test_ob.tick(i,d);
-      test_ob.apply(i,d);
+      test_ob.tick(d);
+      test_ob.apply(d);
       i++;
       if (i > 29) break;
     }; 
@@ -197,8 +197,8 @@ int main()
     // rotate 90 degrees in 1/2 second.
     while (test_ob.attitude.angles().z < (pi/2.0))
     {
-      test_ob.tick(i,d);
-      test_ob.apply(i,d);
+      test_ob.tick(d);
+      test_ob.apply(d);
       i++;
       if (i > 49) break;
     }; 
@@ -215,8 +215,8 @@ int main()
     // rotate 90 degrees in 5 second.
     while (test_ob.attitude.angles().z > 0.0)
     {
-      test_ob.tick(i,d);
-      test_ob.apply(i,d);
+      test_ob.tick(d);
+      test_ob.apply(d);
       i++;
       if (i > 300) break;
     }; 
