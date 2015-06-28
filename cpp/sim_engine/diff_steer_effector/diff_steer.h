@@ -25,9 +25,35 @@
 namespace nrtb
 {
 
+  
+/***************************************************
+ * diff_steer provides the effetors and control 
+ * inteface for a differential drive sytsem. This is 
+ * good for modeling a tank or any other ground 
+ * friction based system which steers by applying 
+ * unequal forces between the left and right sides.
+ **************************************************/  
 class diff_steer
 {
 public:
+  /*************************************************
+   * Contructor which establishes all the constants
+   * for the diff_steer module. Once established there
+   * is no means to change or report these constants.
+   *  - o : the base_object descendent this module 
+   *      affects. Normally, this diff_steer would 
+   *      be a member of the provided object.
+   *  - thrust : the maximum thrust, in newtons, 
+   *      which this drive system can apply to the 
+   *      object.
+   *  - _break : The maximun braking force in newtons
+   *      which can be applyed to the object.
+   *  - turn_rate : the maxium turn rate which the 
+   *      object can achieve, in radians.
+   *  -  skid_threshold and slide_friction are not 
+   *      used in this implementation and are 
+   *      resereved for future use.
+   ************************************************/
   diff_steer(base_object & o, float thrust, float _brake,
              float turn_rate,
              float skid_threshold, float slide_friction); 
