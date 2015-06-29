@@ -57,15 +57,19 @@ public:
   diff_steer(base_object & o, float thrust, float _brake,
              float turn_rate,
              float skid_threshold, float slide_friction); 
-  // control methods
-  float drive(float power);   // sets the "throttle"
-  float brake(float braking); // sets the brake
-  float turn(float rate);     // sets turn rate
-  void lockdown();            // full stop.
+  // control methods -- illegal valus force full stop.
+  // Sets the drive power level, 0.0 >= power >= 1.0
+  float drive(float power);
+  // Sets the braking level, 0.0 >= braking >= 1.0
+  float brake(float braking);
+  // Sets the turn rate, 0.0 >= rate >= 1.0
+  float turn(float rate);
+  // Full stop; power 0, braking 1, turn 0.
+  void lockdown();        
   // status reporting;
-  float get_drive();
-  float get_brake();
-  float get_turn();
+  float get_drive();  // returns 0.0 - 1.0
+  float get_brake();  // returns 0.0 - 1.0
+  float get_turn();   // returns 0.0 - 1.0
   // effector definitions
   struct pre: public abs_effector
   {
