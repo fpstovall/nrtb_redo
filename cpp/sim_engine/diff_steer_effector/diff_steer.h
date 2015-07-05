@@ -71,32 +71,55 @@ public:
   float get_brake();  // returns 0.0 - 1.0
   float get_turn();   // returns 0.0 - 1.0
   // effector definitions
+  /***********************************************
+   * pre is the pre-effector for diff_steer. It 
+   * handles the force calcuations for each game
+   * cycle.
+   **********************************************/
   struct pre: public abs_effector
   {
-    // Constructor
+    /********************************************
+     * Constructs a diff_steer::pre effector 
+     *   mp - max power in newtons
+     *   mb - max braking power in newtons
+     *   mt - max turn rate in radians
+     *******************************************/
     pre(float mp, float mb, float mt);
+    // Copy constructor
     pre(const pre & t);
     // local data
-    float max_p;
-    float max_t;
-    float max_b;
-    // Input fields
-    std::atomic<float> set_p {0.0};
-    std::atomic<float> set_t {0.0};
-    std::atomic<float> set_b {1.0};
+    float max_p;  // -- max power in newtons
+    float max_t;  // -- max turn rate in radians
+    float max_b;  // -- max braking force in newtons
+    // Input fields -- acceptable values 0.0 to 1.0 inclusive. 
+    std::atomic<float> set_p {0.0};  // current power setting.
+    std::atomic<float> set_t {0.0};  // current turn setting.
+    std::atomic<float> set_b {1.0};  // current brake setting.
     // required overrides.
     effector_p clone();
     std::string as_str();
     bool tick(base_object & o, float quanta);
   };
+  /***********************************************
+   * post is the post effector for diff_steer. It
+   * applies the forces and deals with skids and 
+   * slips for each game cycle.
+   **********************************************/
   struct post: public abs_effector
   {
-    // Constructor
+    /*********************************************
+     * Constructs a diff_steer::post effector
+     *   f - slide friction
+     *   t - skid threshold
+     * Neither of the above are used in this 
+     * version, but a reserved for later use.
+     ********************************************/
     post(float t, float f);
+    // copy constructor
     post(const post & t);
     // local data
-    float skid_threshold;
-    float slide_friction;
+    float skid_threshold; // not used in this version
+    float slide_friction; // not used in this version
     // required overrides.
     effector_p clone();
     std::string as_str();
