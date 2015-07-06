@@ -25,12 +25,44 @@
 namespace nrtb
 {
   
+  
+/*****************************************
+ * radar_mk1 provides a simple scanner 
+ * for robots.  It accesses the panopticon
+ * inteface on the global_sim_core, flters
+ * and formats results for the supplied 
+ * object's point of view.
+ ****************************************/
 class radar_mk1
 {
 public:
+  /***************************************
+   * rader_mk1 constructor. Establishes 
+   * the link to object the radar is 
+   * "mounted" and the link to the 
+   * global_sim_core. 
+   * 
+   *  o - the object the radar is mounted
+   *      on. It will be used to estabish
+   *      relative angles and ranges.
+   **************************************/
   radar_mk1(base_object & o);
+  // NOP distructor for safety.
   virtual ~radar_mk1() {};
+  /***************************************
+   * Resturns a vector<string> containing 
+   * one string per contact, formatted as
+   * follows:
+   * type (polar vector) (rel velocity)
+   * where:
+   *   type - int indicating target type.
+   *   polar vector - range,elevation,azmuth
+   *                  to target
+   *   rel velocity - cartisian 3D relative
+   *                  velocity to target
+   **************************************/
   std::string get_contacts();
+  // In this version always returns "1"
   std::string status();
 private:
   base_object & parent;

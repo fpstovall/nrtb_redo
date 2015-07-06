@@ -25,7 +25,9 @@ using namespace nrtb;
 using namespace std;
 
 struct my_object : public base_object
-{
+{  
+  radar_mk1 radar;
+  
   my_object() : radar(radar_mk1(*this))
   {
     location = triplet(0,0,0);
@@ -35,27 +37,21 @@ struct my_object : public base_object
     mass = 1;
   };
   
-  radar_mk1 radar;
-  
   bool apply_collision(object_p o, float duration) 
   {
     return true;
   };
-/*
-  bool tick(int quanta)
-  {
-    cout << quanta << "|" << id << ":" << radar.get_contacts() << endl;
-    return base_object::tick(quanta);
-  };
-*/  
-  base_object * clone()
+  
+  object_p clone()
   {
     my_object * returnme = new my_object(*this);
     returnme->pre_attribs = get_pre_attribs_copy();
     returnme->post_attribs = get_post_attribs_copy();
-    return returnme;
+    return object_p(returnme);
   };
 };
+
+typedef shared_ptr<my_object> my_object_p;
 
 typedef vector<sensor_rec> my_contacts;
 
@@ -85,10 +81,10 @@ int main()
     << endl;
  
   // get a couple target objects.
-  my_object * o1 = new my_object;
-  my_object * o2 = new my_object;
+  my_object_p o1(new my_object);
+  my_object_p o2(new my_object);
   o2->location = triplet(0,5,5);
-  my_object * o3 = new my_object;
+  my_object_p o3(new my_object);
   o3->location = triplet(0,-5,5);
   o3->attitude.set(triplet(0,0,pi/2.0));
   o3->velocity = triplet(1.0,0,0);
