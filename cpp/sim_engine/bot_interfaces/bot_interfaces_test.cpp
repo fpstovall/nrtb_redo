@@ -94,12 +94,12 @@ struct my_object
     return true;
   };
     
-  base_object * clone()
+  object_p clone()
   {
     my_object * returnme = new my_object(*this);
     returnme->pre_attribs = get_pre_attribs_copy();
     returnme->post_attribs = get_post_attribs_copy();
-    return returnme;
+    return object_p(returnme);
   };
   
 };
@@ -121,7 +121,7 @@ int main()
   for(int i=0; i<iterations; i++)
   {
     this_thread::sleep_for(pause);
-    o1.tick(i,1.0/50.0);
+    o1.tick(1.0/50.0);
   };
       
   if (failed)

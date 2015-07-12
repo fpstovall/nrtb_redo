@@ -39,8 +39,8 @@ void ticker::tick_all(float duration)
     p.second(duration);
 };
 
-bool abs_bot::tick(int quanta, float duration)
+bool abs_bot::tick(float duration)
 {
   tick_all(duration);
-  return nrtb::base_object::tick(quanta, duration);
+  return nrtb::base_object::tick(duration);
 }

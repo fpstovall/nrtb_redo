@@ -24,51 +24,80 @@
 namespace nrtb
 {
 
-/// allows a module to send to the bot's BCP  
+/************************************************
+ * bcp_sender is a functor interface for bots 
+ * which simplifies returning messages to the 
+ * bot control program. 
+ ***********************************************/
 class bcp_sender
 {
 public:
   virtual void send_to_bcp(std::string msg) = 0;
 };
 
-/// allows a module to insert a command into the
-/// bot's BCP command stream.
+/************************************************
+ * cmd_interface is a interface for bots
+ * which allows the insertion of commands into
+ * into the BCP command interface as if it was 
+ * recieved from the BCP itself.
+ ***********************************************/
 class cmd_interface
 {
 public:
   virtual void bot_cmd(std::string cmd) = 0;
 };
 
-/// Allows a module to sleep until woke up by the object.
-/// typically this would be the next game cycle, but 
-/// nothing prevents a bot from implementing it's own
-/// unique ticker mechanism.
+/*=======================================================
+ * The following two intefaces provide a mechanism for 
+ * a bot to implement internal functions called on a 
+ * regular basis. Typically, the bot would arrange to 
+ * call them once per game turn.
+ *=====================================================*/
 
-// -- functor to be supplied by module
+/******************************************************
+ * tickable is a functor interface provided by modules 
+ * wanting to plug into a bot's ticker mechanism to be 
+ * called regularly. 
+ *****************************************************/
 class tickable
 {
 public:
-  virtual ~tickable() {};
+  // method to be called by the bot's ticker
   virtual void operator()(float duration) = 0;
 };
 
-// scheduling methods provided by the bot.
+/******************************************************
+ * ticker provides the methods and data required to 
+ * allow a bot implementation to manage callbacks to 
+ * modules which need to do some work each game cycle.
+ *****************************************************/
 class ticker
 {
 public:
+  // stores modules implementing the tickable interface
   std::map<unsigned long long,tickable &> tickees;
+  // Register a tickable to be called.
   void register_ticker(tickable & t);
+  // Remove the tickable from the callback list.
   void deregister_ticker(tickable & t);
+  // Call all tickables iteratively.
   void tick_all(float duration);
 };
 
+/****************************************************
+ * abs_bot provides the common interfaces a bot needs
+ * to be useful. In addition to agragating the 
+ * interfaces, base_object::tick() is overridden to
+ * to call ticker::tick_all() before calling the
+ * original method and returning the results.
+ ***************************************************/
 struct abs_bot
 : public base_object,
   public bcp_sender,
   public cmd_interface,
   public ticker
 {
-  bool tick(int quanta, float duration);
+  bool tick(float duration);
 };
 
 } // namepace nrtb
