@@ -39,8 +39,8 @@ bot_mk1::bot_mk1(tcp_socket_p link, triplet where)
   : bot_mk1(where)
 {
   // add effectors
-  add_pre(new norm_gravity);
-  add_pre(new hover(location.z,0.10,2.0));
+  add_pre(effector_p(new norm_gravity));
+  add_pre(effector_p(new hover(location.z,0.10,2.0)));
   drive.reset(new diff_steer(*this,1e5,2e5,4*pi,10,8));
   // bot control and com setup.
   BCP = std::move(link);
@@ -52,7 +52,7 @@ bot_mk1::bot_mk1(tcp_socket_p link, triplet where)
   to_BCP.push("READY");
 };
 
-base_object * bot_mk1::clone()
+object_p bot_mk1::clone()
 {
   bot_mk1 * t = new bot_mk1(location);
   t->pre_attribs = get_pre_attribs_copy();
@@ -63,7 +63,7 @@ base_object * bot_mk1::clone()
   t->attitude.set(attitude);
   t->rotation.set(rotation);
   t->ImAlive.store(ImAlive);
-  return t;
+  return object_p(t);
 };
 
 bot_mk1::~bot_mk1()
@@ -77,12 +77,12 @@ bot_mk1::~bot_mk1()
   if (t_thread.joinable()) t_thread.join();
 };
 
-bool bot_mk1::tick(int time, float duration)
+bool bot_mk1::tick(float duration)
 {
   if (ImAlive)
   {
     std::unique_lock<std::mutex> lock(cooking_lock);
-    return nrtb::abs_bot::tick(time, duration);
+    return nrtb::abs_bot::tick(duration);
   }
   else
   {
@@ -91,12 +91,12 @@ bool bot_mk1::tick(int time, float duration)
   };
 };
 
-bool bot_mk1::apply(int time, float quanta)
+bool bot_mk1::apply(float quanta)
 {
   if (ImAlive)
   {
     std::unique_lock<std::mutex> lock(cooking_lock);
-    return nrtb::base_object::apply(time, quanta);
+    return nrtb::base_object::apply(quanta);
   }
   else
   {

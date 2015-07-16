@@ -31,13 +31,22 @@
 namespace nrtb
 {
 
+/****************************************************
+ * bot_mk1 is the prototype bot in the alpha system. 
+ * As such it is subject to rapid change and may not 
+ * be the prettiest code.
+ ***************************************************/  
 struct bot_mk1: public abs_bot
 {
+  /* Constucts a bot at the supplied location and 
+   *  and establishes the link to the BCP socket.
+   *  link - a tcp_socket_p connected to the BCP.
+   *  where - the locaiton the bot is to created at.
+   */
   bot_mk1(tcp_socket_p link, triplet where);
-  bot_mk1(triplet where);
   virtual ~bot_mk1();
   // polymophic copier
-  virtual base_object * clone();
+  virtual object_p clone();
   // additional data
   std::string name;
   std::atomic<bool> ImAlive;
@@ -51,8 +60,8 @@ struct bot_mk1: public abs_bot
   // returns true if a collision is detected.
   virtual bool check_collision(object_p o, float duration);
   // the following return true if the object is destroyed.
-  virtual bool tick(int time, float duration);
-  virtual bool apply(int time, float duration);
+  virtual bool tick(float duration);
+  virtual bool apply(float duration);
   virtual bool apply_collision(object_p o, float duration);
   // BCP communications managers;
   void receiver();
@@ -61,6 +70,12 @@ struct bot_mk1: public abs_bot
   // bot_interfaces stuff;
   void send_to_bcp(std::string msg);
   void bot_cmd(std::string cmd);
+private:
+  /* Constucts a bot at the supplied locaiton but 
+   * without much of the setup completed. 
+   */
+  bot_mk1(triplet where);
+
 };
 
 } // namepace nrtb
