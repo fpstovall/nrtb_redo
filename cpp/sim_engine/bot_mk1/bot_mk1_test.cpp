@@ -80,7 +80,7 @@ int main()
 
     // first check.. did the bot say "READY"?
     string msg = gsub(BCP.getln("\r",64,2),"\r","");
-    bool bad = (msg != "READY") or !(test_bot->ImAlive);
+    bool bad = (msg != "READY") or !(test_bot->IsAlive());
     failed = failed or bad;
     cout << "READY: " << ( bad ? "FAILED" : "Passed" ) 
       << " '" << msg << "'" << endl;
@@ -89,7 +89,7 @@ int main()
     BCP.put("bot lvar\r");
     msg = gsub(BCP.getln("\r",64,2),"\r","");
     bad = (msg != "bot lvar (0,0,2.5) (0,0,0) (0,0,0) (0,0,0)") 
-      or !(test_bot->ImAlive);
+      or !(test_bot->IsAlive());
     failed = failed or bad;
     cout << "bot lvar: " << ( bad ? "FAILED" : "Passed" ) 
       << " '" << msg << "'" << endl;
@@ -97,7 +97,7 @@ int main()
     // get health data.
     BCP.put("bot health\r");
     msg = gsub(BCP.getln("\r",64,2),"\r","");
-    bad = (msg != "bot health 100") or !(test_bot->ImAlive);
+    bad = (msg != "bot health 100") or !(test_bot->IsAlive());
     failed = failed or bad;
     cout << "bot health: " << ( bad ? "FAILED" : "Passed" ) 
       << " '" << msg << "'" << endl;
@@ -105,7 +105,7 @@ int main()
     // get bot error response.
     BCP.put("bot error\r");
     msg = gsub(BCP.getln("\r",64,2),"\r","");
-    bad = (msg != "bad_cmd \"bot error\"") or !(test_bot->ImAlive);
+    bad = (msg != "bad_cmd \"bot error\"") or !(test_bot->IsAlive());
     failed = failed or bad;
     cout << "bot cmd error: " << ( bad ? "FAILED" : "Passed" ) 
       << " '" << msg << "'" << endl;
@@ -113,7 +113,7 @@ int main()
     // get drive settings.
     BCP.put("drive status\r");
     msg = gsub(BCP.getln("\r",64,2),"\r","");
-    bad = (msg != "drive status 0 1 0") or !(test_bot->ImAlive);
+    bad = (msg != "drive status 0 1 0") or !(test_bot->IsAlive());
     failed = failed or bad;
     cout << "drive status: " << ( bad ? "FAILED" : "Passed" ) 
       << " '" << msg << "'" << endl;
@@ -124,7 +124,7 @@ int main()
     BCP.put("drive turn 100\r");
     BCP.put("drive status\r");
     msg = gsub(BCP.getln("\r",64,2),"\r","");
-    bad = (msg != "drive status 1 0 1") or !(test_bot->ImAlive);
+    bad = (msg != "drive status 1 0 1") or !(test_bot->IsAlive());
     failed = failed or bad;
     cout << "drive settings: " << ( bad ? "FAILED" : "Passed" ) 
       << " '" << msg << "'" << endl;
@@ -132,13 +132,13 @@ int main()
     // check drive lockown on error.
     BCP.put("drive nocmd\r");
     msg = gsub(BCP.getln("\r",64,2),"\r","");
-    bad = (msg != "bad_cmd \"drive nocmd\"") or !(test_bot->ImAlive);
+    bad = (msg != "bad_cmd \"drive nocmd\"") or !(test_bot->IsAlive());
     failed = failed or bad;
     cout << "drive cmd error: " << ( bad ? "FAILED" : "Passed" ) 
       << " '" << msg << "'" << endl;
     BCP.put("drive status\r");
     msg = gsub(BCP.getln("\r",64,2),"\r","");
-    bad = (msg != "drive status 0 1 0") or !(test_bot->ImAlive);
+    bad = (msg != "drive status 0 1 0") or !(test_bot->IsAlive());
     failed = failed or bad;
     cout << "drive lockdown: " << ( bad ? "FAILED" : "Passed" ) 
       << " '" << msg << "'" << endl;
@@ -161,7 +161,7 @@ int main()
     BCP.close();
     chrono::milliseconds pause(20);
     this_thread::sleep_for(pause);
-    bad = test_bot->ImAlive;
+    bad = test_bot->IsAlive();
     failed = failed or bad;
     cout << "shudown on close: " << ( bad ? "FAILED" : "Passed" )
       << endl;
