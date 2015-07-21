@@ -28,6 +28,16 @@
 using namespace nrtb;
 using namespace std;
 
+/*****************************************************
+ * output_writer drains the sim_core output queue and 
+ * writes the output to a formatted text file. main()
+ * launches this as an independent thread which is 
+ * left to run until the output queue is closed.
+ * 
+ * As we move out of alpha, this needs to be moved
+ * out of the main file and into it's own more complete
+ * module.
+ ****************************************************/
 void output_writer(bool write_zeros=true)
 {
   ofstream output("simulation.out");

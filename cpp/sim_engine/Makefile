@@ -43,7 +43,7 @@ doit:
 	cd bot_interfaces; make ${action}
 	cd bot_mk1; make ${action}
 	cd bcp_server; make ${action}
-#	cd main; make ${action}
+	cd main; make ${action}
 
 ../common/nrtb_common.a:
 	@cd ../common; make 
