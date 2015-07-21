@@ -66,7 +66,7 @@ int main()
   while (soq.size())
   {
     gp_sim_message_p msg(sim_out.pop());
-    sim_core::report & rep = msg->data<sim_core::report>();
+    sim_core::report rep = msg->data<sim_core::report>();
     cout << rep.quanta << "\t" << rep.objects.size() << "\t";
     for (auto p : rep.objects)
       cout << p.first << " ";
