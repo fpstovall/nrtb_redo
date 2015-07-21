@@ -40,7 +40,7 @@ void output_writer(bool write_zeros=true)
     while (true)
     {
       gp_sim_message_p raw = sim_out.pop();
-      sim_core::report & rep = raw->data<sim_core::report>();
+      sim_core::report rep = raw->data<sim_core::report>();
       if (write_zeros or rep.objects.size())
       {
         output << "q\t" << rep.quanta 
