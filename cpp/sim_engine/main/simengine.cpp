@@ -70,7 +70,11 @@ int main(int argc, char * argv[])
   
   // Report our startup and configuration.
   g_log.info("Start up");
+  std::stringstream s;
+  s << std::thread::hardware_concurrency() 
+    << " hardware threads supported.";
   g_log.info("Configuration Follows");
+  g_log.info(s.str());
   for (auto i : config)
   {
     g_log.info(i.first+" = "+i.second);
