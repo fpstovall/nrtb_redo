@@ -168,16 +168,24 @@ bool base_object::tick(float quanta)
   for (auto e : pre_attribs)
     if (e.second->tick(*this, quanta))
       killme = true;
-  // apply forces to rotation, mass, and velocity.
   mass += mass_mod;
-  triplet a = force / mass;
-  triplet ev = velocity + (((a + accel_mod)/2.0) * quanta);
-  velocity += (a  + accel_mod) * quanta;
-  rotatable rbase(rotation);
-  rotation.add(rotation_mod.angles() * quanta);
-  rotation.apply_force(mass, bounding_sphere.radius,
-                       torque.angles(),quanta);
-  rotation_mod.set((rotation.angles() + rbase.angles()) / 2.0);
+  if (mass <= 0.0)
+  {
+    // No photons or imaginary materials here.
+    killme = true;
+  }
+  else
+  {
+    // apply forces to rotation, mass, and velocity.
+    triplet a = force / mass;
+    triplet ev = velocity + (((a + accel_mod)/2.0) * quanta);
+    velocity += (a  + accel_mod) * quanta;
+    rotatable rbase(rotation);
+    rotation.add(rotation_mod.angles() * quanta);
+    rotation.apply_force(mass, bounding_sphere.radius,
+                        torque.angles(),quanta);
+    rotation_mod.set((rotation.angles() + rbase.angles()) / 2.0);
+  }
   return killme;
 };
 
