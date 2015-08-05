@@ -37,6 +37,43 @@ diff_steer::diff_steer(base_object& o, float thrust, float _brake,
   lockdown();
 };
 
+std::string diff_steer::command(std::string cmd)
+{
+  std::stringstream tokens(cmd);
+  std::string sys;
+  std::string verb;
+  tokens >> sys >> verb;
+  // check for drive commands
+  std::string returnme = "";
+  if (sys == "drive")
+  {
+    if (verb == "status")
+    {
+      std::stringstream s;
+      s << sys << " " << verb << " "
+        << get_drive()
+        << " " << get_brake()
+        << " " << get_turn();
+      returnme = s.str();
+    }
+    else if (!tokens.eof())
+    {
+      // get the float argument.
+      float val;
+      tokens >> val;
+      // apply val to the correct setting.
+      if (verb == "power") { drive(val); }
+      else if (verb == "brake") { brake(val); }
+      else if (verb == "turn") { turn(val); };
+    }
+    else 
+    {
+      returnme = "bad_cmd \""+cmd+"\"";
+      lockdown();
+    };
+  };
+};
+
 float diff_steer::drive(float power)
 {
   if (fabsf(power) <= 100.0)
