@@ -72,6 +72,7 @@ std::string diff_steer::command(std::string cmd)
       lockdown();
     };
   };
+  return returnme;
 };
 
 float diff_steer::drive(float power)
