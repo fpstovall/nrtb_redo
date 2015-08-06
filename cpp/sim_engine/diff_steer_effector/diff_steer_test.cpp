@@ -56,23 +56,6 @@ struct driver : public base_object
 {
   // diff_steer interface
   shared_ptr<diff_steer>  mobility;
-  // control interface
-  void drive(float p)
-  {
-    mobility->drive(p);
-  };
-  void brake(float b)
-  {
-    mobility->brake(b);
-  };
-  void turn(float t)
-  {
-    mobility->turn(t);
-  };
-  void lockdown()
-  {
-    mobility->lockdown();
-  };
   // constructor
   driver()
   {
@@ -154,8 +137,8 @@ int main()
       << test_ob.location << test_ob.velocity << endl;
       
     cout << "Simple drive test: ";
-    test_ob.drive(100.0);
-    test_ob.brake(0.0);
+    test_ob.mobility->command("drive power 100");
+    test_ob.mobility->command("drive brake 0");
     bool done = false;
     int i = 0;
     while (!done)
@@ -174,8 +157,8 @@ int main()
       << test_ob.location << test_ob.velocity << endl;
 
     cout << "Simple braking test: ";
-    test_ob.drive(0.0);
-    test_ob.brake(100.0);
+    test_ob.mobility->command("drive power 0");
+    test_ob.mobility->command("drive brake 100");
     i=0;
     while ((test_ob.velocity.x > 0.0) or (test_ob.velocity.y > 0.0))
     {
@@ -190,9 +173,9 @@ int main()
       << i << " " << test_ob.location << test_ob.velocity << endl; 
 
     cout << "Simple turning test: ";
-    test_ob.drive(0.0);
-    test_ob.brake(100.0);
-    test_ob.turn(100.0);
+    test_ob.mobility->command("drive power 0.0");
+    test_ob.mobility->command("drive brake 100.0");
+    test_ob.mobility->command("drive turn 100.0");
     i=0;
     // rotate 90 degrees in 1/2 second.
     while (test_ob.attitude.angles().z < (pi/2.0))
@@ -207,10 +190,10 @@ int main()
     cout << (test_failed ? "Failed" : "Passed") << " "
       << i << " " << test_ob.attitude.angles() << endl; 
 
-    cout << "Compound moment test: ";
-    test_ob.drive(100.0);
-    test_ob.brake(0.0);
-    test_ob.turn(-10.0);
+    cout << "Compound movement test: ";
+    test_ob.mobility->command("drive power 100.0");
+    test_ob.mobility->command("drive brake 0.0");
+    test_ob.mobility->command("drive turn -10.0");
     i=0;
     // rotate 90 degrees in 5 second.
     while (test_ob.attitude.angles().z > 0.0)
