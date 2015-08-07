@@ -172,63 +172,44 @@ void bot_mk1::msg_router(std::string s)
 {
   try
   {
-    std::stringstream tokens(s);
-    std::string sys;
-    std::string verb;
-    tokens >> sys >> verb;
-    // check for drive commands
-    if (sys == "drive")
+    std::string returnme;
+    if (drive->command(s,returnme))
     {
-      if (verb == "status")
-      {
-        std::stringstream s;
-        s << sys << " " << verb << " "
-          << drive->get_drive()
-          << " " << drive->get_brake()
-          << " " << drive->get_turn();
-        to_BCP.push(s.str());
-      }
-      else if (!tokens.eof())
-      {
-        // get the float argument.
-        float val;
-        tokens >> val;
-        // apply val to the correct setting.
-        if (verb == "power") { drive->drive(val); }
-        else if (verb == "brake") { drive->brake(val); }
-        else if (verb == "turn") { drive->turn(val); };
-      }
-      else 
-      {
-        to_BCP.push("bad_cmd \""+s+"\"");
-        drive->lockdown();
-      };
+      if (returnme != "") to_BCP.push(returnme);
     }
-    else if (sys == "bot")
+    else 
     {
-      if (verb == "lvar")
+      std::stringstream tokens(s);
+      std::string sys;
+      std::string verb;
+      tokens >> sys >> verb;
+      // check for drive commands
+      if (sys == "bot")
       {
-        std::unique_lock<std::mutex> lock(cooking_lock);
-        std::stringstream s;
-        s << sys << " " << verb 
-          << " " << location 
-          << " " << velocity
-          << " " << attitude.angles() 
-          << " " << rotation.angles();
-        to_BCP.push(s.str());
-      }
-      else if (verb == "health")
-      {
-        to_BCP.push("bot health 100");
+        if (verb == "lvar")
+        {
+          std::unique_lock<std::mutex> lock(cooking_lock);
+          std::stringstream s;
+          s << sys << " " << verb 
+            << " " << location 
+            << " " << velocity
+            << " " << attitude.angles() 
+            << " " << rotation.angles();
+          to_BCP.push(s.str());
+        }
+        else if (verb == "health")
+        {
+          to_BCP.push("bot health 100");
+        }
+        else
+        {
+          to_BCP.push("bad_cmd \""+s+"\"");
+        };
       }
       else
       {
-        to_BCP.push("bad_cmd \""+s+"\"");
+        to_BCP.push("bad_sys \""+s+"\"");
       };
-    }
-    else
-    {
-      to_BCP.push("bad_sys \""+s+"\"");
     };
   }
   catch (...)

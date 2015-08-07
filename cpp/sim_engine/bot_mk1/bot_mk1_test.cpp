@@ -163,7 +163,7 @@ int main()
     this_thread::sleep_for(pause);
     bad = test_bot->IsAlive();
     failed = failed or bad;
-    cout << "shudown on close: " << ( bad ? "FAILED" : "Passed" )
+    cout << "shutdown on close: " << ( bad ? "FAILED" : "Passed" )
       << endl;
       
     // verify stopped statuses.
