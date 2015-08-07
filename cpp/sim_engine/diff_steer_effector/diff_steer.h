@@ -64,7 +64,7 @@ public:
   /**************************************************
    * External command interface for diff_steer
    *************************************************/
-  std::string command(std::string cmd);
+  bool command(std::string cmd, std::string & response);
   // -- effector definitions
   /***********************************************
    * pre is the pre-effector for diff_steer. It 

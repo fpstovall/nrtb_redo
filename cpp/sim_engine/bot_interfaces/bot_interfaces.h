@@ -34,7 +34,7 @@ namespace nrtb
 class commandable
 {
 public:
-  virtual std::string command(std::string cmd) = 0;
+  virtual bool command(std::string cmd, std::string & response) = 0;
 };
   
 /************************************************
