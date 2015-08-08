@@ -56,11 +56,12 @@ private:
   base_object & parent;
   sim_core & sim;
   /***************************************
-   * Resturns a vector<string> containing 
-   * one string per contact, formatted as
-   * follows:
-   * type (polar vector) (rel velocity)
-   * where:
+   * Returns a string containing information
+   * on each contact.  
+   * The string starts with an integer 
+   * indicating the number of contects 
+   * listed, followed by a group for each
+   * contact where:
    *   type - int indicating target type.
    *   polar vector - range,elevation,azmuth
    *                  to target

@@ -107,12 +107,6 @@ int main()
   o1->radar.command("radar contacts",o1c);
   o2->radar.command("radar contacts",o2c);
   o3->radar.command("radar contacts",o3c);
-  
-/*  
-  string o1c = o1->radar.get_contacts();
-  string o2c = o2->radar.get_contacts();  
-  string o3c = o3->radar.get_contacts();  
-*/
 
   w.stop_sim();
 
@@ -133,16 +127,14 @@ int main()
   if (o1t)
     cout << "  ** " << o1l[0].location << o1l[0].velocity 
       << o1l[1].location << o1l[1].velocity << endl;
-
-//  failed = 
-//    (o1c != "2 1 7.07107 1.5708 0.785398 (0,0,0) 1 7.07107 -1.5708 2.35619 (0,0,0)")
-//    or 
-//    (o2c != "2 1 7.07107 -1.5708 -2.35619 (0,0,0) 1 10 -1.5708 3.14159 (0,0,0)")
-//    or 
-//    (o3c != "2 1 7.07107 1.3113e-06 -0.785398 (0,0,0) 1 10 1.3113e-06 0 (0,0,0)");
-
-
+            
   failed = failed or o1t;
+
+  // test status command.
+  string status; 
+  o1->radar.command("radar status", status);
+  failed = failed or (status != "1");
+
   
   if (failed)
     cout << " *** Unit test failed" << endl;
