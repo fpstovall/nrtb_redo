@@ -29,6 +29,29 @@ radar_mk1::radar_mk1(base_object & o)
     parent(o)
 {};
 
+
+bool radar_mk1::command(std::string cmd, std::string& response)
+{
+  bool returnme = false;
+  response = "";
+  std::stringstream s(cmd);
+  std::string module;
+  std::string verb;
+  s >> module >> verb;
+  if (module == "radar")
+  {
+    returnme = true;
+    if (verb == "contacts") { response = get_contacts(); }
+    else if (verb == "status") { response = status(); }
+    else 
+    {
+      // not a recognised command.
+      response = "bad cmd \""+cmd+"\"";
+    };
+  };
+  return returnme;
+};
+
 std::string radar_mk1::get_contacts()
 {
   std::stringstream returnme;

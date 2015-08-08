@@ -103,10 +103,17 @@ int main()
   this_thread::sleep_for(pause);
   
   // Verify they see each other properly.
+  string o1c, o2c, o3c;
+  o1->radar.command("radar contacts",o1c);
+  o2->radar.command("radar contacts",o2c);
+  o3->radar.command("radar contacts",o3c);
+  
+/*  
   string o1c = o1->radar.get_contacts();
   string o2c = o2->radar.get_contacts();  
   string o3c = o3->radar.get_contacts();  
-  
+*/
+
   w.stop_sim();
 
   cout << "from o1: " << o1c << endl;
