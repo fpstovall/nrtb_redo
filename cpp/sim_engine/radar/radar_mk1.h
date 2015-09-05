@@ -47,13 +47,13 @@ public:
    *      on. It will be used to estabish
    *      relative angles and ranges.
    **************************************/
-  radar_mk1(object_p o);
+  radar_mk1(base_object & o);
   // NOP distructor for safety.
   virtual ~radar_mk1() {};
   // command interface.
   bool command(std::string cmd, std::string & response);
 private:
-  object_p parent;
+  base_object & parent;
   sim_core & sim;
   /***************************************
    * Returns a string containing information

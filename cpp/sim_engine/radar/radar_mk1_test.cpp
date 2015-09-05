@@ -28,7 +28,7 @@ struct my_object : public base_object
 {  
   radar_mk1 radar;
   
-  my_object() : radar(object_p(this))
+  my_object() : radar(radar_mk1(*this))
   {
     location = triplet(0,0,0);
     velocity = triplet(0,0,0);
