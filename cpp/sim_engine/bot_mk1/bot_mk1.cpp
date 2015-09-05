@@ -24,6 +24,7 @@
 using namespace nrtb;
 
 bot_mk1::bot_mk1(triplet where)
+  : radar(std::ref(*this))
 {
   std::stringstream s;
   s << "mk1_" << id;
