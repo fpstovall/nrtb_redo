@@ -58,6 +58,7 @@ std::string radar_mk1::get_contacts()
   // for now, update every time.
   contacts c_list = sim.contact_list();
   // assemble the return string
+  returnme << "radar contacts ";
   if (c_list.size())
   {
     returnme << (c_list.size()-1);
@@ -81,5 +82,5 @@ std::string radar_mk1::get_contacts()
 
 std::string radar_mk1::status()
 {
-  return "1";
+  return "radar status 1";
 };

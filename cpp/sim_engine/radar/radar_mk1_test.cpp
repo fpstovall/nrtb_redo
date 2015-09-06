@@ -59,6 +59,8 @@ my_contacts parse_contacts(string s)
 {
   my_contacts returnme;
   stringstream in(s);
+  string system; string cmd;
+  in >> system >> cmd;
   int count;
   in >> count;
   int worked = 0;
@@ -133,7 +135,7 @@ int main()
   // test status command.
   string status; 
   o1->radar.command("radar status", status);
-  failed = failed or (status != "1");
+  failed = failed or (status != "radar status 1");
 
   
   if (failed)
