@@ -59,6 +59,8 @@ my_contacts parse_contacts(string s)
 {
   my_contacts returnme;
   stringstream in(s);
+  string system; string cmd;
+  in >> system >> cmd;
   int count;
   in >> count;
   int worked = 0;
@@ -103,10 +105,11 @@ int main()
   this_thread::sleep_for(pause);
   
   // Verify they see each other properly.
-  string o1c = o1->radar.get_contacts();
-  string o2c = o2->radar.get_contacts();  
-  string o3c = o3->radar.get_contacts();  
-  
+  string o1c, o2c, o3c;
+  o1->radar.command("radar contacts",o1c);
+  o2->radar.command("radar contacts",o2c);
+  o3->radar.command("radar contacts",o3c);
+
   w.stop_sim();
 
   cout << "from o1: " << o1c << endl;
@@ -126,16 +129,14 @@ int main()
   if (o1t)
     cout << "  ** " << o1l[0].location << o1l[0].velocity 
       << o1l[1].location << o1l[1].velocity << endl;
-
-//  failed = 
-//    (o1c != "2 1 7.07107 1.5708 0.785398 (0,0,0) 1 7.07107 -1.5708 2.35619 (0,0,0)")
-//    or 
-//    (o2c != "2 1 7.07107 -1.5708 -2.35619 (0,0,0) 1 10 -1.5708 3.14159 (0,0,0)")
-//    or 
-//    (o3c != "2 1 7.07107 1.3113e-06 -0.785398 (0,0,0) 1 10 1.3113e-06 0 (0,0,0)");
-
-
+            
   failed = failed or o1t;
+
+  // test status command.
+  string status; 
+  o1->radar.command("radar status", status);
+  failed = failed or (status != "radar status 1");
+
   
   if (failed)
     cout << " *** Unit test failed" << endl;

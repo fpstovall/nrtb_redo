@@ -20,6 +20,7 @@
 #define radar_mk1_header
 
 #include <sim_core.h>
+#include <bot_interfaces.h>
 #include <hires_timer.h>
 
 namespace nrtb
@@ -33,7 +34,7 @@ namespace nrtb
  * and formats results for the supplied 
  * object's point of view.
  ****************************************/
-class radar_mk1
+class radar_mk1 : public commandable
 {
 public:
   /***************************************
@@ -49,12 +50,18 @@ public:
   radar_mk1(base_object & o);
   // NOP distructor for safety.
   virtual ~radar_mk1() {};
+  // command interface.
+  bool command(std::string cmd, std::string & response);
+private:
+  base_object & parent;
+  sim_core & sim;
   /***************************************
-   * Resturns a vector<string> containing 
-   * one string per contact, formatted as
-   * follows:
-   * type (polar vector) (rel velocity)
-   * where:
+   * Returns a string containing information
+   * on each contact.  
+   * The string starts with an integer 
+   * indicating the number of contects 
+   * listed, followed by a group for each
+   * contact where:
    *   type - int indicating target type.
    *   polar vector - range,elevation,azmuth
    *                  to target
@@ -64,9 +71,6 @@ public:
   std::string get_contacts();
   // In this version always returns "1"
   std::string status();
-private:
-  base_object & parent;
-  sim_core & sim;
 };
 
 } // namepace nrtb

@@ -115,34 +115,17 @@ int main()
     msg = gsub(BCP.getln("\r",64,2),"\r","");
     bad = (msg != "drive status 0 1 0") or !(test_bot->IsAlive());
     failed = failed or bad;
-    cout << "drive status: " << ( bad ? "FAILED" : "Passed" ) 
+    cout << "drive response: " << ( bad ? "FAILED" : "Passed" ) 
       << " '" << msg << "'" << endl;
-    
-    // change some settings.
-    BCP.put("drive power 100\r");
-    BCP.put("drive brake 0\r");
-    BCP.put("drive turn 100\r");
-    BCP.put("drive status\r");
+
+      // Verify radar command/response
+    BCP.put("radar status\r");
     msg = gsub(BCP.getln("\r",64,2),"\r","");
-    bad = (msg != "drive status 1 0 1") or !(test_bot->IsAlive());
+    bad = (msg != "radar status 1") or !(test_bot->IsAlive());
     failed = failed or bad;
-    cout << "drive settings: " << ( bad ? "FAILED" : "Passed" ) 
+    cout << "radar response: " << ( bad ? "FAILED" : "Passed" ) 
       << " '" << msg << "'" << endl;
-      
-    // check drive lockown on error.
-    BCP.put("drive nocmd\r");
-    msg = gsub(BCP.getln("\r",64,2),"\r","");
-    bad = (msg != "bad_cmd \"drive nocmd\"") or !(test_bot->IsAlive());
-    failed = failed or bad;
-    cout << "drive cmd error: " << ( bad ? "FAILED" : "Passed" ) 
-      << " '" << msg << "'" << endl;
-    BCP.put("drive status\r");
-    msg = gsub(BCP.getln("\r",64,2),"\r","");
-    bad = (msg != "drive status 0 1 0") or !(test_bot->IsAlive());
-    failed = failed or bad;
-    cout << "drive lockdown: " << ( bad ? "FAILED" : "Passed" ) 
-      << " '" << msg << "'" << endl;
-      
+          
     // verify running statuses.
     float d = 1.0/50.0;
     bad = test_bot->tick(d) or test_bot->apply(d);
@@ -163,7 +146,7 @@ int main()
     this_thread::sleep_for(pause);
     bad = test_bot->IsAlive();
     failed = failed or bad;
-    cout << "shudown on close: " << ( bad ? "FAILED" : "Passed" )
+    cout << "shutdown on close: " << ( bad ? "FAILED" : "Passed" )
       << endl;
       
     // verify stopped statuses.
