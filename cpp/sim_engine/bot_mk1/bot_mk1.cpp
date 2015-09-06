@@ -178,7 +178,11 @@ void bot_mk1::msg_router(std::string s)
     {
       if (returnme != "") to_BCP.push(returnme);
     }
-    else 
+    else if (radar.command(s,returnme))
+    {
+      if (returnme != "") to_BCP.push(returnme);
+    }
+    else
     {
       std::stringstream tokens(s);
       std::string sys;
