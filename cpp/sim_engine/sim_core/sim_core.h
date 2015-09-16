@@ -100,6 +100,8 @@ public:
   void set_quanta(float time_slice);
   // returns true if running.
   bool running();
+  // returns the current population count
+  int size();
   // Starts the simulation. Throws if already running.
   void start_sim();
   // Stops the the simulation. 

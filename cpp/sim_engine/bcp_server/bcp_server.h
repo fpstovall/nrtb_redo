@@ -64,6 +64,8 @@ private:
   sim_core & engine;
   // handle for the processor thread.
   std::thread p_thread;
+  // stop accepting bots if this is exceeded.
+  int pop_limit;
   // catches new connection requests.
   tcp_server_socket_factory listener;
   // this method runs as a separate thread.
