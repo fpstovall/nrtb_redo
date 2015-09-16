@@ -47,6 +47,11 @@ int main(int argc, char * argv[])
     // get bot ack.
     cout << "\n" << sim.getln() << endl;
     
+    // get and publish our curent location.
+    sim.put("bot lvar\r");
+    // get bot ack.
+    cout << "\n" << sim.getln() << endl;
+    
       
     
   }
