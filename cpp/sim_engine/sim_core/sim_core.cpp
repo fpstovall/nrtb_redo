@@ -28,6 +28,11 @@
 using namespace std;
 using namespace nrtb;
 
+int sim_core::size()
+{
+  return all_objects.size();
+};
+
 contacts panopticon::get()
 {
   std::unique_lock<std::mutex>(list_lock);

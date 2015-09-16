@@ -246,12 +246,12 @@ int main()
   world.add_object(object_p(new rocket_ball));
   world.add_object(object_p(new my_object));
   bool t = log_test(log,"Static object add",
-                (world.obj_status().size() != 2));
+                (world.size() != 2));
   failed = failed or t;
   // test static removal of one object
   world.remove_obj(1);
   t = log_test(log,"Static object remove",
-                (world.obj_status().size() != 1));
+                (world.size() != 1));
   failed = failed or t; 
   
   cout << "Single object run (3 secs)" << endl;
