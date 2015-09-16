@@ -28,7 +28,9 @@ bcp_listener::bcp_listener(sim_core& e)
   : engine(e),
     listener("*:"+
       global_conf_reader::get_reference().get<std::string>(
-        "bcp_port","64500"))
+        "bcp_port","64500")),
+    pop_limit(global_conf_reader::get_reference().get<int>(
+        "pop_limit",100))
 {};
 
 bcp_listener::~bcp_listener()
@@ -79,10 +81,18 @@ void bcp_listener::processor()
     while (listener.listening())
     {
       tcp_socket_p bcp = listener.get_sock();
-      log.trace("new connection");
-      triplet l(u(rng)-1e4,u(rng)-1e4,0.0);
-      engine.add_object(object_p(new bot_mk1(std::move(bcp), l)));     
-      log.trace("bot added to sim");
+      if (engine.size() < pop_limit)
+      {
+        log.trace("new connection");
+        triplet l(u(rng)-1e4,u(rng)-1e4,0.0);
+        engine.add_object(object_p(new bot_mk1(std::move(bcp), l)));     
+        log.trace("bot added to sim");
+      }
+      else 
+      {
+        // fully populated, reject.
+        bcp->put("NOT_AVAILALE\r");
+      };
     };
   }
   catch (base_exception& e)
