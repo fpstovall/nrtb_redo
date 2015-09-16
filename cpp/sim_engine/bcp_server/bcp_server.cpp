@@ -72,6 +72,7 @@ int bcp_listener::pending()
 
 void bcp_listener::processor()
 {
+  int rejected = 0;
   auto log = common_log::get_reference()("BCP_req_proc");
   log.trace("Starting");
   try
@@ -92,6 +93,7 @@ void bcp_listener::processor()
       {
         // fully populated, reject.
         bcp->put("NOT_AVAILALE\r");
+        rejected++;
       };
     };
   }
@@ -117,7 +119,8 @@ void bcp_listener::processor()
     log.critical("Unidentified exception");
   };
   std::stringstream s;
-  s << "connections: " << connections() 
+  s << "connections: " << connections()
+    << ", rejected: " << rejected
     << ", dropped: " << dropped();
   log.info(s.str());
   log.trace("Exiting");
