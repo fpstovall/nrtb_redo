@@ -54,6 +54,7 @@ void output_writer(bool write_zeros=true)
       if (write_zeros or rep.objects.size())
       {
         output << "q\t" << rep.quanta 
+          << "\t" << rep.objects.size()
           << "\t" << rep.duration
           << "\t" << rep.wallclock 
           << endl;
@@ -101,7 +102,9 @@ int main(int argc, char * argv[])
   world.start_sim();
   
   // start the bcp_server
-  bcp_listener bcps(world);
+  bcp_listener bcps(world,
+    config.get<std::string>("port","*:64500"),
+    config.get<int>("pop_limit",100));
   bcps.start();
   
   int run_time = config.get("run_time",1);
