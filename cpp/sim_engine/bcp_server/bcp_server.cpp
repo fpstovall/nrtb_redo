@@ -91,6 +91,7 @@ void bcp_listener::processor()
         // fully populated, reject.
         bcp->put("NOT_AVAILALE\r");
         rejected++;
+        log.warning("connection rejected");
       };
     };
   }
