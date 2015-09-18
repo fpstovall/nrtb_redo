@@ -34,10 +34,16 @@ int main(int argc, char * argv[])
   hirez_timer runtime();
   // load the global configuration
   conf_reader config;
-  config.read(argc, argv, "kamikaze.conf");
+  config.read(argc, argv, "target.conf");
+  
+  // display config choices.
+  cout << endl;
+  for (auto v: config) cout << v.first << "=" << v.second << endl;
   
   // get the configuration data
   string server_addr(config.get<string>("server","127.0.0.1:64500"));
+  triplet seek(config.get<triplet>("seek",triplet(0,0,-1)));
+  
   
   tcp_socket sim;
   try
