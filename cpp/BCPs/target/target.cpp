@@ -43,6 +43,7 @@ int main(int argc, char * argv[])
   // get the configuration data
   string server_addr(config.get<string>("server","127.0.0.1:64500"));
   triplet seek(config.get<triplet>("seek",triplet(0,0,-1)));
+  int zone(config.get<int>("zone",1000));
   
   
   tcp_socket sim;
