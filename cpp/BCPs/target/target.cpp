@@ -22,12 +22,88 @@
 #include <confreader.h>
 #include <base_socket.h>
 #include <hires_timer.h>
+#include <linear_queue.h>
 #include <triad.h>
 
 using namespace nrtb;
 using namespace std;
 
 typedef triad<float> triplet;
+
+
+class async_com_handler
+{
+public:
+  async_com_handler(std::string addr)
+    : address(addr), active(false)
+  {
+    worker_thread = std::thread(async_com_handler::worker, std::ref(*this));
+  };
+  ~async_com_handler()
+  {
+    if (active) try {close();} catch (...) {};
+  };
+  std::string get()
+  {
+    return inbound.pop();
+  };
+  void put(std::string msg)
+  {
+    sock.put(msg+"\r");
+  };
+  void close()
+  {
+    active = false;
+    sock.close();
+    if (worker_thread.joinable()) worker_thread.join();
+  };
+private:
+  linear_queue<std::string> inbound;
+  std::string address;
+  std::atomic<bool> active;
+  tcp_socket sock;
+  std::thread worker_thread;
+  static void worker(async_com_handler & a)
+  {
+    a.active = true;
+    try
+    {
+      // Make the socket connection.
+      a.sock.connect(a.address);
+      // loop
+      while (a.active)
+      {
+        try
+        {
+          a.inbound.push(gsub(a.sock.getln("\r",0,1),"\r",""));
+        }
+        catch (tcp_socket::timeout_exception e) {};
+      };
+    }
+    catch (tcp_socket::not_open_exception & e)
+    {
+      // nop... this is normal af the end.
+    }
+    catch (base_exception & e) 
+    {
+      cerr << "Exception at " << __FILE__ << ":" << __LINE__ << endl;
+      cerr << e.what() << "\n" << e.comment() << endl;
+    }
+    catch (std::exception & e)
+    {
+      cerr << "Exception at " << __FILE__ << ":" << __LINE__ << endl;
+      cerr << e.what() << endl;
+    }
+    catch (...) 
+    {
+      cerr << "Unknown error at " << __FILE__ << ":" << __LINE__ << endl;
+    };
+    // close out the connection
+    try {a.sock.close();} catch (...) {};
+    a.active = false;
+  };
+};
+
 
 int main(int argc, char * argv[])
 {
@@ -44,32 +120,26 @@ int main(int argc, char * argv[])
   string server_addr(config.get<string>("server","127.0.0.1:64500"));
   triplet seek(config.get<triplet>("seek",triplet(0,0,-1)));
   int zone(config.get<int>("zone",1000));
+
+  // start com handler.
+  async_com_handler sim(server_addr);
   
-  
-  tcp_socket sim;
   try
   {
     string sys, verb; 
-    sim.connect(server_addr);
     // get bot ack.
-    cout << "\n" << sim.getln() << endl;
+    cout << "\n" << sim.get() << endl;
     
     // get and publish our curent location.
-    sim.put("bot lvar\r");
+    sim.put("bot lvar");
     // get bot ack.
-    cout << "\n" << sim.getln() << endl;
+    cout << sim.get() << endl;
     
       
     
   }
   catch (...)
   {};
-  
-  
-  
-  sim.close();
-
-
   
 };
 
