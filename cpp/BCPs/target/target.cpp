@@ -30,6 +30,20 @@ using namespace std;
 
 typedef triad<float> triplet;
 
+struct lvar
+{
+  triplet location;
+  triplet velocity;
+  triplet attitude;
+  triplet rotation;
+  void load(string data)
+  {
+    string junk;
+    stringstream s(data);
+    s >> junk >> junk // "bot lvar"
+      >> location >> velocity >> attitude >> rotation;
+  }
+};
 
 class async_com_handler
 {
@@ -119,21 +133,37 @@ int main(int argc, char * argv[])
   // get the configuration data
   string server_addr(config.get<string>("server","127.0.0.1:64500"));
   triplet seek(config.get<triplet>("seek",triplet(0,0,-1)));
-  int zone(config.get<int>("zone",1000));
+  float zone(config.get<float>("zone",1000));
 
   // start com handler.
   async_com_handler sim(server_addr);
   
   try
   {
-    string sys, verb; 
+    string sys, verb;
+    triplet center;
+    lvar start;
+    lvar current;
     // get bot ack.
     cout << "\n" << sim.get() << endl;
     
-    // get and publish our curent location.
+    // get and record initial conditions
     sim.put("bot lvar");
-    // get bot ack.
-    cout << sim.get() << endl;
+    start.load(sim.get());
+    current = start;
+    (seek.z < 0) ? center = start.location : center = seek;
+    
+    // report starting status
+    cout << "landed at " << start.location << endl
+      << "zone center : " << center << endl
+      << "zone size : " << zone << endl
+      << "range : " << current.location.range(center) << endl;
+    
+    // working loop
+//    while (true) // literally loop till we die....
+//    {
+//      
+//    };
     
       
     
