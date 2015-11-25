@@ -134,6 +134,7 @@ int main(int argc, char * argv[])
   string server_addr(config.get<string>("server","127.0.0.1:64500"));
   triplet seek(config.get<triplet>("seek",triplet(0,0,-1)));
   float zone(config.get<float>("zone",1000));
+  float turnslop(config.get<float>("turnslop",0.6));
 
   // start com handler.
   async_com_handler sim(server_addr);
@@ -156,17 +157,89 @@ int main(int argc, char * argv[])
     // report starting status
     cout << "landed at " << start.location << endl
       << "zone center : " << center << endl
-      << "zone size : " << zone << endl
-      << "range : " << current.location.range(center) << endl;
+      << "  zone size : " << zone << endl
+      << "      range : " << current.location.range(center) 
+      << "  turn slop : " << turnslop
+      << endl;
+      
+    sim.put("drive power 25");
+
+    const int run=1;
+    const int stopping=2;
+    const int turning=3;
+    const int tofar=4;
+    int state(run); 
+    triplet wayhome;
+    long long unsigned counter(0);
     
     // working loop
-//    while (true) // literally loop till we die....
-//    {
-//      
-//    };
-    
+    while (true) // literally loop till we die....
+    {
+      // get current conditions
+      sim.put("bot lvar");
+      current.load(sim.get());
       
-    
+      if ((++counter % 50) == 0)
+      {
+        cout << counter 
+          << "\n\t" << current.location
+          << "\n\t" << current.velocity
+          << "\n\t" << current.location.range(center)
+          << endl;
+      };
+      
+      // check conditions
+      switch (state)
+      {
+        case run : 
+        {
+          if (current.location.range(center) > zone) state = tofar;
+          break;
+        }
+        case tofar :
+        {
+          cout << "Too far from base." << endl;
+          sim.put("drive power 0");
+          sim.put("drive brake 100");
+          state = stopping;
+          break;
+        }
+        case stopping : 
+        {
+          if (current.velocity.magnatude() < 0.01)
+          {
+            cout << "Stopped" << endl;
+            sim.put("drive brake 0");
+            // where are we relative to center?
+            wayhome = (center - current.location).to_polar();
+            // start turn
+            sim.put("drive turn 25");
+            // set state
+            state = turning;
+          }
+          break;
+        }
+        case turning : 
+        {
+          float diff = fabs(current.attitude.x - wayhome.y);
+          // check to see if we have the heading yet.
+          if (diff < turnslop)
+          {
+            cout << "Turn complete." << endl;
+            // -- stop turn
+            sim.put("drive turn 0");
+            // -- start drive
+            sim.put("drive power 20");
+            // -- set status to run
+            state = run;
+          }
+          break;
+        }
+      };
+      int t(1e6/50);
+      std::chrono::microseconds st(t);
+      this_thread::sleep_for(st);
+    };
   }
   catch (...)
   {};
