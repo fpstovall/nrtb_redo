@@ -163,13 +163,15 @@ int main(int argc, char * argv[])
       << endl;
       
     sim.put("drive power 25");
+    sim.put("drive brake 0");
 
     const int run=1;
     const int stopping=2;
     const int turning=3;
     const int tofar=4;
+    const int returning=5;
     int state(run); 
-    triplet wayhome;
+    float wayhome;
     long long unsigned counter(0);
     
     // working loop
@@ -183,7 +185,9 @@ int main(int argc, char * argv[])
       {
         cout << counter 
           << "\n\t" << current.location
-          << "\n\t" << current.velocity
+          << "\n\t" << current.attitude
+          << "\n\t" << wayhome
+          << "\n\t" << current.velocity.magnatude()
           << "\n\t" << current.location.range(center)
           << endl;
       };
@@ -206,14 +210,14 @@ int main(int argc, char * argv[])
         }
         case stopping : 
         {
-          if (current.velocity.magnatude() < 0.01)
+          if (current.velocity.magnatude() < 1.0)
           {
             cout << "Stopped" << endl;
             sim.put("drive brake 0");
             // where are we relative to center?
-            wayhome = (center - current.location).to_polar();
+            wayhome = (center - current.location).to_polar().y;
             // start turn
-            sim.put("drive turn 25");
+            sim.put("drive turn 10");
             // set state
             state = turning;
           }
@@ -221,7 +225,7 @@ int main(int argc, char * argv[])
         }
         case turning : 
         {
-          float diff = fabs(current.attitude.x - wayhome.y);
+          float diff = fabs(current.attitude.z - wayhome);
           // check to see if we have the heading yet.
           if (diff < turnslop)
           {
@@ -229,14 +233,23 @@ int main(int argc, char * argv[])
             // -- stop turn
             sim.put("drive turn 0");
             // -- start drive
-            sim.put("drive power 20");
+            sim.put("drive power 25");
             // -- set status to run
+            state = returning;
+          }
+          break;
+        }
+        case returning:
+        {
+          if (current.location.range(center) < zone)
+          {
             state = run;
+            cout << "Back in zone." << endl;
           }
           break;
         }
       };
-      int t(1e6/50);
+      const int t(1e6/50);
       std::chrono::microseconds st(t);
       this_thread::sleep_for(st);
     };
