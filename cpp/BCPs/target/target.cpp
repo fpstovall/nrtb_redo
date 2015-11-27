@@ -119,6 +119,26 @@ private:
 };
 
 
+const int run=1;
+const int stopping=2;
+const int turning=3;
+const int tofar=4;
+const int returning=5;
+
+std::string state_map(int state)
+{
+  string returnme = "WRONG";
+  switch (state)
+  {
+    case run: { returnme="cruse"; break; }
+    case stopping: { returnme="stopping"; break;}
+    case turning: { returnme="turning"; break; }
+    case tofar: { returnme="zone exception"; break; }
+    case returning: { returnme="seeking zone"; break; }
+  };
+  return returnme;
+};
+
 int main(int argc, char * argv[])
 {
   hirez_timer runtime();
@@ -165,13 +185,8 @@ int main(int argc, char * argv[])
     sim.put("drive power 25");
     sim.put("drive brake 0");
 
-    const int run=1;
-    const int stopping=2;
-    const int turning=3;
-    const int tofar=4;
-    const int returning=5;
     int state(run); 
-    float wayhome;
+    float wayhome(0.0);
     long long unsigned counter(0);
     
     // working loop
@@ -183,13 +198,19 @@ int main(int argc, char * argv[])
       
       if ((++counter % 50) == 0)
       {
-        cout << counter 
-          << "\n\t" << current.location
-          << "\n\t" << current.attitude
-          << "\n\t" << wayhome
-          << "\n\t" << current.velocity.magnatude()
-          << "\n\t" << current.location.range(center)
+        cout << counter / 50
+          << "\n\t           State: " << state_map(state) 
+          << "\n\t vct from center: " << (current.location-center).to_polar()
+          << "\n\t    ground speed: " << current.velocity.magnatude()
+          << "\n\t vehicle heading: " << current.attitude.z
+          << "\n\t calc'd way home: " << wayhome
           << endl;
+      };
+      
+      if (wayhome < 0.0) 
+      {
+        sim.close();
+        exit(1);
       };
       
       // check conditions
@@ -202,7 +223,6 @@ int main(int argc, char * argv[])
         }
         case tofar :
         {
-          cout << "Too far from base." << endl;
           sim.put("drive power 0");
           sim.put("drive brake 100");
           state = stopping;
@@ -212,10 +232,10 @@ int main(int argc, char * argv[])
         {
           if (current.velocity.magnatude() < 1.0)
           {
-            cout << "Stopped" << endl;
             sim.put("drive brake 0");
             // where are we relative to center?
             wayhome = (center - current.location).to_polar().y;
+            if (wayhome<0.0) wayhome += 6.283185;
             // start turn
             sim.put("drive turn 10");
             // set state
@@ -229,7 +249,6 @@ int main(int argc, char * argv[])
           // check to see if we have the heading yet.
           if (diff < turnslop)
           {
-            cout << "Turn complete." << endl;
             // -- stop turn
             sim.put("drive turn 0");
             // -- start drive
@@ -244,7 +263,6 @@ int main(int argc, char * argv[])
           if (current.location.range(center) < zone)
           {
             state = run;
-            cout << "Back in zone." << endl;
           }
           break;
         }
