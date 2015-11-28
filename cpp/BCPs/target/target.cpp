@@ -120,7 +120,7 @@ private:
 
 
 const int run=1;
-const int stopping=2;
+const int orient=2;
 const int turning=3;
 const int tofar=4;
 const int returning=5;
@@ -131,7 +131,7 @@ std::string state_map(int state)
   switch (state)
   {
     case run: { returnme="cruse"; break; }
-    case stopping: { returnme="stopping"; break;}
+    case orient: { returnme="orientation"; break;}
     case turning: { returnme="turning"; break; }
     case tofar: { returnme="zone exception"; break; }
     case returning: { returnme="seeking zone"; break; }
@@ -141,7 +141,7 @@ std::string state_map(int state)
 
 int main(int argc, char * argv[])
 {
-  hirez_timer runtime();
+  hirez_timer returntime();
   // load the global configuration
   conf_reader config;
   config.read(argc, argv, "target.conf");
@@ -155,6 +155,7 @@ int main(int argc, char * argv[])
   triplet seek(config.get<triplet>("seek",triplet(0,0,-1)));
   float zone(config.get<float>("zone",1000));
   float turnslop(config.get<float>("turnslop",0.6));
+  float speedlimit(config.get<float>("zonelimit",150));
 
   // start com handler.
   async_com_handler sim(server_addr);
@@ -165,6 +166,8 @@ int main(int argc, char * argv[])
     triplet center;
     lvar start;
     lvar current;
+    hirez_timer runtime;
+    
     // get bot ack.
     cout << "\n" << sim.get() << endl;
     
@@ -187,6 +190,7 @@ int main(int argc, char * argv[])
 
     int state(run); 
     float wayhome(0.0);
+    float tohome;
     long long unsigned counter(0);
     
     // working loop
@@ -198,7 +202,7 @@ int main(int argc, char * argv[])
       
       if ((++counter % 50) == 0)
       {
-        cout << counter / 50
+        cout << runtime.interval_as_HMS()
           << "\n\t           State: " << state_map(state) 
           << "\n\t vct from center: " << (current.location-center).to_polar()
           << "\n\t    ground speed: " << current.velocity.magnatude()
@@ -218,29 +222,28 @@ int main(int argc, char * argv[])
       {
         case run : 
         {
+          float v = current.velocity.magnatude();
           if (current.location.range(center) > zone) state = tofar;
+          else if (v > speedlimit)
+            sim.put("drive power 0");
+          else if (v < (speedlimit*0.95))
+            sim.put("drive power 25");
           break;
         }
         case tofar :
         {
           sim.put("drive power 0");
-          sim.put("drive brake 100");
-          state = stopping;
+          state = orient;
           break;
         }
-        case stopping : 
+        case orient : 
         {
-          if (current.velocity.magnatude() < 1.0)
-          {
-            sim.put("drive brake 0");
-            // where are we relative to center?
-            wayhome = (center - current.location).to_polar().y;
-            if (wayhome<0.0) wayhome += 6.283185;
-            // start turn
-            sim.put("drive turn 10");
-            // set state
-            state = turning;
-          }
+          wayhome = (center - current.location).to_polar().y;
+          if (wayhome<0.0) wayhome += 6.283185;
+          // start turn
+          sim.put("drive turn 10");
+          // set state
+          state = turning;
           break;
         }
         case turning : 
@@ -255,15 +258,24 @@ int main(int argc, char * argv[])
             sim.put("drive power 25");
             // -- set status to run
             state = returning;
+            tohome = current.location.range(center);
           }
           break;
         }
         case returning:
         {
-          if (current.location.range(center) < zone)
+          float dist = current.location.range(center);
+          if (dist < zone)
           {
             state = run;
           }
+          else if (dist > tohome)
+          {
+            // missed by that much.. stop and retry.
+            state = tofar;
+          };
+          // ensure we continue to close;
+          tohome = dist;
           break;
         }
       };
