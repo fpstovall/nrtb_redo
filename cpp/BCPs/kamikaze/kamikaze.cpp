@@ -128,14 +128,14 @@ lvar get_my_state(async_com_handler & s)
 lvar get_target(async_com_handler & s)
 {
   lvar returnme;
-  int tossme;
+  std::string tossme;
   s.put("radar contacts");
   std::stringstream contacts(s.get());
   int count;
-  contacts >> count;
+  contacts >> tossme >> tossme >> count;
   if (count > 0)
   {
-    contacts >> tossme 
+    contacts >> tossme
       >> returnme.location
       >> returnme.velocity;
   }
@@ -179,10 +179,11 @@ int main(int argc, char * argv[])
       if ((counter++ % 25) == 0)
       {
         cout << runtime.interval_as_HMS()
-          << "\n\tvct to target: " << target.location
-          << "\n\t     location: " << current.location
-          << "\n\t      heading: " << current.attitude.z
-          << "\n\t        speed: " << current.velocity.magnatude()
+          << "\n\t vct to target: " << target.location
+          << "\n\t     target Vr: " << target.velocity
+          << "\n\t      location: " << current.location
+          << "\n\t       heading: " << current.attitude.z
+          << "\n\t         speed: " << current.velocity.magnatude()
           << endl;
       };
       
@@ -200,9 +201,9 @@ int main(int argc, char * argv[])
         // figure out our course changes. 
         float delta = (target.location.y -current.attitude.z);
         if (delta < -0.3) 
-          { sim.put("drive turn -100"); }
+          { sim.put("drive turn -10"); }
         else if (delta > -0.3) 
-          { sim.put("drive turn 100"); }
+          { sim.put("drive turn 10"); }
         else { sim.put("drive turn 0"); };
       };
       const int t(1e6/50);
