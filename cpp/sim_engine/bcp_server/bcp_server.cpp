@@ -24,13 +24,10 @@
 
 using namespace nrtb;
 
-bcp_listener::bcp_listener(sim_core& e)
+bcp_listener::bcp_listener(sim_core& e, std::string addr, int limit)
   : engine(e),
-    listener("*:"+
-      global_conf_reader::get_reference().get<std::string>(
-        "bcp_port","64500")),
-    pop_limit(global_conf_reader::get_reference().get<int>(
-        "pop_limit",100))
+    listener(addr),
+    pop_limit(limit)
 {};
 
 bcp_listener::~bcp_listener()
@@ -94,6 +91,7 @@ void bcp_listener::processor()
         // fully populated, reject.
         bcp->put("NOT_AVAILALE\r");
         rejected++;
+        log.warning("connection rejected");
       };
     };
   }

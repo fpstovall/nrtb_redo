@@ -45,7 +45,7 @@ class bcp_listener
 {
 public:
   // Instanciates the class and limks to the sim_engine.
-  bcp_listener(sim_core & e);
+  bcp_listener(sim_core & e, std::string addr, int limit);
   // shuts down and destructs the class
   ~bcp_listener();
   // -- performance metrics
