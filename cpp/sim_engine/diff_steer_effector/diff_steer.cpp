@@ -183,7 +183,7 @@ bool diff_steer::pre::tick(base_object& o, float quanta)
     triplet vel = o.velocity;
     vel.z = 0.0;
     float speed = vel.magnatude();
-    float bspeed = speed * 50;
+    float bspeed = speed * (1.0/quanta);
     float KE = o.mass * bspeed * bspeed ;
     // Include current power setting in budget.
     KE += p;
@@ -246,24 +246,14 @@ bool diff_steer::post::tick(base_object& o, float time)
        * simplistic for alpha.. simply snap to the 
        * current heading.
        *******************************/
+      // adjust gspeed to deal with the skid.
+      gspeed *= delta;
       // Scale new xy to match original components
       DoH = DoH * gspeed;
       // restore the z component.
       DoH.z = o.velocity.z;
-      // TODO: we may want remove this check.
-      // Verify we have the correct velocity.
-      if (fabs(DoH.magnatude() - speed) > 0.001)
-      {
-        // Sanity check failed.
-        base_exception e;
-        std::stringstream s;
-        s << "diff_steer::post::tick() DoH magnitude incorrect"
-          << ":" << DoH << "," << DoH.magnatude();
-        e.store(s.str());
-        throw e;
-      };
       // scale back to original speed adjusted for slide drag
-      o.velocity = DoH * delta;
+      o.velocity = DoH;
     };
     // if gspeed is less than 0.001, just stop.
     if (gspeed < 1e-3)
@@ -272,16 +262,14 @@ bool diff_steer::post::tick(base_object& o, float time)
       o.velocity.y = 0.0;
       gspeed = 0.0;
     };
-    /******** removed for now **********
     // apply rolling friction (limit is 360 km/h).
     // calculate drag
-    float drag_q = 1.0 - (gspeed/10000.0);
+    float drag_q = 1.0 - ((gspeed*gspeed)/1e8);
     drag_q = drag_q > 1.0 ? 1.0 : drag_q;
     // assemble drag vector;
     triplet drags(drag_q,drag_q,1.0);
     // apply drag.
     o.velocity = o.velocity * drags;
-    ***********************************/
   };
   return false;
 };
