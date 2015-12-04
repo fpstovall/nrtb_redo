@@ -81,6 +81,7 @@ float diff_steer::drive(float power)
 {
   if (fabsf(power) <= 100.0)
   {
+    if (power != 0.0) pre_effector->set_b.store(0.0);
     pre_effector->set_p.store(power/100.0);
   }
   else
@@ -93,6 +94,7 @@ float diff_steer::brake(float braking)
 {
   if ((braking >= 0.0) and (braking <= 100.0))
   {
+    if (braking != 0.0) pre_effector->set_p.store(0.0);
     pre_effector->set_b.store(braking/100.0);
   }
   else 
@@ -227,44 +229,38 @@ bool diff_steer::post::tick(base_object& o, float time)
   {
     // get velocity vector and speed.
     triplet DoT = o.velocity;
-    float speed = o.velocity.magnatude();
+    triplet att = o.attitude.angles();
     // -- squash verticals
     DoT.z = 0.0;
-    // get the current ground speed
-    float gspeed = DoT.magnatude();
-    // build the xy plane vector
-    rotatable & a = o. attitude;
-    triplet DoH(a.get_cos().z,a.get_sin().z,0.0);
-    // get the cosine of the angle between them.
-    DoT = DoT.normalize();
-    float delta = DoT.dot_product(DoH);
+    // get the current ground speed and direction
+    triplet gnd_vec = DoT.to_polar();
+    float delta = fabs(gnd_vec.y - att.z) ;
     // are we sliding?
-    if ((gspeed > 0.0001) and (delta < 0.995))
+    if ((gnd_vec.x > 0.0001) and (delta > 0.005))
     {
       /********************************
        * sliding.. need to fix and apply drag.
        * simplistic for alpha.. simply snap to the 
        * current heading.
        *******************************/
+      gnd_vec.y = att.z;
       // adjust gspeed to deal with the skid.
-      gspeed *= delta;
-      // Scale new xy to match original components
-      DoH = DoH * gspeed;
-      // restore the z component.
-      DoH.z = o.velocity.z;
-      // scale back to original speed adjusted for slide drag
-      o.velocity = DoH;
+      gnd_vec.x *= 1.0 - pow(delta * (gnd_vec.x/1e4), 2);
+      // store the changes back to the object.
+      DoT = gnd_vec.to_cartesian();
+      o.velocity.x = DoT.x;
+      o.velocity.y = DoT.y;
     };
     // if gspeed is less than 0.001, just stop.
-    if (gspeed < 1e-3)
+    if (gnd_vec.x < 1e-3)
     {
       o.velocity.x = 0.0;
       o.velocity.y = 0.0;
-      gspeed = 0.0;
+      gnd_vec.x = 0.0;
     };
     // apply rolling friction (limit is 360 km/h).
     // calculate drag
-    float drag_q = 1.0 - ((gspeed*gspeed)/1e8);
+    float drag_q = 1.0 - pow(gnd_vec.x/1e4,2);
     drag_q = drag_q > 1.0 ? 1.0 : drag_q;
     // assemble drag vector;
     triplet drags(drag_q,drag_q,1.0);
