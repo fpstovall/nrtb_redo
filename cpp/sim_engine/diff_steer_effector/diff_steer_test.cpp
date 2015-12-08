@@ -202,7 +202,7 @@ int main()
       test_ob.tick(d);
       test_ob.apply(d);
       i++;
-      if (i > 300) break;
+      if (i > 3000) break;
     }; 
     test_failed = (i != 261);
     failed = failed or test_failed;
