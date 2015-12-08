@@ -234,6 +234,7 @@ bool diff_steer::post::tick(base_object& o, float time)
     DoT.z = 0.0;
     // get the current ground speed and direction
     triplet gnd_vec = DoT.to_polar();
+    if (gnd_vec.y < 0.0) gnd_vec.y += 2*pi;
     float delta = fabs(gnd_vec.y - att.z) ;
     // are we sliding?
     if ((gnd_vec.x > 0.0001) and (delta > 0.005))
@@ -243,9 +244,9 @@ bool diff_steer::post::tick(base_object& o, float time)
        * simplistic for alpha.. simply snap to the 
        * current heading.
        *******************************/
-      gnd_vec.y = att.z;
+      gnd_vec.y = att.z; 
       // adjust gspeed to deal with the skid.
-      gnd_vec.x *= 1.0 - pow(delta * (gnd_vec.x/1e4), 2);
+      gnd_vec.x *= 1.0 - pow(delta * (gnd_vec.x/1e4), 3);
       // store the changes back to the object.
       DoT = gnd_vec.to_cartesian();
       o.velocity.x = DoT.x;
