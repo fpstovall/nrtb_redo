@@ -24,6 +24,9 @@
 #include <common_log.h>
 #include <sim_core.h>
 #include <bcp_server.h>
+#include <mongo/client/dbclient.h>
+#include <mongo/bson/bson.h>
+#include <boost/lexical_cast.hpp>
 
 using namespace nrtb;
 using namespace std;
@@ -43,6 +46,8 @@ void output_writer(bool write_zeros=true)
   ofstream output("simulation.out");
   try
   {
+    mongo::DBClientConnection db;
+    db.connect("localhost");
     // get the results from the sim_core.
     auto & ipc = global_ipc_channel_manager::get_reference();
     ipc_queue & soq = ipc.get("sim_output");
@@ -53,19 +58,30 @@ void output_writer(bool write_zeros=true)
       sim_core::report rep = raw->data<sim_core::report>();
       if (write_zeros or rep.objects.size())
       {
-        output << "q\t" << rep.quanta 
-          << "\t" << rep.objects.size()
-          << "\t" << rep.duration
-          << "\t" << rep.wallclock 
-          << endl;
-        for(auto o : rep.objects)
-          output << "o\t" << rep.quanta 
-            << "\t" << o.second->as_str() << endl;
+        mongo::BSONObjBuilder b;
+        b.genOID();
+        b.append("quanta",boost::lexical_cast<string>(rep.quanta));
+        b.append("obj_count",boost::lexical_cast<string>(rep.objects.size()));
+        b.append("ticks",boost::lexical_cast<string>(rep.duration));
+        b.append("run_ticks",boost::lexical_cast<string>(rep.wallclock));
+        for(auto o: rep.objects)
+        {
+          string on = "obj_"+boost::lexical_cast<string>(o.second->id);
+          b.append(on,o.second->as_str());
+        };
+        auto storeme = b.obj();
+        db.insert("nrtb.quanta",storeme);
       };
     };
   }
+  catch (std::exception &e)
+  {
+    cerr << e.what() << endl;
+  }
   catch (...)
-  {};
+  {
+    cerr << "output_writer: Unspecified error caught" << endl;
+  };
   output.close();
   cout << "output writer closed." << endl;
 };
