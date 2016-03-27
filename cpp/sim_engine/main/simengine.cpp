@@ -41,7 +41,7 @@ using namespace std;
  * out of the main file and into it's own more complete
  * module.
  ****************************************************/
-void output_writer(bool write_zeros=true)
+void output_writer(string id, bool write_zeros=true)
 {
   try
   {
@@ -57,12 +57,15 @@ void output_writer(bool write_zeros=true)
       sim_core::report rep = raw->data<sim_core::report>();
       if (write_zeros or rep.objects.size())
       {
+        // build basic data.
         mongo::BSONObjBuilder b;
         b.genOID();
-        b << "quanta" << unsigned(rep.quanta)
+        b << "sim_id" << id
+          << "quanta" << unsigned(rep.quanta)
           << "obj_count" << unsigned(rep.objects.size())
           << "ticks" << unsigned(rep.duration)
           << "run_sec" << rep.wallclock;
+        // buld objects array.
         mongo::BSONArrayBuilder obj_array;
         for (auto o : rep.objects)
         {
@@ -70,20 +73,25 @@ void output_writer(bool write_zeros=true)
           //o.second->as_str());
         };
         b.appendArray("objects",obj_array.arr());
-        auto storeme = b.obj();
-        db.insert("nrtb.quanta",storeme);
+        // save the quanta to the database.
+        db.insert("nrtb.quanta",b.obj());
       };
     };
   }
-  catch (std::exception &e)
-  {
-    cerr << e.what() << endl;
-  }
-  catch (...)
-  {
-    cerr << "output_writer: Unspecified error caught" << endl;
-  };
+  catch (...) {}; 
   cout << "output writer closed." << endl;
+};
+
+string mk_run_id()
+{
+  std::time_t base = std::time(nullptr);
+  std::tm now = *std::localtime(&base);
+  std::stringstream s;
+  unsigned long long year = now.tm_year*31557600l;
+  unsigned long long day = now.tm_yday*24*3600;
+  unsigned long long secs = (now.tm_hour*3600)+(now.tm_min*60)+now.tm_sec;
+  s << year+day+secs;
+  return s.str();
 };
 
 int main(int argc, char * argv[])
@@ -92,6 +100,8 @@ int main(int argc, char * argv[])
   conf_reader config;
   config.read(argc, argv, "simengine.conf");
 
+  string run_id = mk_run_id();
+  
   mongo::client::initialize();
 
   
@@ -100,6 +110,7 @@ int main(int argc, char * argv[])
   
   // Report our startup and configuration.
   g_log.info("Start up");
+  g_log.info("id: "+run_id);
   std::stringstream s;
   s << std::thread::hardware_concurrency() 
     << " hardware threads supported.";
@@ -112,7 +123,8 @@ int main(int argc, char * argv[])
   g_log.info("Configuration list complete");
   
   // start the sim output writer.
-  std::thread writer(output_writer,config.get<bool>("write_zeros",true));
+  std::thread writer(output_writer, run_id,
+                     config.get<bool>("write_zeros",true));
   
   // start the sim_core.
   float quanta = config.get<float>("quanta",1.0/50.0); 
