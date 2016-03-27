@@ -35,7 +35,7 @@ clean:
 	@echo all objects and executables have been erased.
 
 
-switches=-std=gnu++11 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP 
+switches=-std=gnu++14 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP 
 libs=../lib/sim_engine.a ../../common/lib/nrtb_common.a -lpthread -lmongoclient -lboost_thread -lboost_system -lboost_regex
 include=-I../../common/include -I../include
 bargs=${switches} ${include}

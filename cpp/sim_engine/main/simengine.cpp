@@ -43,7 +43,6 @@ using namespace std;
  ****************************************************/
 void output_writer(bool write_zeros=true)
 {
-  ofstream output("simulation.out");
   try
   {
     mongo::DBClientConnection db;
@@ -60,14 +59,14 @@ void output_writer(bool write_zeros=true)
       {
         mongo::BSONObjBuilder b;
         b.genOID();
-        b.append("quanta",boost::lexical_cast<string>(rep.quanta));
-        b.append("obj_count",boost::lexical_cast<string>(rep.objects.size()));
-        b.append("ticks",boost::lexical_cast<string>(rep.duration));
-        b.append("run_ticks",boost::lexical_cast<string>(rep.wallclock));
+        b << "quanta" << unsigned(rep.quanta)
+          << "obj_count" << unsigned(rep.objects.size())
+          << "ticks" << unsigned(rep.duration)
+          << "run_sec" << rep.wallclock;
         for(auto o: rep.objects)
         {
-          string on = "obj_"+boost::lexical_cast<string>(o.second->id);
-          b.append(on,o.second->as_str());
+          b << "obj_"+boost::lexical_cast<string>(o.second->id) 
+            << o.second->as_str();
         };
         auto storeme = b.obj();
         db.insert("nrtb.quanta",storeme);
@@ -82,7 +81,6 @@ void output_writer(bool write_zeros=true)
   {
     cerr << "output_writer: Unspecified error caught" << endl;
   };
-  output.close();
   cout << "output writer closed." << endl;
 };
 
@@ -91,6 +89,9 @@ int main(int argc, char * argv[])
   // load the global configuration
   conf_reader config;
   config.read(argc, argv, "simengine.conf");
+
+  mongo::client::initialize();
+
   
   // create our recorder
   auto g_log(common_log::get_reference()("main()"));
