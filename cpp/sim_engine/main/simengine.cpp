@@ -63,11 +63,13 @@ void output_writer(bool write_zeros=true)
           << "obj_count" << unsigned(rep.objects.size())
           << "ticks" << unsigned(rep.duration)
           << "run_sec" << rep.wallclock;
-        for(auto o: rep.objects)
+        mongo::BSONArrayBuilder obj_array;
+        for (auto o : rep.objects)
         {
-          b << "obj_"+boost::lexical_cast<string>(o.second->id) 
-            << o.second->as_str();
+          obj_array << o.second->as_str();
+          //o.second->as_str());
         };
+        b.appendArray("objects",obj_array.arr());
         auto storeme = b.obj();
         db.insert("nrtb.quanta",storeme);
       };
