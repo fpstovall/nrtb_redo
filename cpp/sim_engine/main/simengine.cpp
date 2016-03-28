@@ -102,7 +102,18 @@ int main(int argc, char * argv[])
 
   string run_id = mk_run_id();
   
+  // store the sim setup to database.
   mongo::client::initialize();
+  mongo::DBClientConnection db;
+  db.connect("localhost");
+  mongo::BSONObjBuilder b;
+  b.genOID();
+  b.append("sim_id",run_id);
+  for (auto i : config)
+  {
+    b.append(i.first,i.second);
+  };
+  db.insert("nrtb.sim_setup",b.obj());
 
   
   // create our recorder
