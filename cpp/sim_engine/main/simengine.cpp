@@ -41,14 +41,14 @@ using namespace std;
  * out of the main file and into it's own more complete
  * module.
  ****************************************************/
-void output_writer(string id, bool write_zeros=true)
+void output_writer(string id, string host, bool write_zeros=true)
 {
   try
   {
     mongo::DBClientConnection db;
-    db.connect("localhost");
     // get the results from the sim_core.
     auto & ipc = global_ipc_channel_manager::get_reference();
+    db.connect(host);
     ipc_queue & soq = ipc.get("sim_output");
     gp_sim_message_adapter sim_out(soq);
     while (true)
@@ -114,7 +114,7 @@ int main(int argc, char * argv[])
   // store the sim setup to database.
   mongo::client::initialize();
   mongo::DBClientConnection db;
-  db.connect("localhost");
+  db.connect(config.get<string>("mongo","localhost"));
   mongo::BSONObjBuilder b;
   b.genOID();
   b.append("sim_id",run_id);
@@ -125,7 +125,6 @@ int main(int argc, char * argv[])
   b.append("hardware_threads",std::thread::hardware_concurrency());
   b.append("last_checkpoint",0);
   db.insert("nrtb.sim_setup",b.obj());
-
   
   // create our recorder
   auto g_log(common_log::get_reference()("main()"));
@@ -146,6 +145,7 @@ int main(int argc, char * argv[])
   
   // start the sim output writer.
   std::thread writer(output_writer, run_id,
+                     config.get<string>("mongo","localhost"),
                      config.get<bool>("write_zeros",true));
   
   // start the sim_core.
