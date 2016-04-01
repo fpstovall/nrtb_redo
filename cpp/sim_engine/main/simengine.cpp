@@ -76,6 +76,15 @@ void output_writer(string id, bool write_zeros=true)
         // save the quanta to the database.
         db.insert("nrtb.quanta",b.obj());
       };
+      // is it time for a checkpoint update?
+      if ((rep.quanta % 50) == 0)
+      {
+        // Update the checkpoint field.
+        db.update("nrtb.sim_setup",
+          BSON("sim_id" << id),
+          BSON("$set" << BSON("last_checkpoint" << unsigned(rep.quanta)))
+        );
+      };
     };
   }
   catch (...) {}; 
@@ -113,6 +122,8 @@ int main(int argc, char * argv[])
   {
     b.append(i.first,i.second);
   };
+  b.append("hardware_threads",std::thread::hardware_concurrency());
+  b.append("last_checkpoint",0);
   db.insert("nrtb.sim_setup",b.obj());
 
   
