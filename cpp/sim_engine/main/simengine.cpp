@@ -64,7 +64,7 @@ void output_writer(string id, string host, bool write_zeros=true)
           << "quanta" << unsigned(rep.quanta)
           << "obj_count" << unsigned(rep.objects.size())
           << "ticks" << unsigned(rep.duration)
-          << "run_sec" << rep.wallclock;
+          << "run_sec" << float(rep.wallclock);
         // buld objects array.
         mongo::BSONArrayBuilder obj_array;
         for (auto o : rep.objects)
