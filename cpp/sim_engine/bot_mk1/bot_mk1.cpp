@@ -80,9 +80,9 @@ bot_mk1::~bot_mk1()
 
 bool bot_mk1::tick(float duration)
 {
+  cooking_lock.lock();
   if (ImAlive)
   {
-    std::unique_lock<std::mutex> lock(cooking_lock);
     return nrtb::abs_bot::tick(duration);
   }
   else
@@ -96,12 +96,14 @@ bool bot_mk1::apply(float quanta)
 {
   if (ImAlive)
   {
-    std::unique_lock<std::mutex> lock(cooking_lock);
-    return nrtb::base_object::apply(quanta);
+    bool returnme = nrtb::base_object::apply(quanta);
+    cooking_lock.unlock();
+    return returnme;
   }
   else
   {
     // we are dead.. tell sim_engine.
+    cooking_lock.unlock();
     return true;
   };
 };
@@ -110,7 +112,6 @@ bool bot_mk1::check_collision(object_p o, float duration)
 {
   if (ImAlive)
   {
-    std::unique_lock<std::mutex> lock(cooking_lock);
     return nrtb::base_object::check_collision(o, duration);
   }
   else
@@ -171,6 +172,8 @@ void bot_mk1::transmitter()
 
 void bot_mk1::msg_router(std::string s)
 {
+  // don't go in here if we are in a quanta refresh.
+  std::unique_lock<std::mutex>(cooking_lock);
   try
   {
     std::string returnme;
@@ -193,7 +196,6 @@ void bot_mk1::msg_router(std::string s)
       {
         if (verb == "lvar")
         {
-          std::unique_lock<std::mutex> lock(cooking_lock);
           std::stringstream s;
           s << sys << " " << verb 
             << " " << location 

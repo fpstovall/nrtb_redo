@@ -199,14 +199,16 @@ int main(int argc, char * argv[])
       // get current conditions
       sim.put("bot lvar");
       current.load(sim.get());
-      
+            
       if ((++counter % 50) == 0)
       {
         cout << runtime.interval_as_HMS()
           << "\n\t           State: " << state_map(state) 
           << "\n\t vct from center: " << (current.location-center).to_polar()
           << "\n\t    ground speed: " << current.velocity.magnatude()
-          << "\n\t vehicle heading: " << current.attitude.z
+          << "\n\t vehicle heading: " << current.attitude.z 
+          << "\n\t   actual motion: " << 
+            [&]{triplet t=current.velocity; t.z=0.0; return t.to_polar().y;}()
           << "\n\t calc'd way home: " << wayhome
           << endl;
       };

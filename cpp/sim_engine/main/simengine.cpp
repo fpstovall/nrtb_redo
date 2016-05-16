@@ -24,6 +24,9 @@
 #include <common_log.h>
 #include <sim_core.h>
 #include <bcp_server.h>
+#include <mongo/client/dbclient.h>
+#include <mongo/bson/bson.h>
+#include <boost/lexical_cast.hpp>
 
 using namespace nrtb;
 using namespace std;
@@ -38,13 +41,14 @@ using namespace std;
  * out of the main file and into it's own more complete
  * module.
  ****************************************************/
-void output_writer(bool write_zeros=true)
+void output_writer(string id, string host, bool write_zeros=true)
 {
-  ofstream output("simulation.out");
   try
   {
+    mongo::DBClientConnection db;
     // get the results from the sim_core.
     auto & ipc = global_ipc_channel_manager::get_reference();
+    db.connect(host);
     ipc_queue & soq = ipc.get("sim_output");
     gp_sim_message_adapter sim_out(soq);
     while (true)
@@ -53,21 +57,50 @@ void output_writer(bool write_zeros=true)
       sim_core::report rep = raw->data<sim_core::report>();
       if (write_zeros or rep.objects.size())
       {
-        output << "q\t" << rep.quanta 
-          << "\t" << rep.objects.size()
-          << "\t" << rep.duration
-          << "\t" << rep.wallclock 
-          << endl;
-        for(auto o : rep.objects)
-          output << "o\t" << rep.quanta 
-            << "\t" << o.second->as_str() << endl;
+        // build basic data.
+        mongo::BSONObjBuilder b;
+        b.genOID();
+        b << "sim_id" << id
+          << "quanta" << unsigned(rep.quanta)
+          << "obj_count" << unsigned(rep.objects.size())
+          << "ticks" << unsigned(rep.duration)
+          << "run_sec" << float(rep.wallclock);
+        // buld objects array.
+        mongo::BSONArrayBuilder obj_array;
+        for (auto o : rep.objects)
+        {
+          obj_array << o.second->as_str();
+          //o.second->as_str());
+        };
+        b.appendArray("objects",obj_array.arr());
+        // save the quanta to the database.
+        db.insert("nrtb.quanta",b.obj());
+      };
+      // is it time for a checkpoint update?
+      if ((rep.quanta % 50) == 0)
+      {
+        // Update the checkpoint field.
+        db.update("nrtb.sim_setup",
+          BSON("sim_id" << id),
+          BSON("$set" << BSON("last_checkpoint" << unsigned(rep.quanta)))
+        );
       };
     };
   }
-  catch (...)
-  {};
-  output.close();
+  catch (...) {}; 
   cout << "output writer closed." << endl;
+};
+
+string mk_run_id()
+{
+  std::time_t base = std::time(nullptr);
+  std::tm now = *std::localtime(&base);
+  std::stringstream s;
+  unsigned long long year = now.tm_year*31557600l;
+  unsigned long long day = now.tm_yday*24*3600;
+  unsigned long long secs = (now.tm_hour*3600)+(now.tm_min*60)+now.tm_sec;
+  s << year+day+secs;
+  return s.str();
 };
 
 int main(int argc, char * argv[])
@@ -75,12 +108,30 @@ int main(int argc, char * argv[])
   // load the global configuration
   conf_reader config;
   config.read(argc, argv, "simengine.conf");
+
+  string run_id = mk_run_id();
+  
+  // store the sim setup to database.
+  mongo::client::initialize();
+  mongo::DBClientConnection db;
+  db.connect(config.get<string>("mongo","localhost"));
+  mongo::BSONObjBuilder b;
+  b.genOID();
+  b.append("sim_id",run_id);
+  for (auto i : config)
+  {
+    b.append(i.first,i.second);
+  };
+  b.append("hardware_threads",std::thread::hardware_concurrency());
+  b.append("last_checkpoint",0);
+  db.insert("nrtb.sim_setup",b.obj());
   
   // create our recorder
   auto g_log(common_log::get_reference()("main()"));
   
   // Report our startup and configuration.
   g_log.info("Start up");
+  g_log.info("id: "+run_id);
   std::stringstream s;
   s << std::thread::hardware_concurrency() 
     << " hardware threads supported.";
@@ -93,7 +144,9 @@ int main(int argc, char * argv[])
   g_log.info("Configuration list complete");
   
   // start the sim output writer.
-  std::thread writer(output_writer,config.get<bool>("write_zeros",true));
+  std::thread writer(output_writer, run_id,
+                     config.get<string>("mongo","localhost"),
+                     config.get<bool>("write_zeros",true));
   
   // start the sim_core.
   float quanta = config.get<float>("quanta",1.0/50.0); 
