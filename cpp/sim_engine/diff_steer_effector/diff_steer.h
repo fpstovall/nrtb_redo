@@ -37,7 +37,7 @@ namespace nrtb
  * This is a very "loose" simulation of a diff-steer
  * system.. good enough for alpha, but low fidelity.
  **************************************************/  
-class diff_steer : public commandable
+class diff_steer  
 {
 public:
   /*************************************************
@@ -64,7 +64,7 @@ public:
   /**************************************************
    * External command interface for diff_steer
    *************************************************/
-  bool command(std::string cmd, std::string & response);
+  virtual bool command(std::string cmd, std::string & response);
   // -- effector definitions
   /***********************************************
    * pre is the pre-effector for diff_steer. It 
