@@ -41,7 +41,8 @@ int test_triad(const std::string prompt, ld_triad val, ld_triad right, int ec)
 int test_ld(const std::string prompt, long double val, long double right, int ec)
 {
   cout << "\t" << prompt << " = " << val << endl;
-  if (val != right)
+  long double tval = fabs(val - right);
+  if (tval > 0.0001)
   {
     ec++;
     cerr << "\t\tTest Failed: Answer should be " << val << endl;
