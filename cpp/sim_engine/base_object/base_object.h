@@ -100,18 +100,18 @@ typedef std::map<unsigned long long, object_p> object_list;
  *****************************************/
 struct abs_effector
 {
-  // provides a unique id for each effector.
+  /// provides a unique id for each effector.
   static serializer effector_num;
-  // Populated from the serializer at allocation.
+  /// Populated from the serializer at allocation.
   unsigned long long id = effector_num();
-  // NOP destructor to ensure proper deallocation.
+  /// NOP destructor to ensure proper deallocation.
   virtual ~abs_effector() {};
   /** polymorphic copier
   /* Returns a newly allocated copy of the effector.
    * Must be overridden by each child class.
    */
   virtual std::shared_ptr<abs_effector> clone() = 0;
-  // name of the effector.
+  /// name of the effector.
   std::string handle;
   /** Reporting method
    * Overridden by each descendent, this method 
@@ -119,6 +119,14 @@ struct abs_effector
    * status at the time of the call.
    */
   virtual std::string as_str() = 0;
+  /*****************************************
+   * command accepts strings and returns a response
+   * as appropriate. It should return true if the 
+   * cmd was recognised and handled by the effector
+   * or false in all other cases. The default 
+   * implementation defaults to false.
+  ******************************************/
+  virtual bool command(std::string cmd, std::string & response) { return false; };
   /** does the "time quanta" work of the effector.
    * Returns true if the object should die.
    * o is the parent object
