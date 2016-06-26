@@ -60,43 +60,6 @@ public:
   virtual void bot_cmd(std::string cmd) = 0;
 };
 
-/*=======================================================
- * The following two intefaces provide a mechanism for 
- * a bot to implement internal functions called on a 
- * regular basis. Typically, the bot would arrange to 
- * call them once per game turn.
- *=====================================================*/
-
-/******************************************************
- * tickable is a functor interface provided by modules 
- * wanting to plug into a bot's ticker mechanism to be 
- * called regularly. 
- *****************************************************/
-class tickable
-{
-public:
-  // method to be called by the bot's ticker
-  virtual void operator()(float duration) = 0;
-};
-
-/******************************************************
- * ticker provides the methods and data required to 
- * allow a bot implementation to manage callbacks to 
- * modules which need to do some work each game cycle.
- *****************************************************/
-class ticker
-{
-public:
-  // stores modules implementing the tickable interface
-  std::map<unsigned long long,tickable &> tickees;
-  // Register a tickable to be called.
-  void register_ticker(tickable & t);
-  // Remove the tickable from the callback list.
-  void deregister_ticker(tickable & t);
-  // Call all tickables iteratively.
-  void tick_all(float duration);
-};
-
 /****************************************************
  * abs_bot provides the common interfaces a bot needs
  * to be useful. In addition to agragating the 
@@ -107,11 +70,8 @@ public:
 struct abs_bot
 : public base_object,
   public bcp_sender,
-  public cmd_interface,
-  public ticker
-{
-  bool tick(float duration);
-};
+  public cmd_interface
+{};
 
 } // namepace nrtb
 
