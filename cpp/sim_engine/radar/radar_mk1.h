@@ -34,7 +34,7 @@ namespace nrtb
  * and formats results for the supplied 
  * object's point of view.
  ****************************************/
-class radar_mk1 : public commandable
+class radar_mk1
 {
 public:
   /***************************************
