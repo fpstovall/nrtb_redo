@@ -118,6 +118,25 @@ void effector_list::remove(long long unsigned int key)
   erase(key);
 };
 
+bool base_object::command(std::string cmd, std::string & response)
+{
+	bool found = false;
+	for(auto &e : pre_attribs)
+	{
+		found = e.second->command(cmd,response);
+		if (found) break;
+	};
+	if (!found)
+	{
+		for(auto &e : post_attribs)
+		{
+			found = e.second->command(cmd,response);
+			if (found) break;
+		};		
+	};
+	return found;
+};
+
 std::string base_object::as_str()
 {
   std::stringstream returnme;

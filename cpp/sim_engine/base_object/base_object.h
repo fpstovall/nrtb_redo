@@ -187,6 +187,14 @@ struct base_object
   triplet accel_mod;
   rotatable rotation_mod;
   float mass_mod;
+  /*****************************************
+   * command accepts strings and returns a response
+   * as appropriate. It should return true if the 
+   * cmd was recognised and handled by the effector
+   * or false in all other cases. The default 
+   * implementation defaults to false.
+  ******************************************/
+  virtual bool command(std::string cmd, std::string & response);
   // reporting
   virtual std::string as_str();
   // effector management
