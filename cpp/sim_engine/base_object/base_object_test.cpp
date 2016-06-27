@@ -44,6 +44,17 @@ struct gravity : public abs_effector
     return returnme.str();
   };
   
+  bool command(std::string cmd, std::string & response)
+  {
+	  bool returnme = false;
+	  if (cmd == "grav") 
+	  {
+		  response = "downwards";
+		  returnme = true;
+	  };
+	  return returnme;
+  };
+  
   bool tick(base_object & o, float quanta)
   {
     o.accel_mod += g;
@@ -69,6 +80,18 @@ struct rocket : public abs_effector
     returnme << "rocket_" << id << "=" << impulse;
     return returnme.str();
   };
+
+  bool command(std::string cmd, std::string & response)
+  {
+	  bool returnme = false;
+	  if (cmd == "rocket") 
+	  {
+		  response = "upwards";
+		  returnme = true;
+	  };
+	  return returnme;
+  };
+  
   
   bool tick(base_object & o, float quanta)
   {
@@ -107,6 +130,18 @@ struct torquer : public abs_effector
     returnme << handle << "_" << id << "=" << torque.angles();
     return returnme.str();
   };
+  
+  bool command(std::string cmd, std::string & response)
+  {
+	  bool returnme = false;
+	  if (cmd == "torq") 
+	  {
+		  response = "around";
+		  returnme = true;
+	  };
+	  return returnme;
+  };
+  
   
   bool tick(base_object & o, float quanta)
   {
@@ -152,6 +187,33 @@ int main()
   effector_p rp(new rocket);
   rocket_ball.add_pre(rp);
 //  cout << rocket_ball.as_str() << endl;  
+  
+  // test command method
+  std::string cmd, s;
+  cmd = "rocket";
+  if (rocket_ball.command(cmd,s))
+  {
+	  if(s != "upwards") failed = true;
+  }
+  else failed = true;
+  cout << cmd << ":" << s << endl;
+  
+  cmd = "grav";
+  if (rocket_ball.command(cmd,s))
+  {
+	  if(s != "downwards") failed = true;
+  }
+  else failed = true;
+  cout << cmd << ":" << s << endl;
+  
+  cmd = "nop";
+  if (rocket_ball.command(cmd,s))
+  {
+	  failed = true;
+	  cout << cmd << ":" << s << endl;
+  };
+  
+  cout << "command : " << (failed ? "FAILED" : "PASSED") << endl;
   
   cout << "Launch:" << endl;
   int time = 0;
