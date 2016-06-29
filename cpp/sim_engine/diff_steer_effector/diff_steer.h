@@ -61,10 +61,6 @@ public:
   diff_steer(base_object & o, float thrust, float _brake,
              float turn_rate,
              float skid_threshold, float slide_friction); 
-  /**************************************************
-   * External command interface for diff_steer
-   *************************************************/
-  virtual bool command(std::string cmd, std::string & response);
   // -- effector definitions
   /***********************************************
    * pre is the pre-effector for diff_steer. It 
@@ -82,6 +78,21 @@ public:
     pre(float mp, float mb, float mt);
     // Copy constructor
     pre(const pre & t);
+    // command inteface.
+    virtual bool command(std::string cmd, std::string & response);
+    // control methods -- illegal valus force full stop.
+    // Sets the drive power level, 0.0 >= power >= 1.0
+    float drive(float power);
+    // Sets the braking level, 0.0 >= braking >= 1.0
+    float brake(float braking);
+    // Sets the turn rate, 0.0 >= rate >= 1.0
+    float turn(float rate);
+    // Full stop; power 0, braking 1, turn 0.
+    void lockdown();        
+    // status reporting;
+    float get_drive();  // returns 0.0 - 1.0
+    float get_brake();  // returns 0.0 - 1.0
+    float get_turn();   // returns 0.0 - 1.0    
     // local data
     float max_p;  // -- max power in newtons
     float max_t;  // -- max turn rate in radians
@@ -125,19 +136,6 @@ public:
 protected:
   pre_p pre_effector;
   post_p post_effector;  
-  // control methods -- illegal valus force full stop.
-  // Sets the drive power level, 0.0 >= power >= 1.0
-  float drive(float power);
-  // Sets the braking level, 0.0 >= braking >= 1.0
-  float brake(float braking);
-  // Sets the turn rate, 0.0 >= rate >= 1.0
-  float turn(float rate);
-  // Full stop; power 0, braking 1, turn 0.
-  void lockdown();        
-  // status reporting;
-  float get_drive();  // returns 0.0 - 1.0
-  float get_brake();  // returns 0.0 - 1.0
-  float get_turn();   // returns 0.0 - 1.0
 };
 
 } // namepace nrtb

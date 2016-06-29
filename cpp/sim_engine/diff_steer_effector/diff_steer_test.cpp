@@ -138,8 +138,8 @@ int main()
       << test_ob.location << test_ob.velocity << endl;
       
     cout << "Simple drive test: ";
-    test_ob.mobility->command("drive power 100", response);
-    test_ob.mobility->command("drive brake 0", response);
+    test_ob.command("drive power 100", response);
+    test_ob.command("drive brake 0", response);
     bool done = false;
     int i = 0;
     while (!done)
@@ -158,8 +158,8 @@ int main()
       << test_ob.location << test_ob.velocity << endl;
 
     cout << "Simple braking test: ";
-    test_ob.mobility->command("drive power 0", response);
-    test_ob.mobility->command("drive brake 100", response);
+    test_ob.command("drive power 0", response);
+    test_ob.command("drive brake 100", response);
     i=0;
     while ((test_ob.velocity.x > 0.0) or (test_ob.velocity.y > 0.0))
     {
@@ -174,9 +174,9 @@ int main()
       << i << " " << test_ob.location << test_ob.velocity << endl; 
 
     cout << "Simple turning test: ";
-    test_ob.mobility->command("drive power 0.0", response);
-    test_ob.mobility->command("drive brake 100.0", response);
-    test_ob.mobility->command("drive turn 100.0", response);
+    test_ob.command("drive power 0.0", response);
+    test_ob.command("drive brake 100.0", response);
+    test_ob.command("drive turn 100.0", response);
     i=0;
     // rotate 90 degrees in 1/2 second.
     while (test_ob.attitude.angles().z < (pi/2.0))
@@ -192,9 +192,9 @@ int main()
       << i << " " << test_ob.attitude.angles() << endl; 
 
     cout << "Compound movement test: ";
-    test_ob.mobility->command("drive power 100.0", response);
-    test_ob.mobility->command("drive brake 0.0", response);
-    test_ob.mobility->command("drive turn -10.0", response);
+    test_ob.command("drive power 100.0", response);
+    test_ob.command("drive brake 0.0", response);
+    test_ob.command("drive turn -10.0", response);
     i=0;
     // rotate 90 degrees in 5 second.
     while (test_ob.attitude.angles().z > 0.0)
@@ -212,7 +212,7 @@ int main()
 
     // Status command test.
     cout << "Status command test: ";
-    bool handled = test_ob.mobility->command("drive status", response);
+    bool handled = test_ob.command("drive status", response);
     test_failed = (!handled) 
       or (response != "drive status 1 0 -0.1");
     failed = failed or test_failed;
@@ -221,7 +221,7 @@ int main()
       
     // Bad command test
     cout << "Invalid command test: ";
-    handled = test_ob.mobility->command("drive fubar", response);
+    handled = test_ob.command("drive fubar", response);
     test_failed = (!handled) 
       or (response != "bad_cmd \"drive fubar\"");
     failed = failed or test_failed;
@@ -230,7 +230,7 @@ int main()
       
     // unhandled command test
     cout << "Unhandled command test: ";
-    handled = test_ob.mobility->command("nota command", response);
+    handled = test_ob.command("nota command", response);
     test_failed = (handled); 
     failed = failed or test_failed;
     cout << (test_failed ? "Failed" : "Passed") << " ("
