@@ -34,7 +34,7 @@ namespace nrtb
  * and formats results for the supplied 
  * object's point of view.
  ****************************************/
-class radar_mk1
+class radar_mk1 : public abs_effector
 {
 public:
   /***************************************
@@ -52,6 +52,9 @@ public:
   virtual ~radar_mk1() {};
   // command interface.
   bool command(std::string cmd, std::string & response);
+  std::string as_str() { return "radar"; };
+  bool tick(base_object & o, float quanta) { return false; };
+  effector_p clone() { return std::make_shared<radar_mk1>(parent); };
 private:
   base_object & parent;
   sim_core & sim;

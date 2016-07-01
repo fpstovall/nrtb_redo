@@ -26,14 +26,13 @@ using namespace std;
 
 struct my_object : public base_object
 {  
-  radar_mk1 radar;
-  
-  my_object() : radar(radar_mk1(*this))
+  my_object()
   {
     location = triplet(0,0,0);
     velocity = triplet(0,0,0);
     bounding_sphere.center = triplet(0,0,0);
     bounding_sphere.radius = 1;
+    add_pre(std::make_shared<radar_mk1>(*this));
     mass = 1;
   };
   
@@ -106,9 +105,9 @@ int main()
   
   // Verify they see each other properly.
   string o1c, o2c, o3c;
-  o1->radar.command("radar contacts",o1c);
-  o2->radar.command("radar contacts",o2c);
-  o3->radar.command("radar contacts",o3c);
+  o1->command("radar contacts",o1c);
+  o2->command("radar contacts",o2c);
+  o3->command("radar contacts",o3c);
 
   w.stop_sim();
 
@@ -134,7 +133,7 @@ int main()
 
   // test status command.
   string status; 
-  o1->radar.command("radar status", status);
+  o1->command("radar status", status);
   failed = failed or (status != "radar status 1");
 
   
