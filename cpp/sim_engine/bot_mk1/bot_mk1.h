@@ -73,8 +73,6 @@ private:
   std::atomic<bool> ImAlive;  // used to trigger shutdown of threads.
   // the robot's drive module.
   std::unique_ptr<diff_steer> drive;
-  // Radar module.
-  radar_mk1 radar;
   // connection to the controlling bot control program.
   tcp_socket_p BCP;
   // outbound message queue.
