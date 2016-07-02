@@ -208,7 +208,6 @@ void bot_mk1::msg_router(std::string s)
     }
 	  else if (command(s,returnme))
 		{
-		  std::cerr << "this->command(" << s << "," <<returnme << ")" << std::endl;
 		  if (returnme != "") to_BCP.push(returnme);
 		}
 	  else

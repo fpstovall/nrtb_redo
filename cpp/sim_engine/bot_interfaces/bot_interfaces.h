@@ -23,19 +23,6 @@
 
 namespace nrtb
 {
-
-/************************************************
- * commandable is a function interface for modules
- * which provide controlable elements to the bot 
- * and perhaps to the BCP. It accepts the command
- * as a string and returns the results, again as
- * a string. Results may be a null string.
- ***********************************************/  
-class commandable
-{
-public:
-  virtual bool command(std::string cmd, std::string & response) = 0;
-};
   
 /************************************************
  * bcp_sender is a function interface for bots 
