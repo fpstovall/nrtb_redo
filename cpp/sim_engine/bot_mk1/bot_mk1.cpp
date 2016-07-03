@@ -39,7 +39,7 @@ bot_mk1::bot_mk1(tcp_socket_p link, triplet where)
   : bot_mk1(where)
 {
   // add effectors
-	add_pre(std::make_shared<radar_mk1>(*this));
+	add_pre(std::make_shared<radar_mk1>());
   //add_pre(effector_p(new norm_gravity));
   add_pre(std::make_shared<norm_gravity>());
   //add_pre(effector_p(new hover(location.z,0.10,2.0)));
