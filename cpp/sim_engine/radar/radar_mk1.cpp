@@ -24,9 +24,8 @@
 
 using namespace nrtb;
 
-radar_mk1::radar_mk1(base_object & o)
-  : sim(global_sim_core::get_reference()),
-    parent(o)
+radar_mk1::radar_mk1()
+  : sim(global_sim_core::get_reference())
 {};
 
 
@@ -64,16 +63,16 @@ std::string radar_mk1::get_contacts()
     returnme << (c_list.size()-1);
     for(auto c : c_list)
     {
-      if (c.id != parent.id)
+      if (c.id != parent_id)
       {
-        float range = parent.location.range(c.location);
+        float range = parent_location.range(c.location);
         // get xy azimuth
-        triplet offset = (c.location - parent.location).to_polar();
+        triplet offset = (c.location - parent_location).to_polar();
         // assemble return string
         returnme << " " << c.type << " "
           << offset << " "
-          << (c.velocity - parent.velocity);
-      }
+          << (c.velocity - parent_velocity);
+      };
     };
   }
   else returnme << 0;
@@ -84,3 +83,12 @@ std::string radar_mk1::status()
 {
   return "radar status 1";
 };
+
+bool radar_mk1::tick(base_object & o, float quanta)
+{
+	parent_id = o.id;
+	parent_location = o.location;
+	parent_velocity = o.velocity;
+	return false;
+};
+

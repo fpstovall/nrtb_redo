@@ -32,7 +32,7 @@ struct my_object : public base_object
     velocity = triplet(0,0,0);
     bounding_sphere.center = triplet(0,0,0);
     bounding_sphere.radius = 1;
-    add_pre(std::make_shared<radar_mk1>(*this));
+    add_pre(std::make_shared<radar_mk1>());
     mass = 1;
   };
   
