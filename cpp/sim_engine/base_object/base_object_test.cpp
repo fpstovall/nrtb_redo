@@ -44,6 +44,8 @@ struct gravity : public abs_effector
     return returnme.str();
   };
   
+  bool commandable() { return true; };
+  
   bool command(std::string cmd, std::string & response)
   {
 	  bool returnme = false;
@@ -81,6 +83,8 @@ struct rocket : public abs_effector
     return returnme.str();
   };
 
+  bool commandable() { return true; };
+  
   bool command(std::string cmd, std::string & response)
   {
 	  bool returnme = false;
@@ -130,6 +134,8 @@ struct torquer : public abs_effector
     returnme << handle << "_" << id << "=" << torque.angles();
     return returnme.str();
   };
+  
+  bool commandable() { return true; };
   
   bool command(std::string cmd, std::string & response)
   {
