@@ -217,6 +217,7 @@ struct base_object
   // override apply_collision as needed; return true to kill the object.
   virtual bool apply_collision(object_p o, float quanta) = 0;
 protected:
+  effector_list cmd_attribs;
   effector_list pre_attribs;
   effector_list post_attribs; 
   std::vector<unsigned long long> dropped_attribs;
