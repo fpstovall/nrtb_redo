@@ -127,6 +127,8 @@ struct abs_effector
    * implementation defaults to false.
   ******************************************/
   virtual bool command(std::string cmd, std::string & response) { return false; };
+  /// override to return true if the effector has a non-default command() method.
+  virtual bool commandable() { return false; };
   /** does the "time quanta" work of the effector.
    * Returns true if the object should die.
    * o is the parent object
