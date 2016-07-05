@@ -110,7 +110,7 @@ void effector_list::add(effector_p e)
 
 void effector_list::remove(effector_p e)
 {
-  erase(e->id);
+  try { erase(e->id); } catch (...) {};
 };
 
 void effector_list::remove(long long unsigned int key)
@@ -178,6 +178,7 @@ bool base_object::tick(float quanta)
     {
       pre_attribs.remove(i);
       post_attribs.remove(i);
+      cmd_attribs.remove(i);
     }
     catch (...) {};
   };
