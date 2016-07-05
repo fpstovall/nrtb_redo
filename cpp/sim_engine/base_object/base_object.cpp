@@ -260,12 +260,14 @@ bool base_object::check_collision(object_p o, float quanta)
 void base_object::add_pre(effector_p e)
 {
   pre_attribs.add(e);
+  if (e->commandable()) cmd_attribs.add(e);
 };
 
 
 void base_object::add_post(effector_p e)
 {
   post_attribs.add(e);
+  if (e->commandable()) cmd_attribs.add(e);
 };
 
 effector_list base_object::get_pre_attribs_copy()
