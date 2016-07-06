@@ -26,7 +26,6 @@
 namespace nrtb
 {
   
-  
 /*****************************************
  * radar_mk1 provides a simple scanner 
  * for robots.  It accesses the panopticon
@@ -52,6 +51,7 @@ public:
   virtual ~radar_mk1() {};
   // command interface.
   bool command(std::string cmd, std::string & response);
+  bool commandable() { return true; };
   std::string as_str() { return "radar"; };
   bool tick(base_object & o, float quanta);
   effector_p clone() { return std::make_shared<radar_mk1>(); };
