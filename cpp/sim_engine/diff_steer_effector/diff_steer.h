@@ -80,6 +80,7 @@ public:
     pre(const pre & t);
     // command inteface.
     virtual bool command(std::string cmd, std::string & response);
+    bool commandable() { return true; };
     // control methods -- illegal valus force full stop.
     // Sets the drive power level, 0.0 >= power >= 1.0
     float drive(float power);
