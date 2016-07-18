@@ -139,6 +139,8 @@ struct abs_effector
   
 typedef std::shared_ptr<abs_effector> effector_p;
 
+using effector_factory = effector_p();
+
 /***********************************************
  * effector_list is a specialization of std::map
  * which stores effector_p by id number. Adds
