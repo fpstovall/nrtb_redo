@@ -19,11 +19,34 @@
 #ifndef plugin_manager_header
 #define plugin_manager_header
 
+#include <boost/dll.h>
 #include <base_object.h>
 
 namespace nrtb
 {
 
+class plugin_manager
+{
+private:
+	struct plugin_rec
+	{
+		std::string name;
+		effector_factory factory;
+	};
+	std::map<std::string, plugin_rec> eff_plugins;
+	void add_plugin(std::string name);
+	void remove_plugin(std::string name);
+public: 
+	// catch this to handle all plugin_manager errors.
+	class general_error :: public base_exception {};
+	// catch this to handle naming issues.
+	class not_found :: public general_error {};
+	// catch this to handle dll load issues.
+	class load_error :: public general_error {};
+	plugin_manager();
+	~plugin_manager();
+	effector_p get_effector(std::string name);
+};
 
 } // namepace nrtb
 
