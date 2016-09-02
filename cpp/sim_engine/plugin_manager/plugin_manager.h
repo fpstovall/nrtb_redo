@@ -43,8 +43,25 @@ public:
 	class not_found :: public general_error {};
 	// catch this to handle dll load issues.
 	class load_error :: public general_error {};
+	/**********************************
+	 * This constructor scans predefined directories
+	 * and loads all plugins found to the eff_plugsins
+	 * map. 
+	 * 
+	 * Configuration Variables:
+	 *   plugin_path: defaults to ./plugins
+	 *   fail_on_plug_load_error: defaults to true.
+	 *********************************/
 	plugin_manager();
+	// releases all resources.
 	~plugin_manager();
+	/*********************************
+	 * Call this to get the requested effector by name.
+	 * 
+	 * If the effector is already loaded, a reference to 
+	 * a new instance is returned. Otherwise an excepiton
+	 * is thrown indicating the probable issue.
+	 *********************************/
 	effector_p get_effector(std::string name);
 };
 
