@@ -176,6 +176,8 @@ struct base_object
   virtual object_p clone() = 0;
   // Unique object id, seeded from the serializer
   unsigned long long id = object_num();
+  // Object type ID, set to a number in child constructors.
+  int object_type = 0;
   // Name of this object, should set in constructor
   std::string handle;
   // The following are automatically managed after creation.
