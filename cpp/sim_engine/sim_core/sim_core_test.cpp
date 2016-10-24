@@ -131,7 +131,7 @@ struct rocket : public abs_effector
 
 struct my_object : public base_object
 {
-  my_object() { mass = 1; };
+  my_object() { mass = 1; object_type = 1;};
   
   bool apply_collision(object_p o, float duration) 
   {
@@ -151,6 +151,7 @@ struct rocket_ball : public my_object
 {
   rocket_ball()
   {
+	object_type = 2;
     mass = 100;
     bounding_sphere.center = triplet(0);
     bounding_sphere.radius = 0.5;

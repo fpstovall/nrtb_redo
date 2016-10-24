@@ -47,7 +47,7 @@ void panopticon::start_new()
 void panopticon::add(const base_object & o)
 {
   sensor_rec s;
-  s.type = 1;
+  s.type = o.object_type;
   s.id = o.id;
   s.location = o.location;
   s.velocity = o.velocity;
