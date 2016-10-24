@@ -34,6 +34,7 @@ struct my_object : public base_object
     bounding_sphere.radius = 1;
     add_pre(std::make_shared<radar_mk1>());
     mass = 1;
+    object_type = 2;
   };
   
   bool apply_collision(object_p o, float duration) 
