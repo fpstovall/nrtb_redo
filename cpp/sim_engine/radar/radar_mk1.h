@@ -77,6 +77,9 @@ private:
   std::string get_contacts();
   // In this version always returns "1"
   std::string status();
+  // performance limiter values
+  float type_return_limit = 10000;
+  float dist_return_limit = 10000;
 };
 
 } // namepace nrtb

@@ -19,6 +19,7 @@
 // see base_socket.h for documentation
 
 #include "radar_mk1.h"
+#include <confreader.h>
 #include <sstream>
 #include <iostream>
 
@@ -26,8 +27,11 @@ using namespace nrtb;
 
 radar_mk1::radar_mk1()
   : sim(global_sim_core::get_reference())
-{};
-
+{
+  conf_reader & conf = global_conf_reader::get_reference();
+  dist_return_limit = conf.get<float>("radar_dr",10000.0);
+  type_return_limit = conf.get<float>("radar_tr",10000.0);
+};
 
 bool radar_mk1::command(std::string cmd, std::string& response)
 {
