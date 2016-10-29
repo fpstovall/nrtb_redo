@@ -69,9 +69,18 @@ std::string radar_mk1::get_contacts()
     {
       if (c.id != parent_id)
       {
-        float range = parent_location.range(c.location);
+        // float range = parent_location.range(c.location);
         // get xy azimuth
         triplet offset = (c.location - parent_location).to_polar();
+        // see if we need to do range and type adjustments
+        if (offset.x > dist_return_limit)
+        {
+          // create range inaccuracy.
+          float adjustment = offset.x - dist_return_limit;
+          float scale = (adjustment - floor(adjustment)*1.0) - 0.5;
+          offset.x += adjustment * scale;
+        }
+        if (offset.x > type_return_limit) { c.type = 0; };
         // assemble return string
         returnme << " " << c.type << " "
           << offset << " "
