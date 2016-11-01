@@ -1,4 +1,4 @@
-/***********************************************
+ /***********************************************
  This file is part of the NRTB project (https://github.com/fpstovall/nrtb_alpha).
  
  NRTB is free software: you can redistribute it and/or modify
@@ -90,7 +90,13 @@ int main()
   o3->location = triplet(0,-5,5);
   o3->attitude.set(triplet(0,0,pi/2.0));
   o3->velocity = triplet(1.0,0,0);
-    
+  // this one is for type resolution limit illustration.
+  my_object_p o4 = make_shared<my_object>();
+  o4->location = triplet(0,10000,1500);
+  // this one is for distance limit illustration.
+  my_object_p o5 = make_shared<my_object>();
+  o5->location = triplet(0,1e5,1500);
+  
   // start a sim_core;
   sim_core & w = global_sim_core::get_reference();
   w.start_sim();
@@ -101,6 +107,8 @@ int main()
   w.add_object(object_p(o1));
   w.add_object(object_p(o2));
   w.add_object(object_p(o3));
+  w.add_object(object_p(o4));
+  w.add_object(object_p(o5));
   chrono::milliseconds pause(50);
   this_thread::sleep_for(pause);
   
@@ -120,7 +128,7 @@ int main()
   my_contacts o2l = parse_contacts(o2c);
   my_contacts o3l = parse_contacts(o3c);
 
-  failed = (o1l.size() !=2) or (o2l.size() != 2) or (o3l.size() != 2);  
+  failed = (o1l.size() !=3) or (o2l.size() != 3) or (o3l.size() != 3);  
   bool o1t = (o1l[0].location != triplet(7.07107,1.5708,0.785398))
     or (o1l[0].velocity != triplet(0,0,0))
     or (o1l[1].location != triplet(7.07132,-1.5588,0.785434))
@@ -146,30 +154,3 @@ int main()
   
   return failed;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

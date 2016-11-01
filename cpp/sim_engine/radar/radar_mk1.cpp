@@ -79,12 +79,16 @@ std::string radar_mk1::get_contacts()
           float adjustment = offset.x - dist_return_limit;
           float scale = (adjustment - floor(adjustment)*1.0) - 0.5;
           offset.x += adjustment * scale;
-        }
+        };
         if (offset.x > type_return_limit) { c.type = 0; };
-        // assemble return string
-        returnme << " " << c.type << " "
-          << offset << " "
-          << (c.velocity - parent_velocity);
+        // send it out if we are close enough.
+        if (offset.x < (dist_return_limit*5.0))
+        {
+          // assemble return string
+          returnme << " " << c.type << " "
+            << offset << " "
+            << (c.velocity - parent_velocity);
+        };
       };
     };
   }
