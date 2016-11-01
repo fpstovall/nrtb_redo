@@ -58,13 +58,15 @@ bool radar_mk1::command(std::string cmd, std::string& response)
 std::string radar_mk1::get_contacts()
 {
   std::stringstream returnme;
+  std::stringstream results;
+  int counter = 0;
   // for now, update every time.
   contacts c_list = sim.contact_list();
   // assemble the return string
   returnme << "radar contacts ";
   if (c_list.size())
   {
-    returnme << (c_list.size()-1);
+    // returnme << (c_list.size()-1);
     for(auto c : c_list)
     {
       if (c.id != parent_id)
@@ -78,19 +80,23 @@ std::string radar_mk1::get_contacts()
           // create range inaccuracy.
           float adjustment = offset.x - dist_return_limit;
           float scale = (adjustment - floor(adjustment)*1.0) - 0.5;
-          offset.x += adjustment * scale;
+          offset.x += (adjustment * scale);
+          // hide velocity
+          c.velocity = parent_velocity;
         };
         if (offset.x > type_return_limit) { c.type = 0; };
         // send it out if we are close enough.
         if (offset.x < (dist_return_limit*5.0))
         {
+          counter++;
           // assemble return string
-          returnme << " " << c.type << " "
+          results << " " << c.type << " "
             << offset << " "
             << (c.velocity - parent_velocity);
         };
       };
     };
+    returnme << counter << results.str();
   }
   else returnme << 0;
   return returnme.str();
