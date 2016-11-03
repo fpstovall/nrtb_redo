@@ -19,6 +19,7 @@
 #ifndef bot_mk1_header
 #define bot_mk1_header
 
+#include <map>
 #include <bot_interfaces.h>
 #include <base_socket.h>
 #include <confreader.h>
@@ -64,6 +65,14 @@ struct bot_mk1: public abs_bot
   void send_to_bcp(std::string msg);
   void bot_cmd(std::string cmd);
 private:
+  // record to hold an "auto command"
+  struct auto_cmd
+  {
+    int rep_rate;
+    int last_tick;
+    std::string command;
+  };
+  std::map<std::string, auto_cmd> auto_cmds;
   /* Constucts a bot at the supplied location but 
    * without much of the setup completed. 
    */
