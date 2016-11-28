@@ -100,6 +100,9 @@ bool bot_mk1::apply(float quanta)
   {
     bool returnme = nrtb::base_object::apply(quanta);
     cooking_lock.unlock();
+    // call auto command here.
+    if (autol) bot_cmd("bot lvar");
+    if (autor) bot_cmd("radar contacts");
     return returnme;
   }
   else
@@ -187,33 +190,41 @@ void bot_mk1::msg_router(std::string s)
 	  // check for effector commands
 	  if (sys == "bot")
 	  {
-			if (verb == "lvar")
-			{
-			  std::stringstream s;
-			  s << sys << " " << verb 
-				<< " " << location 
-				<< " " << velocity
-				<< " " << attitude.angles() 
-				<< " " << rotation.angles();
-			  to_BCP.push(s.str());
-			}
-			else if (verb == "health")
-			{
-			  to_BCP.push("bot health 100");
-			}
-			else
-			{
-			  to_BCP.push("bad_cmd \""+s+"\"");
-			};
-    }
-	  else if (command(s,returnme))
+		if (verb == "lvar")
 		{
-		  if (returnme != "") to_BCP.push(returnme);
+		  std::stringstream s;
+		  s << sys << " " << verb 
+			<< " " << location 
+			<< " " << velocity
+			<< " " << attitude.angles() 
+			<< " " << rotation.angles();
+		  to_BCP.push(s.str());
 		}
-	  else
+		else if (verb == "autol")
+		{
+		  autol = !autol;
+		}
+		else if (verb == "autor")
+		{
+		  autor = !autor;
+		}
+		else if (verb == "health")
+		{
+		  to_BCP.push("bot health 100");
+		}
+		else
+		{
+		  to_BCP.push("bad_cmd \""+s+"\"");
+		};
+      }
+      else if (command(s,returnme))
 	  {
-		to_BCP.push("bad_sys \""+s+"\"");
-	  };
+	    if (returnme != "") to_BCP.push(returnme);
+	  }
+    else
+    {
+	  to_BCP.push("bad_sys \""+s+"\"");
+    };
   }
   catch (...)
   {
