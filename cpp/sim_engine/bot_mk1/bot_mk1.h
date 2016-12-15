@@ -66,8 +66,8 @@ struct bot_mk1: public abs_bot
   void bot_cmd(std::string cmd);
 private:
   // flags for auto commands (report every game turn)
-  bool autor = false; // auto radar contact report
-  bool autol = false; // auto lvar 
+  bool autor {false}; // auto radar contact report
+  bool autol {false}; // auto lvar 
   /* Constucts a bot at the supplied location but 
    * without much of the setup completed. 
    */

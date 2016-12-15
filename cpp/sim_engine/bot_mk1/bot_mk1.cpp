@@ -203,10 +203,16 @@ void bot_mk1::msg_router(std::string s)
 		else if (verb == "autol")
 		{
 		  autol = !autol;
+		  std::stringstream s;
+		  s << "autol " << int(autol);
+		  to_BCP.push(s.str());
 		}
 		else if (verb == "autor")
 		{
 		  autor = !autor;
+		  std::stringstream s;
+		  s << "autor " << int(autor);
+		  to_BCP.push(s.str());
 		}
 		else if (verb == "health")
 		{

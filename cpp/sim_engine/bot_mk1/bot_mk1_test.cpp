@@ -118,7 +118,7 @@ int main()
     cout << "drive response: " << ( bad ? "FAILED" : "Passed" ) 
       << " '" << msg << "'" << endl;
 
-      // Verify radar command/response
+    // Verify radar command/response
     BCP.put("radar status\r");
     msg = gsub(BCP.getln("\r",64,2),"\r","");
     bad = (msg != "radar status 1") or !(test_bot->IsAlive());
@@ -142,6 +142,17 @@ int main()
     cout << "clone(): " << ( bad ? "FAILED" : "Passed" )
       << endl;
     failed = failed or bad;
+    
+    // autol test
+    BCP.put("bot autol\r");
+    msg = gsub(BCP.getln("\r",64,2),"\r","");
+    bad = (msg != "autol 1") or !(test_bot->IsAlive());
+    failed = failed or bad;
+    cout << "autol response: " << ( bad ? "FAILED" : "Passed" ) 
+      << " '" << msg << "'" << endl;
+    
+    
+    // autor test
   
     // verify bot shutdown on connection close
     BCP.close();
