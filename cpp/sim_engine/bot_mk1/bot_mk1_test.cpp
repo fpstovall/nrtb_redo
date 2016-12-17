@@ -171,6 +171,30 @@ int main()
     
     
     // autor test
+    BCP.put("bot autor\r");
+    msg = gsub(BCP.getln("\r",64,2),"\r","");
+    bad = (msg != "autor 1") or !(test_bot->IsAlive());
+    failed = failed or bad;
+    cout << "autor response: " << ( bad ? "FAILED" : "Passed" ) 
+      << " '" << msg << "'" << endl;
+    bad = test_bot->tick(d) or test_bot->apply(d);
+    msg = gsub(BCP.getln("\r",64,2),"\r",""); 
+    bad = (msg != "radar contacts 0") or !(test_bot->IsAlive());
+    failed = failed or bad;
+    cout << "autor tick: " << ( bad ? "FAILED" : "Passed" ) 
+      << " '" << msg << "'" << endl;
+    bad = test_bot->tick(d) or test_bot->apply(d);
+    msg = gsub(BCP.getln("\r",64,2),"\r",""); 
+    bad = (msg != "radar contacts 0") or !(test_bot->IsAlive());
+    failed = failed or bad;
+    cout << "autor tick: " << ( bad ? "FAILED" : "Passed" ) 
+      << " '" << msg << "'" << endl;
+    BCP.put("bot autor\r");
+    msg = gsub(BCP.getln("\r",64,2),"\r","");
+    bad = (msg != "autor 0") or !(test_bot->IsAlive());
+    failed = failed or bad;
+    cout << "autor response: " << ( bad ? "FAILED" : "Passed" ) 
+      << " '" << msg << "'" << endl;
   
     // verify bot shutdown on connection close
     BCP.close();
