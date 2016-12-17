@@ -150,6 +150,24 @@ int main()
     failed = failed or bad;
     cout << "autol response: " << ( bad ? "FAILED" : "Passed" ) 
       << " '" << msg << "'" << endl;
+    bad = test_bot->tick(d) or test_bot->apply(d);
+    msg = gsub(BCP.getln("\r",64,2),"\r",""); 
+    bad = (msg != "bot lvar (0,0,2.49647) (0,0,0.0196133) (0,0,0) (0,0,0)") or !(test_bot->IsAlive());
+    failed = failed or bad;
+    cout << "autol tick: " << ( bad ? "FAILED" : "Passed" ) 
+      << " '" << msg << "'" << endl;
+    bad = test_bot->tick(d) or test_bot->apply(d);
+    msg = gsub(BCP.getln("\r",64,2),"\r",""); 
+    bad = (msg != "bot lvar (0,0,2.50075) (0,0,0.213785) (0,0,0) (0,0,0)") or !(test_bot->IsAlive());
+    failed = failed or bad;
+    cout << "autol tick: " << ( bad ? "FAILED" : "Passed" ) 
+      << " '" << msg << "'" << endl;
+    BCP.put("bot autol\r");
+    msg = gsub(BCP.getln("\r",64,2),"\r","");
+    bad = (msg != "autol 0") or !(test_bot->IsAlive());
+    failed = failed or bad;
+    cout << "autol response: " << ( bad ? "FAILED" : "Passed" ) 
+      << " '" << msg << "'" << endl;
     
     
     // autor test
