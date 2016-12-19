@@ -71,7 +71,7 @@ int main(int argc, char * argv[])
   tcp_socket sim;
   // load the global configuration
   conf_reader config;
-  config.read(argc, argv, "target.conf");
+  config.read(argc, argv, "target_2.conf");
   
   // display config choices.
   cout << endl;
