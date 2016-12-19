@@ -90,6 +90,7 @@ int main(int argc, char * argv[])
     triplet center;
     lvar start;
     lvar current;
+    bool power{false};
     hirez_timer runtime;
 
     // connect to the simulation.
@@ -138,6 +139,9 @@ int main(int argc, char * argv[])
             [&]{triplet t=current.velocity; t.z=0.0; return t.to_polar().y;}()
           << "\n\t calc'd way home: " << wayhome
           << endl;
+        // ping to keep our connection alive.. 
+        sim.put("bot ping\r");
+        sim.getln("\r",0,1); // throw away the response.
       };
       
       if (wayhome < 0.0) 
@@ -152,16 +156,26 @@ int main(int argc, char * argv[])
         case run : 
         {
           float v = current.velocity.magnatude();
-          if (current.location.range(center) > zone) state = tofar;
-          else if (v > speedlimit)
+          if (current.location.range(center) > zone) 
+          {
+            state = tofar;
+          }
+          else if ((v > speedlimit) and (power))
+          {
             sim.put("drive power 0\r");
-          else if (v < (speedlimit*0.95))
+            power = false;
+          }
+          else if ((v < (speedlimit*0.95)) and (!power))
+          {
             sim.put("drive power 25\r");
+            power = true;
+          }
           break;
         }
         case tofar :
         {
           sim.put("drive power 0\r");
+          power = false;
           state = orient;
           break;
         }
@@ -185,6 +199,7 @@ int main(int argc, char * argv[])
             sim.put("drive turn 0\r");
             // -- start drive
             sim.put("drive power 25\r");
+            power = true;
             // -- set status to run
             state = returning;
             tohome = current.location.range(center);

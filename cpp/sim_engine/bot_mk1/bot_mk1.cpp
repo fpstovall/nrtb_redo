@@ -218,6 +218,10 @@ void bot_mk1::msg_router(std::string s)
 		{
 		  to_BCP.push("bot health 100");
 		}
+		else if (verb == "ping")
+		{
+		  to_BCP.push("READY");
+		}
 		else
 		{
 		  to_BCP.push("bad_cmd \""+s+"\"");
