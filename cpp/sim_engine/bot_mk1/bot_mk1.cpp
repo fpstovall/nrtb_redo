@@ -82,7 +82,6 @@ bot_mk1::~bot_mk1()
 
 bool bot_mk1::tick(float duration)
 {
-  cooking_lock.lock();
   if (ImAlive)
   {
     return nrtb::abs_bot::tick(duration);
@@ -99,16 +98,11 @@ bool bot_mk1::apply(float quanta)
   if (ImAlive)
   {
     bool returnme = nrtb::base_object::apply(quanta);
-    cooking_lock.unlock();
-    // call auto command here.
-    if (autol) bot_cmd("bot lvar");
-    if (autor) bot_cmd("radar contacts");
     return returnme;
   }
   else
   {
     // we are dead.. tell sim_engine.
-    cooking_lock.unlock();
     return true;
   };
 };
@@ -254,3 +248,15 @@ void bot_mk1::bot_cmd(std::string cmd)
   msg_router(cmd);
 };
 
+void bot_mk1::lock()
+{
+  cooking_lock.lock();
+};
+
+void bot_mk1::unlock()
+{
+  cooking_lock.unlock();
+  // call auto command here.
+  if (autol) bot_cmd("bot lvar");
+  if (autor) bot_cmd("radar contacts");
+};

@@ -64,6 +64,9 @@ struct bot_mk1: public abs_bot
   // bot_interfaces stuff;
   void send_to_bcp(std::string msg);
   void bot_cmd(std::string cmd);
+  // simcore lock and unlock.
+  void lock();
+  void unlock();
 private:
   // flags for auto commands (report every game turn)
   bool autor {false}; // auto radar contact report
