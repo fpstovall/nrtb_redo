@@ -19,16 +19,19 @@
 // see base_socket.h for documentation
 
 #include "radar_mk1.h"
+#include <confreader.h>
 #include <sstream>
 #include <iostream>
 
 using namespace nrtb;
 
-radar_mk1::radar_mk1(base_object & o)
-  : sim(global_sim_core::get_reference()),
-    parent(o)
-{};
-
+radar_mk1::radar_mk1()
+  : sim(global_sim_core::get_reference())
+{
+  conf_reader & conf = global_conf_reader::get_reference();
+  dist_return_limit = conf.get<float>("radar_dr",10000.0);
+  type_return_limit = conf.get<float>("radar_tr",10000.0);
+};
 
 bool radar_mk1::command(std::string cmd, std::string& response)
 {
@@ -55,26 +58,45 @@ bool radar_mk1::command(std::string cmd, std::string& response)
 std::string radar_mk1::get_contacts()
 {
   std::stringstream returnme;
+  std::stringstream results;
+  int counter = 0;
   // for now, update every time.
   contacts c_list = sim.contact_list();
   // assemble the return string
   returnme << "radar contacts ";
   if (c_list.size())
   {
-    returnme << (c_list.size()-1);
+    // returnme << (c_list.size()-1);
     for(auto c : c_list)
     {
-      if (c.id != parent.id)
+      if (c.id != parent_id)
       {
-        float range = parent.location.range(c.location);
+        // float range = parent_location.range(c.location);
         // get xy azimuth
-        triplet offset = (c.location - parent.location).to_polar();
-        // assemble return string
-        returnme << " " << c.type << " "
-          << offset << " "
-          << (c.velocity - parent.velocity);
-      }
+        triplet offset = (c.location - parent_location).to_polar();
+        // see if we need to do range and type adjustments
+        if (offset.x > dist_return_limit)
+        {
+          // create range inaccuracy.
+          float adjustment = offset.x - dist_return_limit;
+          float scale = (adjustment - floor(adjustment)*1.0) - 0.5;
+          offset.x += (adjustment * scale);
+          // hide velocity
+          c.velocity = parent_velocity;
+        };
+        if (offset.x > type_return_limit) { c.type = 0; };
+        // send it out if we are close enough.
+        if (offset.x < (dist_return_limit*5.0))
+        {
+          counter++;
+          // assemble return string
+          results << " " << c.type << " "
+            << offset << " "
+            << (c.velocity - parent_velocity);
+        };
+      };
     };
+    returnme << counter << results.str();
   }
   else returnme << 0;
   return returnme.str();
@@ -84,3 +106,12 @@ std::string radar_mk1::status()
 {
   return "radar status 1";
 };
+
+bool radar_mk1::tick(base_object & o, float quanta)
+{
+	parent_id = o.id;
+	parent_location = o.location;
+	parent_velocity = o.velocity;
+	return false;
+};
+

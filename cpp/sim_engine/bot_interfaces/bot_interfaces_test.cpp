@@ -27,28 +27,21 @@
 using namespace nrtb;
 using namespace std;
 
-class test_module : public tickable
+class test_module
 {
 public:
-  test_module(abs_bot & p) : my_parent(p) 
-  {
-    my_parent.register_ticker(*this);
-  };
+  test_module(abs_bot & p) : my_parent(p) {  };
+
   void test_send_to_bcp()
   {
     my_parent.send_to_bcp("BCP message");
-  }
+  };
+
   void test_bot_cmd()
   {
     my_parent.bot_cmd("Bot command");
-  }
-  void operator()(float duration)
-  {
-    stringstream out;
-    out << "tick at " << clock.interval() 
-      << " seconds. d=" << duration ;
-    my_parent.send_to_bcp(out.str());
-  }
+  };
+
 private:
   abs_bot & my_parent;
   hirez_timer clock;

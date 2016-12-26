@@ -16,10 +16,24 @@
  
  **********************************************/
 
+// see plugin_manager.h for documentation
 
-#include "bot_interfaces.h"
+#include "plugin_manager.h"
 #include <sstream>
-#include <iostream>
 
 using namespace nrtb;
+
+plugin_manager::plugin_manager();
+
+plugin_manager::~plugin_manager() {};
+
+effector_p plugin_manager::get_effector(std::string name);
+
+void plugin_manager::add_plugin(std::string name);
+
+void plugin_manager::remove_plugin(std::string name);
+
+
+using namespace nrtb;
+
 

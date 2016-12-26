@@ -26,7 +26,6 @@
 namespace nrtb
 {
   
-  
 /*****************************************
  * radar_mk1 provides a simple scanner 
  * for robots.  It accesses the panopticon
@@ -34,7 +33,7 @@ namespace nrtb
  * and formats results for the supplied 
  * object's point of view.
  ****************************************/
-class radar_mk1 : public commandable
+class radar_mk1 : public abs_effector
 {
 public:
   /***************************************
@@ -47,13 +46,20 @@ public:
    *      on. It will be used to estabish
    *      relative angles and ranges.
    **************************************/
-  radar_mk1(base_object & o);
+  radar_mk1();
   // NOP distructor for safety.
   virtual ~radar_mk1() {};
   // command interface.
   bool command(std::string cmd, std::string & response);
+  bool commandable() { return true; };
+  std::string as_str() { return "radar"; };
+  bool tick(base_object & o, float quanta);
+  effector_p clone() { return std::make_shared<radar_mk1>(); };
 private:
-  base_object & parent;
+  //updated from the parent by tick()
+  int parent_id;
+  triplet parent_location;
+  triplet parent_velocity;
   sim_core & sim;
   /***************************************
    * Returns a string containing information
@@ -71,6 +77,9 @@ private:
   std::string get_contacts();
   // In this version always returns "1"
   std::string status();
+  // performance limiter values
+  float type_return_limit = 10000;
+  float dist_return_limit = 10000;
 };
 
 } // namepace nrtb

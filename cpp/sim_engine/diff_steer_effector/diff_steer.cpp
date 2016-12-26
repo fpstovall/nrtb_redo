@@ -34,10 +34,97 @@ diff_steer::diff_steer(base_object& o, float thrust, float _brake,
   o.add_pre(t);
   t = post_effector;
   o.add_post(t);
-  lockdown();
 };
 
-bool diff_steer::command(std::string cmd, std::string & response)
+/******** pre-effector **********/
+
+diff_steer::pre::pre(float mp, float mb, float mt)
+  : max_p(mp), max_b(mb), max_t(mt) {};
+
+diff_steer::pre::pre(const diff_steer::pre& t)
+  : max_p(t.max_p), max_b(t.max_b), max_t(t.max_t),
+  set_p(t.set_p.load()), set_b(t.set_b.load()),set_t(t.set_t.load())
+{
+	lockdown();
+};
+
+effector_p diff_steer::pre::clone()
+{
+  return effector_p(new diff_steer::pre(*this));
+};
+
+std::string diff_steer::pre::as_str()
+{
+  std::stringstream s;
+  s << "diff_steer::pre=" 
+    << max_p << "," << set_p << ","
+    << max_b << "," << set_b << ","
+    << max_t << "," << set_t;
+  return s.str();
+};
+
+float diff_steer::pre::drive(float power)
+{
+  if (fabsf(power) <= 100.0)
+  {
+    if (power != 0.0) set_b.store(0.0);
+    set_p.store(power/100.0);
+  }
+  else
+  {
+    lockdown();
+  };
+};
+
+float diff_steer::pre::brake(float braking)
+{
+  if ((braking >= 0.0) and (braking <= 100.0))
+  {
+    if (braking != 0.0) set_p.store(0.0);
+    set_b.store(braking/100.0);
+  }
+  else 
+  {
+    lockdown();
+  };
+};
+
+float diff_steer::pre::turn(float rate)
+{
+  if (fabsf(rate) <= 100.0)
+  {
+    set_t.store(rate/100.0);
+  }
+  else
+  {
+    lockdown();
+  };
+};
+
+void diff_steer::pre::lockdown()
+{
+  // full stop.
+  set_p.store(0.0);
+  set_b.store(1.0);
+  set_t.store(0.0);  
+};
+
+float diff_steer::pre::get_drive()
+{
+  return set_p.load();
+};
+
+float diff_steer::pre::get_brake()
+{
+  return set_b.load();
+};
+
+float diff_steer::pre::get_turn()
+{
+  return set_t.load();
+};
+
+bool diff_steer::pre::command(std::string cmd, std::string & response)
 {
   bool returnme = false;
   std::stringstream tokens(cmd);
@@ -75,92 +162,6 @@ bool diff_steer::command(std::string cmd, std::string & response)
     };
   };
   return returnme;
-};
-
-float diff_steer::drive(float power)
-{
-  if (fabsf(power) <= 100.0)
-  {
-    if (power != 0.0) pre_effector->set_b.store(0.0);
-    pre_effector->set_p.store(power/100.0);
-  }
-  else
-  {
-    lockdown();
-  };
-};
-
-float diff_steer::brake(float braking)
-{
-  if ((braking >= 0.0) and (braking <= 100.0))
-  {
-    if (braking != 0.0) pre_effector->set_p.store(0.0);
-    pre_effector->set_b.store(braking/100.0);
-  }
-  else 
-  {
-    lockdown();
-  };
-};
-
-float diff_steer::turn(float rate)
-{
-  if (fabsf(rate) <= 100.0)
-  {
-    pre_effector->set_t.store(rate/100.0);
-  }
-  else
-  {
-    lockdown();
-  };
-};
-
-void diff_steer::lockdown()
-{
-  // full stop.
-  pre_effector->set_p.store(0.0);
-  pre_effector->set_b.store(1.0);
-  pre_effector->set_t.store(0.0);  
-};
-
-float diff_steer::get_drive()
-{
-  return pre_effector->set_p.load();
-};
-
-float diff_steer::get_brake()
-{
-  return pre_effector->set_b.load();
-};
-
-float diff_steer::get_turn()
-{
-  return pre_effector->set_t.load();
-};
-
-/******** pre-effector **********/
-
-diff_steer::pre::pre(float mp, float mb, float mt)
-  : max_p(mp), max_b(mb), max_t(mt) {};
-
-diff_steer::pre::pre(const diff_steer::pre& t)
-  : max_p(t.max_p), max_b(t.max_b), max_t(t.max_t),
-  set_p(t.set_p.load()), set_b(t.set_b.load()),set_t(t.set_t.load())
-{};
-
-effector_p diff_steer::pre::clone()
-{
-  return effector_p(new diff_steer::pre(*this));
-};
-
-std::string diff_steer::pre::as_str()
-{
-  std::stringstream s;
-  s << "diff_steer::pre=" 
-    << max_p << "," << set_p << ","
-    << max_b << "," << set_b << ","
-    << max_t << "," << set_t;
-  return s.str();
 };
 
 bool diff_steer::pre::tick(base_object& o, float quanta)

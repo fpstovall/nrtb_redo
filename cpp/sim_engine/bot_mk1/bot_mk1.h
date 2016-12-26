@@ -19,6 +19,7 @@
 #ifndef bot_mk1_header
 #define bot_mk1_header
 
+#include <map>
 #include <bot_interfaces.h>
 #include <base_socket.h>
 #include <confreader.h>
@@ -63,7 +64,13 @@ struct bot_mk1: public abs_bot
   // bot_interfaces stuff;
   void send_to_bcp(std::string msg);
   void bot_cmd(std::string cmd);
+  // simcore lock and unlock.
+  void lock();
+  void unlock();
 private:
+  // flags for auto commands (report every game turn)
+  bool autor {false}; // auto radar contact report
+  bool autol {false}; // auto lvar 
   /* Constucts a bot at the supplied location but 
    * without much of the setup completed. 
    */
@@ -73,8 +80,6 @@ private:
   std::atomic<bool> ImAlive;  // used to trigger shutdown of threads.
   // the robot's drive module.
   std::unique_ptr<diff_steer> drive;
-  // Radar module.
-  radar_mk1 radar;
   // connection to the controlling bot control program.
   tcp_socket_p BCP;
   // outbound message queue.

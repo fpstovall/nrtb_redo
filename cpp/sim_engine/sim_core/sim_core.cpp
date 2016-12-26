@@ -47,7 +47,7 @@ void panopticon::start_new()
 void panopticon::add(const base_object & o)
 {
   sensor_rec s;
-  s.type = 1;
+  s.type = o.object_type;
   s.id = o.id;
   s.location = o.location;
   s.velocity = o.velocity;
@@ -404,6 +404,7 @@ void sim_core::run_sim(sim_core & w)
     {
       turnclock.reset();
       turnclock.start();
+      for (auto &i: w.all_objects) { i.second->lock(); };
       w.quanta++;
       w.turn_init();
       w.tick();
@@ -415,6 +416,7 @@ void sim_core::run_sim(sim_core & w)
         w.public_list.add(*i.second);
       };
       w.public_list.done_adding();
+      for (auto &i: w.all_objects) { i.second->unlock(); };
       // output turn status
       unsigned long long elapsed = turnclock.interval_as_usec();
       void_p r(new report(w.get_report(elapsed,wallclock.interval())));

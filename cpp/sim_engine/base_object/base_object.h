@@ -100,18 +100,18 @@ typedef std::map<unsigned long long, object_p> object_list;
  *****************************************/
 struct abs_effector
 {
-  // provides a unique id for each effector.
+  /// provides a unique id for each effector.
   static serializer effector_num;
-  // Populated from the serializer at allocation.
+  /// Populated from the serializer at allocation.
   unsigned long long id = effector_num();
-  // NOP destructor to ensure proper deallocation.
+  /// NOP destructor to ensure proper deallocation.
   virtual ~abs_effector() {};
   /** polymorphic copier
   /* Returns a newly allocated copy of the effector.
    * Must be overridden by each child class.
    */
   virtual std::shared_ptr<abs_effector> clone() = 0;
-  // name of the effector.
+  /// name of the effector.
   std::string handle;
   /** Reporting method
    * Overridden by each descendent, this method 
@@ -119,6 +119,16 @@ struct abs_effector
    * status at the time of the call.
    */
   virtual std::string as_str() = 0;
+  /*****************************************
+   * command accepts strings and returns a response
+   * as appropriate. It should return true if the 
+   * cmd was recognised and handled by the effector
+   * or false in all other cases. The default 
+   * implementation defaults to false.
+  ******************************************/
+  virtual bool command(std::string cmd, std::string & response) { return false; };
+  /// override to return true if the effector has a non-default command() method.
+  virtual bool commandable() { return false; };
   /** does the "time quanta" work of the effector.
    * Returns true if the object should die.
    * o is the parent object
@@ -128,6 +138,8 @@ struct abs_effector
 };
   
 typedef std::shared_ptr<abs_effector> effector_p;
+
+using effector_factory = effector_p();
 
 /***********************************************
  * effector_list is a specialization of std::map
@@ -164,6 +176,8 @@ struct base_object
   virtual object_p clone() = 0;
   // Unique object id, seeded from the serializer
   unsigned long long id = object_num();
+  // Object type ID, set to a number in child constructors.
+  int object_type = 0;
   // Name of this object, should set in constructor
   std::string handle;
   // The following are automatically managed after creation.
@@ -179,6 +193,14 @@ struct base_object
   triplet accel_mod;
   rotatable rotation_mod;
   float mass_mod;
+  /*****************************************
+   * command accepts strings and returns a response
+   * as appropriate. It should return true if the 
+   * cmd was recognised and handled by the effector
+   * or false in all other cases. The default 
+   * implementation defaults to false.
+  ******************************************/
+  virtual bool command(std::string cmd, std::string & response);
   // reporting
   virtual std::string as_str();
   // effector management
@@ -198,7 +220,11 @@ struct base_object
   virtual bool apply(float quanta);
   // override apply_collision as needed; return true to kill the object.
   virtual bool apply_collision(object_p o, float quanta) = 0;
+  // used to trigger any processing mutexes, if needed.
+  virtual void lock() {};
+  virtual void unlock() {};
 protected:
+  effector_list cmd_attribs;
   effector_list pre_attribs;
   effector_list post_attribs; 
   std::vector<unsigned long long> dropped_attribs;

@@ -24,7 +24,6 @@
 using namespace nrtb;
 
 bot_mk1::bot_mk1(triplet where)
-  : radar(std::ref(*this))
 {
   std::stringstream s;
   s << "mk1_" << id;
@@ -40,8 +39,11 @@ bot_mk1::bot_mk1(tcp_socket_p link, triplet where)
   : bot_mk1(where)
 {
   // add effectors
-  add_pre(effector_p(new norm_gravity));
-  add_pre(effector_p(new hover(location.z,0.10,2.0)));
+	add_pre(std::make_shared<radar_mk1>());
+  //add_pre(effector_p(new norm_gravity));
+  add_pre(std::make_shared<norm_gravity>());
+  //add_pre(effector_p(new hover(location.z,0.10,2.0)));
+  add_pre(std::make_shared<hover>(location.z,0.10,2.0));
   drive.reset(new diff_steer(*this,1e5,2e5,4*pi,10,8));
   // bot control and com setup.
   BCP = std::move(link);
@@ -80,7 +82,6 @@ bot_mk1::~bot_mk1()
 
 bool bot_mk1::tick(float duration)
 {
-  cooking_lock.lock();
   if (ImAlive)
   {
     return nrtb::abs_bot::tick(duration);
@@ -97,13 +98,11 @@ bool bot_mk1::apply(float quanta)
   if (ImAlive)
   {
     bool returnme = nrtb::base_object::apply(quanta);
-    cooking_lock.unlock();
     return returnme;
   }
   else
   {
     // we are dead.. tell sim_engine.
-    cooking_lock.unlock();
     return true;
   };
 };
@@ -176,47 +175,59 @@ void bot_mk1::msg_router(std::string s)
   std::unique_lock<std::mutex>(cooking_lock);
   try
   {
-    std::string returnme;
-    if (drive->command(s,returnme))
-    {
-      if (returnme != "") to_BCP.push(returnme);
-    }
-    else if (radar.command(s,returnme))
-    {
-      if (returnme != "") to_BCP.push(returnme);
-    }
+    std::string returnme = "";
+    // check local commands first.
+	  std::stringstream tokens(s);
+	  std::string sys;
+	  std::string verb;
+	  tokens >> sys >> verb;
+	  // check for effector commands
+	  if (sys == "bot")
+	  {
+		if (verb == "lvar")
+		{
+		  std::stringstream s;
+		  s << sys << " " << verb 
+			<< " " << location 
+			<< " " << velocity
+			<< " " << attitude.angles() 
+			<< " " << rotation.angles();
+		  to_BCP.push(s.str());
+		}
+		else if (verb == "autol")
+		{
+		  autol = !autol;
+		  std::stringstream s;
+		  s << "autol " << int(autol);
+		  to_BCP.push(s.str());
+		}
+		else if (verb == "autor")
+		{
+		  autor = !autor;
+		  std::stringstream s;
+		  s << "autor " << int(autor);
+		  to_BCP.push(s.str());
+		}
+		else if (verb == "health")
+		{
+		  to_BCP.push("bot health 100");
+		}
+		else if (verb == "ping")
+		{
+		  to_BCP.push("READY");
+		}
+		else
+		{
+		  to_BCP.push("bad_cmd \""+s+"\"");
+		};
+      }
+      else if (command(s,returnme))
+	  {
+	    if (returnme != "") to_BCP.push(returnme);
+	  }
     else
     {
-      std::stringstream tokens(s);
-      std::string sys;
-      std::string verb;
-      tokens >> sys >> verb;
-      // check for drive commands
-      if (sys == "bot")
-      {
-        if (verb == "lvar")
-        {
-          std::stringstream s;
-          s << sys << " " << verb 
-            << " " << location 
-            << " " << velocity
-            << " " << attitude.angles() 
-            << " " << rotation.angles();
-          to_BCP.push(s.str());
-        }
-        else if (verb == "health")
-        {
-          to_BCP.push("bot health 100");
-        }
-        else
-        {
-          to_BCP.push("bad_cmd \""+s+"\"");
-        };
-      }
-      else
-      {
-        to_BCP.push("bad_sys \""+s+"\"");
-      };
+	  to_BCP.push("bad_sys \""+s+"\"");
     };
   }
   catch (...)
@@ -237,3 +248,15 @@ void bot_mk1::bot_cmd(std::string cmd)
   msg_router(cmd);
 };
 
+void bot_mk1::lock()
+{
+  cooking_lock.lock();
+};
+
+void bot_mk1::unlock()
+{
+  cooking_lock.unlock();
+  // call auto command here.
+  if (autol) bot_cmd("bot lvar");
+  if (autor) bot_cmd("radar contacts");
+};

@@ -16,33 +16,27 @@
 #
 #***********************************************
 
-target=hover
+target=kamikaze_2
 
-lib:	${target}_test
-	@./${target}_test
-	@cp -v ${target}.h ../include/
-	@cp -v ${target}.o ../obj/
-	@ar -r ../lib/sim_engine.a ${target}.o
-	@echo build complete
+lib: ${target}
+	@cp ${target} ${target}.conf ../bin/
 
-${target}_test:	${target}.o ${target}_test.cpp
-	@rm -f ${target}_test
-	g++ -c -O3 ${target}_test.cpp -I ../include ${bargs} 
-	g++ -o ${target}_test ${target}_test.o ${target}.o ${largs}
+${target}:	${target}.o
+	@rm -f ${target}
+	g++ -o ${target} ${target}.o ${largs}
 
 
-${target}.o:	${target}.cpp ${target}.h Makefile
+${target}.o:	${target}.cpp Makefile
 	@rm -f ${target}.o
-	g++ -c -O3 ${target}.cpp -I ../include ${bargs} 
+	g++ -c -O3 ${target}.cpp ${bargs} 
 
 clean:
-	@rm -vf *.o ../include/${target}.h ../obj/${target}.o ${target}_test
+	@rm -vf *.o ${target} *log *out ../bin/${target}	
 	@echo all objects and executables have been erased.
 
-switches=-std=gnu++14 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP 
-libs=../../common/lib/nrtb_common.a ../lib/sim_engine.a -lpthread
+
+switches=-std=gnu++11 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP 
+libs=../../common/lib/nrtb_common.a -lpthread
 include=-I../../common/include -I../include
 bargs=${switches} ${include}
 largs=${switches} ${libs}
-
-

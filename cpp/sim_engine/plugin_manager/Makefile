@@ -16,7 +16,7 @@
 #
 #***********************************************
 
-target=hover
+target=plugin_manager
 
 lib:	${target}_test
 	@./${target}_test

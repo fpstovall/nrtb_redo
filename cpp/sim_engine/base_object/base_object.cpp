@@ -110,12 +110,23 @@ void effector_list::add(effector_p e)
 
 void effector_list::remove(effector_p e)
 {
-  erase(e->id);
+  try { erase(e->id); } catch (...) {};
 };
 
 void effector_list::remove(long long unsigned int key)
 {
   erase(key);
+};
+
+bool base_object::command(std::string cmd, std::string & response)
+{
+	bool found = false;
+	for(auto &e : cmd_attribs)
+	{
+		found = e.second->command(cmd,response);
+		if (found) break;
+	};
+	return found;
 };
 
 std::string base_object::as_str()
@@ -159,6 +170,7 @@ bool base_object::tick(float quanta)
     {
       pre_attribs.remove(i);
       post_attribs.remove(i);
+      cmd_attribs.remove(i);
     }
     catch (...) {};
   };
@@ -241,12 +253,14 @@ bool base_object::check_collision(object_p o, float quanta)
 void base_object::add_pre(effector_p e)
 {
   pre_attribs.add(e);
+  if (e->commandable()) cmd_attribs.add(e);
 };
 
 
 void base_object::add_post(effector_p e)
 {
   post_attribs.add(e);
+  if (e->commandable()) cmd_attribs.add(e);
 };
 
 effector_list base_object::get_pre_attribs_copy()

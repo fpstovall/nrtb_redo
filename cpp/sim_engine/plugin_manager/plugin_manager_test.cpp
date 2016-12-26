@@ -16,10 +16,50 @@
  
  **********************************************/
 
-
-#include "bot_interfaces.h"
-#include <sstream>
+#include "plugin_manager.h"
 #include <iostream>
+#include <string>
 
 using namespace nrtb;
+using namespace std;
+
+
+int main()
+{
+  bool failed = false;
+  cout << "========== plugin manager test ============="
+    << endl;
+  
+    
+  cout << "=========== plugin manager test complete ============="
+    << endl;
+  
+  return failed;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
