@@ -159,7 +159,15 @@ void bot_mk1::transmitter()
     while (ImAlive)
     {
       std::string s = to_BCP.pop();
-      BCP->put(s+"\r");
+      if (s == "autoall")
+      {
+        if (autol) bot_cmd("bot lvar");
+        if (autor) bot_cmd("radar contacts");
+      }
+      else
+      {
+        BCP->put(s+"\r");
+      };
       log.trace(">> "+s);
     };
   }
@@ -257,6 +265,5 @@ void bot_mk1::unlock()
 {
   cooking_lock.unlock();
   // call auto command here.
-  if (autol) bot_cmd("bot lvar");
-  if (autor) bot_cmd("radar contacts");
+  to_BCP.push("autoall");
 };
