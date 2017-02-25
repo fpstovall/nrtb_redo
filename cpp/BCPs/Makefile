@@ -16,8 +16,9 @@
 #
 #***********************************************
 
-lib: 
+lib: ../common/include/common.h
 	@echo "============= Building BCPs ==============="
+	@mkdir bin
 	@make action=lib doit
 	@echo "=========== BCP Build Complete ============="
 
@@ -27,9 +28,13 @@ clean:
 	@rm -rf ./obj ./lib ./include ./bin
 	@echo "========== BCPSs cleanup complete ==========="
 
+../common/include/common.h:
+	@cd ../common; make lib
+
 doit:
-	cd target; make ${action}
-	cd target_2; make ${action}
-	cd kamikaze; make ${action}
-	cd kamikaze_2; make ${action}
+	@cd cal_bot; make ${action}
+	@cd target; make ${action}
+	@cd target_2; make ${action}
+	@cd kamikaze; make ${action}
+	@cd kamikaze_2; make ${action}
 
