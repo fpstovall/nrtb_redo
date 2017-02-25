@@ -16,33 +16,20 @@
 #
 #***********************************************
 
-lib: ./bin/nrtb_simulation
-    
-./bin/nrtb_simulation: ../common/nrtb_common.a
-	@echo "============= building simulation engine ==============="
-	@mkdir -p ./obj ./lib ./include ./bin
-	@ar -r ./lib/sim_engine.a
+lib: 
+	@echo "============= Building BCPs ==============="
 	@make action=lib doit
-	@echo "============= simulation engine complete ==============="
+	@echo "=========== BCP Build Complete ============="
 
 clean:
-	@echo "============= cleaning simulation engine ==============="
+	@echo "============= cleaning BCPs ==============="
 	@make action=clean doit
 	@rm -rf ./obj ./lib ./include ./bin
-	@echo "========== simulation engine cleanup complete ==========="
+	@echo "========== BCPSs cleanup complete ==========="
 
 doit:
-	cd messages; make ${action}
-	cd base_object; make ${action}
-	cd common_log; make ${action}
-	cd sim_core; make ${action}
-	cd gravity_effector; make ${action}
-	cd hover_effector; make ${action}
-	cd diff_steer_effector; make ${action}
-	cd bot_mk1; make ${action}
-	cd bcp_server; make ${action}
-	cd main; make ${action}
-
-../common/nrtb_common.a:
-	@cd ../common; make 
+	cd target; make ${action}
+	cd target_2; make ${action}
+	cd kamikaze; make ${action}
+	cd kamikaze_2; make ${action}
 
