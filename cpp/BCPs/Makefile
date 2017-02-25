@@ -18,7 +18,7 @@
 
 lib: ../common/include/common.h
 	@echo "============= Building BCPs ==============="
-	@mkdir bin
+	@mkdir -p bin
 	@make action=lib doit
 	@echo "=========== BCP Build Complete ============="
 

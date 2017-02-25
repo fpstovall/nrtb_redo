@@ -19,7 +19,7 @@
 lib:
 	@echo "============= building C++ code ==============="
 	@make action=lib doit
-	@mkdir bin
+	@mkdir -p bin
 	@cp sim_engine/bin/* bin
 	@cp BCPs/bin/* bin
 	@echo "============= C++ build complete ==============="
