@@ -28,3 +28,11 @@
 Session.vim
 .netrwhist
 *~
+
+### Kdev ###
+.kdev4
+.cproject
+.metadata
+.project
+RemoteSystemsTempFiles
+nrtb_beta.kdev4

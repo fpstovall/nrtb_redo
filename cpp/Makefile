@@ -1,5 +1,5 @@
 #***********************************************
-#This file is part of the NRTB project (https://github.com/fpstovall/nrtb_alpha).
+#This file is part of the NRTB project (https://github.com/fpstovall/nrtb_beta).
 #
 #    NRTB is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -19,13 +19,18 @@
 lib:
 	@echo "============= building C++ code ==============="
 	@make action=lib doit
+	@mkdir bin
+	@cp sim_engine/bin/* bin
+	@cp BCPs/bin/* bin
 	@echo "============= C++ build complete ==============="
 
 clean:
 	@echo "============= cleaning common libs ==============="
 	@make action=clean doit
+	@rm -rf bin
 	@echo "========== common lib cleanup complete ==========="
 
 doit:
 	@cd common; make ${action}
 	@cd sim_engine; make ${action}
+	@cd BCPs; make ${action}
