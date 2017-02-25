@@ -19,11 +19,15 @@
 lib:
 	@echo "============= building C++ code ==============="
 	@make action=lib doit
+	@mkdir bin
+	@cp sim_engine/bin/* bin
+	@cp BCPs/bin/* bin
 	@echo "============= C++ build complete ==============="
 
 clean:
 	@echo "============= cleaning common libs ==============="
 	@make action=clean doit
+	@rm -rf bin
 	@echo "========== common lib cleanup complete ==========="
 
 doit:
