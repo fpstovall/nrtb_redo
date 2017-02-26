@@ -68,9 +68,6 @@ struct bot_mk1: public abs_bot
   void lock();
   void unlock();
 private:
-  // flags for auto commands (report every game turn)
-  bool autor {false}; // auto radar contact report
-  bool autol {false}; // auto lvar 
   /* Constucts a bot at the supplied location but 
    * without much of the setup completed. 
    */

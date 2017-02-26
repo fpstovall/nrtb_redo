@@ -159,15 +159,7 @@ void bot_mk1::transmitter()
     while (ImAlive)
     {
       std::string s = to_BCP.pop();
-      if (s == "autoall")
-      {
-        if (autol) bot_cmd("bot lvar");
-        if (autor) bot_cmd("radar contacts");
-      }
-      else
-      {
-        BCP->put(s+"\r");
-      };
+      BCP->put(s+"\r");
       log.trace(">> "+s);
     };
   }
@@ -192,44 +184,30 @@ void bot_mk1::msg_router(std::string s)
     // check for effector commands
     if (sys == "bot")
     {
-    if (verb == "lvar")
-    {
-      std::stringstream s;
-      s << sys << " " << verb 
-      << " " << location 
-      << " " << velocity
-      << " " << attitude.angles() 
-      << " " << rotation.angles();
-      to_BCP.push(s.str());
-    }
-    else if (verb == "autol")
-    {
-      autol = !autol;
-      std::stringstream s;
-      s << "autol " << int(autol);
-      to_BCP.push(s.str());
-    }
-    else if (verb == "autor")
-    {
-      autor = !autor;
-      std::stringstream s;
-      s << "autor " << int(autor);
-      to_BCP.push(s.str());
-    }
-    else if (verb == "health")
-    {
-      to_BCP.push("bot health 100");
-    }
-    else if (verb == "ping")
-    {
-      to_BCP.push("READY");
-    }
-    else
-    {
-      to_BCP.push("bad_cmd \""+s+"\"");
-    };
+      if (verb == "lvar")
+      {
+        std::stringstream s;
+        s << sys << " " << verb 
+        << " " << location 
+        << " " << velocity
+        << " " << attitude.angles() 
+        << " " << rotation.angles();
+        to_BCP.push(s.str());
       }
-      else if (command(s,returnme))
+      else if (verb == "health")
+      {
+        to_BCP.push("bot health 100");
+      }
+      else if (verb == "ping")
+      {
+        to_BCP.push("READY");
+      }
+      else
+      {
+        to_BCP.push("bad_cmd \""+s+"\"");
+      };
+    }
+    else if (command(s,returnme))
     {
       if (returnme != "") to_BCP.push(returnme);
     }
@@ -264,6 +242,4 @@ void bot_mk1::lock()
 void bot_mk1::unlock()
 {
   cooking_lock.unlock();
-  // call auto command here.
-  to_BCP.push("autoall");
 };

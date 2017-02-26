@@ -140,66 +140,6 @@ int main()
       << endl;
     failed = failed or bad;
     
-    // autol test
-    BCP.put("bot autol\r");
-    msg = gsub(BCP.getln("\r",64,2),"\r","");
-    bad = (msg != "autol 1") or !(test_bot->IsAlive());
-    failed = failed or bad;
-    cout << "autol response: " << ( bad ? "FAILED" : "Passed" ) 
-      << " '" << msg << "'" << endl;
-    test_bot->lock();
-    bad = test_bot->tick(d) or test_bot->apply(d);
-    test_bot->unlock();
-    msg = gsub(BCP.getln("\r",64,2),"\r",""); 
-    bad = (msg != "bot lvar (0,0,2.49647) (0,0,0.0196133) (0,0,0) (0,0,0)") or !(test_bot->IsAlive());
-    failed = failed or bad;
-    cout << "autol tick: " << ( bad ? "FAILED" : "Passed" ) 
-      << " '" << msg << "'" << endl;
-    test_bot->lock();
-    bad = test_bot->tick(d) or test_bot->apply(d);
-    test_bot->unlock();
-    msg = gsub(BCP.getln("\r",64,2),"\r",""); 
-    bad = (msg != "bot lvar (0,0,2.50075) (0,0,0.213785) (0,0,0) (0,0,0)") or !(test_bot->IsAlive());
-    failed = failed or bad;
-    cout << "autol tick: " << ( bad ? "FAILED" : "Passed" ) 
-      << " '" << msg << "'" << endl;
-    BCP.put("bot autol\r");
-    msg = gsub(BCP.getln("\r",64,2),"\r","");
-    bad = (msg != "autol 0") or !(test_bot->IsAlive());
-    failed = failed or bad;
-    cout << "autol response: " << ( bad ? "FAILED" : "Passed" ) 
-      << " '" << msg << "'" << endl;
-    
-    // autor test
-    BCP.put("bot autor\r");
-    msg = gsub(BCP.getln("\r",64,2),"\r","");
-    bad = (msg != "autor 1") or !(test_bot->IsAlive());
-    failed = failed or bad;
-    cout << "autor response: " << ( bad ? "FAILED" : "Passed" ) 
-      << " '" << msg << "'" << endl;
-    test_bot->lock();
-    bad = test_bot->tick(d) or test_bot->apply(d);
-    test_bot->unlock();
-    msg = gsub(BCP.getln("\r",64,2),"\r",""); 
-    bad = (msg != "radar contacts 0") or !(test_bot->IsAlive());
-    failed = failed or bad;
-    cout << "autor tick: " << ( bad ? "FAILED" : "Passed" ) 
-      << " '" << msg << "'" << endl;
-    test_bot->lock();
-    bad = test_bot->tick(d) or test_bot->apply(d);
-    test_bot->unlock();
-    msg = gsub(BCP.getln("\r",64,2),"\r",""); 
-    bad = (msg != "radar contacts 0") or !(test_bot->IsAlive());
-    failed = failed or bad;
-    cout << "autor tick: " << ( bad ? "FAILED" : "Passed" ) 
-      << " '" << msg << "'" << endl;
-    BCP.put("bot autor\r");
-    msg = gsub(BCP.getln("\r",64,2),"\r","");
-    bad = (msg != "autor 0") or !(test_bot->IsAlive());
-    failed = failed or bad;
-    cout << "autor response: " << ( bad ? "FAILED" : "Passed" ) 
-      << " '" << msg << "'" << endl;
-  
     // verify bot shutdown on connection close
     BCP.close();
     chrono::milliseconds pause(20);
