@@ -34,7 +34,5 @@ clean:
 doit:
 	@cd cal_bot; make ${action}
 	@cd target; make ${action}
-	@cd target_2; make ${action}
 	@cd kamikaze; make ${action}
-	@cd kamikaze_2; make ${action}
 

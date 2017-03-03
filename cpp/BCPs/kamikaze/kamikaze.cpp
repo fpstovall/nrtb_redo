@@ -206,7 +206,7 @@ int main(int argc, char * argv[])
           { sim.put("drive turn 10"); }
         else { sim.put("drive turn 0"); };
       };
-      const int t(1e6/50);
+      const int t(1e6/40);
       std::chrono::microseconds st(t);
       this_thread::sleep_for(st);
     };
