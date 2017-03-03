@@ -281,7 +281,7 @@ int main(int argc, char * argv[])
           break;
         }
       };
-      const int t(1e6/50);
+      const int t(1e6/20);
       std::chrono::microseconds st(t);
       this_thread::sleep_for(st);
     };
