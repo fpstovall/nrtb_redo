@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="MySql" id="Project_2cf6c4d9" template="Default" database="MySql" >
+	<schema name="nrtb" catalogname="nrtb" >
+		<table name="conf_options" generator_rows="400" >
+			<comment><![CDATA[Holds the configuration options in effect for any given run]]></comment>
+			<column name="id" type="bigint" jt="-5" mandatory="y" unsigned="y" >
+				<comment><![CDATA[link back to run_data]]></comment>
+			</column>
+			<column name="name" type="varchar" length="100" jt="12" mandatory="y" />
+			<column name="value" type="varchar" length="100" jt="12" mandatory="y" />
+			<index name="idx_conf_options" unique="NORMAL" >
+				<column name="id" />
+			</index>
+			<fk name="fk_conf_options_run_data" to_schema="nrtb" to_table="run_data" delete_action="cascade" >
+				<fk_column name="id" pk="id" />
+			</fk>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+		<table name="pop_summary" generator_rows="5000" >
+			<comment><![CDATA[Each row contains run summary data by population count.]]></comment>
+			<column name="id" type="bigint" jt="-5" mandatory="y" unsigned="y" />
+			<column name="population" type="bigint" jt="-5" mandatory="y" unsigned="y" />
+			<column name="count" type="bigint" jt="-5" mandatory="y" unsigned="y" />
+			<column name="usec_min" type="bigint" jt="-5" mandatory="y" unsigned="y" />
+			<column name="usec_avg" type="float" length="10" decimal="5" jt="7" mandatory="y" unsigned="y" />
+			<column name="usec_max" type="bigint" jt="-5" mandatory="y" unsigned="y" />
+			<index name="idx_pop_summary" unique="NORMAL" >
+				<column name="id" />
+			</index>
+			<fk name="fk_pop_summary_run_data" to_schema="nrtb" to_table="run_data" delete_action="cascade" >
+				<fk_column name="id" pk="id" />
+				<comment><![CDATA[link back to run_data]]></comment>
+			</fk>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+		<table name="run_data" generator_rows="100" >
+			<comment><![CDATA[Holds the run specific data from an experiment.]]></comment>
+			<column name="id" type="bigint" jt="-5" mandatory="y" unsigned="y" autoincrement="y" />
+			<column name="run_id" type="varchar" length="120" jt="12" mandatory="y" >
+				<comment><![CDATA[the system assigned run id.]]></comment>
+			</column>
+			<column name="quanta" type="float" length="4" decimal="3" jt="7" mandatory="y" >
+				<comment><![CDATA[The timeslice in seconds]]></comment>
+			</column>
+			<column name="timeslices" type="bigint" jt="-5" mandatory="y" unsigned="y" >
+				<comment><![CDATA[Number of time slices analized.]]></comment>
+			</column>
+			<column name="usec_min" type="bigint" jt="-5" mandatory="y" unsigned="y" >
+				<comment><![CDATA[Min timeslice]]></comment>
+			</column>
+			<column name="usec_avg" type="float" length="10" decimal="5" jt="7" mandatory="y" >
+				<comment><![CDATA[Overall average quanta]]></comment>
+			</column>
+			<column name="usec_max" type="bigint" jt="-5" mandatory="y" >
+				<comment><![CDATA[maximum quanta]]></comment>
+			</column>
+			<index name="pk_run_data" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+		<table name="usec_summary" generator_rows="4000" >
+			<comment><![CDATA[Each row contains run summary data by microsec range.]]></comment>
+			<column name="id" type="bigint" jt="-5" mandatory="y" unsigned="y" />
+			<column name="range_min" type="bigint" jt="-5" mandatory="y" unsigned="y" />
+			<column name="range_max" type="bigint" jt="-5" mandatory="y" unsigned="y" />
+			<column name="count" type="bigint" jt="-5" mandatory="y" unsigned="y" />
+			<column name="usec_min" type="bigint" jt="-5" mandatory="y" unsigned="y" />
+			<column name="usec_avg" type="float" length="10" decimal="5" jt="7" mandatory="y" unsigned="y" />
+			<column name="usec_max" type="bigint" jt="-5" mandatory="y" unsigned="y" />
+			<index name="idx_pop_summary_0" unique="NORMAL" >
+				<column name="id" />
+			</index>
+			<fk name="fk_pop_summary_0_run_data" to_schema="nrtb" to_table="run_data" delete_action="cascade" >
+				<fk_column name="id" pk="id" />
+			</fk>
+		</table>
+		<view name="all_totals" >
+			<comment><![CDATA[Counts in all tables.]]></comment>
+			<view_script><![CDATA[select (select count(0) from `nrtb`.`run_data`) AS `runs`,(select count(0) from `nrtb`.`conf_options`) AS `options`,(select count(0) from `nrtb`.`pop_summary`) AS `p_sums`,(select count(0) from `nrtb`.`usec_summary`) AS `t_sums`]]></view_script>
+			<column name="runs" type="bigint" />
+			<column name="options" type="bigint" />
+			<column name="p_sums" type="bigint" />
+			<column name="t_sums" type="bigint" />
+		</view>
+		<view name="run_totals" >
+			<view_script><![CDATA[select `nrtb`.`run_data`.`id` AS `id`,count(distinct `nrtb`.`conf_options`.`name`) AS `conf_rec`,count(distinct `nrtb`.`pop_summary`.`count`) AS `pop_rec`,count(distinct `nrtb`.`usec_summary`.`range_min`) AS `usec_rec` from (((`nrtb`.`run_data` left join `nrtb`.`conf_options` on((`nrtb`.`run_data`.`id` = `nrtb`.`conf_options`.`id`))) left join `nrtb`.`pop_summary` on((`nrtb`.`run_data`.`id` = `nrtb`.`pop_summary`.`id`))) left join `nrtb`.`usec_summary` on((`nrtb`.`run_data`.`id` = `nrtb`.`usec_summary`.`id`))) group by `nrtb`.`run_data`.`id`]]></view_script>
+			<column name="id" type="bigint" />
+			<column name="conf_rec" type="bigint" />
+			<column name="pop_rec" type="bigint" />
+			<column name="usec_rec" type="bigint" />
+		</view>
+	</schema>
+	<connector name="MySql" database="MySql" driver_class="com.mysql.jdbc.Driver" driver_jar="mysql-connector-java-5.1.40-bin.jar" driver_desc="Standard" host="localhost" port="3306" instance="nrtb" user="rstovall" />
+	<layout name="Default Layout" id="Layout_36713595" show_relation="columns" >
+		<entity schema="nrtb" name="conf_options" color="bcd5f1" x="114" y="608" />
+		<entity schema="nrtb" name="usec_summary" color="bcd5f1" x="494" y="494" />
+		<entity schema="nrtb" name="run_data" color="bcd5f1" x="114" y="114" />
+		<entity schema="nrtb" name="run_totals" color="bcd5f1" x="874" y="494" />
+		<entity schema="nrtb" name="pop_summary" color="bcd5f1" x="494" y="114" />
+		<entity schema="nrtb" name="all_totals" color="bcd5f1" x="874" y="152" />
+		<script name="fk_conf_options_run_data" id="Query_2ca38caf" language="SQL" >
+			<string><![CDATA[ALTER TABLE nrtb.conf_options ADD CONSTRAINT fk_conf_options_run_data FOREIGN KEY ( id ) REFERENCES nrtb.run_data( id ) ON DELETE CASCADE ON UPDATE NO ACTION;
+
+]]></string>
+		</script>
+	</layout>
+</project>
