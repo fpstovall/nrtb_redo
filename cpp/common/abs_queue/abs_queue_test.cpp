@@ -91,13 +91,13 @@ int main()
   for (int i=225; i<250; i++)
   {
     q1->push(i);
-    usleep(100);
   };
+  usleep(100);
   cout << "cp 3 "
     << q1->in_count << ":"
     << q1->out_count << endl;
   q1->release();
-  usleep(100);  
+  while (q1->size()) usleep(100);
   cout << "cp 4 "
     << q1->in_count << ":"
     << q1->out_count << endl;
