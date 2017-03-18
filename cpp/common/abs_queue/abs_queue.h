@@ -79,6 +79,22 @@ public:
     T pop();
 
     /*********************************************
+      * blocks queue processing temporarily.
+    *********************************************/
+    void hold();
+
+    /*********************************************
+      * Releases the queue if held.
+    *********************************************/
+    void release();
+
+    /*********************************************
+      * Returns true if the queue is blocked 
+      *  false otherwise.
+    *********************************************/
+    bool is_blocked();
+
+    /*********************************************
      * puts the queue in shutdown mode.
     *********************************************/
     void shutdown();
@@ -95,7 +111,8 @@ protected:
     queue_t buffer;
     std::mutex mylock;
     std::condition_variable signal;
-    bool ready {true};
+    std::atomic<bool> ready {true};
+    std::atomic<bool> blocked {false};
 };
 
 template <class T, class queue_t>
@@ -119,7 +136,7 @@ void abs_queue<T,queue_t>::push(T item)
       std::unique_lock<std::mutex> lock(mylock);
       buffer.push(std::move(item));
     }
-    signal.notify_one();
+    if (!blocked) signal.notify_one();
   }
   else 
   {
@@ -132,7 +149,7 @@ template <class T, class queue_t>
 T abs_queue<T,queue_t>::pop()
 {
   std::unique_lock<std::mutex> lock(mylock);
-  while (buffer.empty() && ready)
+  while ((buffer.empty() && ready) or (blocked))
     signal.wait(lock);
   if (ready)
   {
@@ -146,6 +163,25 @@ T abs_queue<T,queue_t>::pop()
     queue_not_ready e;
     throw e;
   };
+};
+
+template <class T, class queue_t>
+void abs_queue<T,queue_t>::hold() 
+{
+  blocked = true;
+};
+
+template <class T, class queue_t>
+void abs_queue<T,queue_t>::release()
+{
+  blocked = false;
+  signal.notify_all();
+};
+
+template <class T, class queue_t>
+bool abs_queue<T,queue_t>::is_blocked()
+{
+  return blocked;
 };
 
 template <class T, class queue_t>
