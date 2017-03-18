@@ -149,7 +149,7 @@ template <class T, class queue_t>
 T abs_queue<T,queue_t>::pop()
 {
   std::unique_lock<std::mutex> lock(mylock);
-  while ((buffer.empty() && ready) or (blocked))
+  while ((buffer.empty() && ready) or (blocked && ready))
     signal.wait(lock);
   if (ready)
   {
