@@ -178,45 +178,51 @@ void bot_mk1::msg_router()
     try {s = from_BCP.pop(); } catch (...) { return; };
     try
     {
-      std::string returnme = "";
-      // check local commands first.
-      std::stringstream tokens(s);
-      std::string sys;
-      std::string verb;
-      tokens >> sys >> verb;
-      // check for effector commands
-      if (sys == "bot")
+      // tick notification.
+      if (s == "tick")
       {
-        if (verb == "lvar")
-        {
-          std::stringstream s;
-          s << sys << " " << verb 
-          << " " << location 
-          << " " << velocity
-          << " " << attitude.angles() 
-          << " " << rotation.angles();
-          to_BCP.push(s.str());
-        }
-        else if (verb == "health")
-        {
-          to_BCP.push("bot health 100");
-        }
-        else if (verb == "ping")
-        {
-          to_BCP.push("READY");
-        }
-        else
-        {
-          to_BCP.push("bad_cmd \""+s+"\"");
-        };
-      }
-      else if (command(s,returnme))
-      {
-        if (returnme != "") to_BCP.push(returnme);
+        gonculate();
       }
       else
       {
-        to_BCP.push("bad_sys \""+s+"\"");
+        std::string returnme = "";
+        // check local commands first.
+        std::stringstream tokens(s);
+        std::string sys;
+        std::string verb;
+        tokens >> sys >> verb;
+        if (sys == "bot")
+        {
+          if (verb == "lvar")
+          {
+            lvar();
+          }
+          else if (verb == "health")
+          {
+            health();
+          }
+          else if (verb == "ping")
+          {
+            to_BCP.push("READY");
+          }
+          else if (verb == "autopilot")
+          {
+            autopilot(tokens);
+          }
+          else
+          {
+            to_BCP.push("bad_cmd \""+s+"\"");
+          };
+        }
+        // check for effector commands.
+        else if (command(s,returnme))
+        {
+          if (returnme != "") to_BCP.push(returnme);
+        }
+        else
+        {
+          to_BCP.push("bad_sys \""+s+"\"");
+        };
       };
     }
     catch (...)
@@ -246,4 +252,95 @@ void bot_mk1::lock()
 void bot_mk1::unlock()
 {
   from_BCP.release();
+  from_BCP.push("tick");
+};
+
+void bot_mk1::gonculate()
+{
+  if (auto_on)
+  {
+    // check speed and adjust
+    triplet v = velocity;
+    v.z = 0;
+    float delta = v.magnatude() - set_speed;
+    std::stringstream s("drive power ");
+    if (delta >= 0) { s << 0; }
+    else { s << power_limit; };
+    bot_cmd(s.str());
+    // check heading and adjust
+    std::stringstream t("drive turn ");
+    float current_heading = attitude.angles().z;
+    delta = (current_heading - set_heading);
+    if (delta < 3.14159) { t << turn_limit; }
+    else { t << -turn_limit; };
+    bot_cmd(t.str());
+  };
+};
+
+void bot_mk1::lvar()
+{
+  std::stringstream s;
+  s << "bot" << " " << "lvar" 
+  << " " << location 
+  << " " << velocity
+  << " " << attitude.angles() 
+  << " " << rotation.angles();
+  to_BCP.push(s.str());
+};
+
+void bot_mk1::health()
+{
+  to_BCP.push("bot health 100");
+};
+
+void bot_mk1::autopilot(std::stringstream & s)
+{
+  try
+  {
+    std::string verb;
+    s >> verb;
+    if (verb == "on") 
+    { 
+      auto_on = true;
+    }
+    else if (verb == "off")
+    {
+      auto_on = false;
+    }
+    else if (verb == "power")
+    {
+      s >> power_limit;
+    }
+    else if (verb == "speed")
+    {
+      s >> set_speed;
+    }
+    else if (verb == "turn_rate")
+    {
+      s >> turn_limit;
+    }
+    else if (verb == "heading")
+    {
+      s >> set_heading;
+    }
+    else if (verb == "status")
+    {
+      std::stringstream response;
+      response << "bot autopilot "
+        << auto_on << " "
+        << set_heading << " "
+        << set_speed << " "
+        << turn_limit << " "
+        << power_limit;
+      to_BCP.push(response.str());
+    }
+    else 
+    {
+      to_BCP.push("bot autopilot bad_cmd");
+    };
+  }
+  catch (...) 
+  {
+    to_BCP.push("bot autopilot WTF?");
+  };
 };

@@ -89,10 +89,21 @@ private:
   std::thread t_thread;
   // handler for the command processor thread;
   std::thread cp_thread;
-  // BCP communications managers;
+  // free running work threads;
   void receiver(); // -- thread which processes inbound BCP messages.
   void transmitter(); // -- thread which processes outbound BCP messages.
   void msg_router(); // -- Command processor.
+  // command implementations
+  void gonculate(); // -- triggered every tick for auto functions.
+  void lvar();  // returns location data to the BCP
+  void health(); // returns health report to the BPP
+  void autopilot(std::stringstream & s); // implements motion management.
+  // autopilot support variables.
+  bool auto_on {false};
+  float set_speed {0.0};
+  float set_heading {0.0};
+  float power_limit {0.0};
+  float turn_limit {0.0};
 };
 
 } // namepace nrtb
