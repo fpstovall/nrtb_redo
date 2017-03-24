@@ -158,6 +158,8 @@ int main(int argc, char * argv[])
   
   // start the comm handler.
   async_com_handler sim(server_addr);
+
+  string state = "new";
   
   try
   {
@@ -195,25 +197,33 @@ int main(int argc, char * argv[])
       
       if (target.location.x == -1.0)
       {
-        // no current target to chase
-        sim.put("bot autopilot off");
-        sim.put("drive brake 100");
-        sim.put("drive turn 0");
+        if (state != "searching")
+        {
+          // no current target to chase
+          sim.put("bot autopilot off");
+          sim.put("drive brake 100");
+          sim.put("drive turn 0");
+          state = "searching";
+        };
       }
       else
       {
-        // go get'm!
-        sim.put("drive brake 0");
+        if (state != "tracking")
+        {
+          // go get'm!
+          sim.put("drive brake 0");
+          sim.put("bot autopilot on");
+          state = "tracking";
+        };
         stringstream s;
         s << "bot autopilot heading " << target.location.y;
         sim.put(s.str());
-        sim.put("bot autopilot on");
+
       };
       const int t(1e6/20);
       std::chrono::microseconds st(t);
       this_thread::sleep_for(st);
     };
-    
   }
   catch (...)
   {};
