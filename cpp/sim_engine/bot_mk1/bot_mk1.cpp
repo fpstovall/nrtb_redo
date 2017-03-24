@@ -263,17 +263,20 @@ void bot_mk1::gonculate()
     triplet v = velocity;
     v.z = 0;
     float delta = v.magnatude() - set_speed;
-    std::stringstream s("drive power ");
-    if (delta >= 0) { s << 0; }
+    std::stringstream s;
+    s << "drive power ";
+    if (delta > 0.1) { s << -power_limit; } 
+    else if (delta >= 0) { s << 0; }
     else { s << power_limit; };
-    bot_cmd(s.str());
+    from_BCP.push(s.str());
     // check heading and adjust
-    std::stringstream t("drive turn ");
+    std::stringstream t;
+    t << "drive turn ";
     float current_heading = attitude.angles().z;
     delta = (current_heading - set_heading);
-    if (delta < 3.14159) { t << turn_limit; }
+    if (delta < 0.0) { t << turn_limit; }
     else { t << -turn_limit; };
-    bot_cmd(t.str());
+    from_BCP.push(t.str());
   };
 };
 
@@ -322,6 +325,7 @@ void bot_mk1::autopilot(std::stringstream & s)
     else if (verb == "heading")
     {
       s >> set_heading;
+      set_heading = fmod(set_heading,3.14159*2);
     }
     else if (verb == "status")
     {

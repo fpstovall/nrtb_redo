@@ -120,7 +120,85 @@ int main(int argc, char * argv[])
       << "\tMeasured: "<< (ad / elapsed) << " d/s" 
       << endl;
     
+    // autopilot test
+    sim.put("drive power 0\r");
+    sim.put("drive brake 100\r");
+    bool stopped {false};
+    while (!stopped) 
+    {
+      this_thread::sleep_for(at);
+      sim.put("bot lvar\r");
+      response.str(sim.getln());
+      response >> sys >> verb
+        >> location >> velocity >> attitude >> rotation;
+      velocity.z = 0;
+      stopped = (velocity.magnatude() == 0.0 and rotation.z == 0.0);
+    };
+    cout << "\nReady for autopilot test." << endl;
+    sim.put("bot autopilot status\r");
+    cout << sim.getln() << endl;
+    sim.put("bot autopilot heading 3.14\r");
+    sim.put("bot autopilot power 100\r");
+    sim.put("bot autopilot speed 50\r");
+    sim.put("bot autopilot turn_rate 10\r");
+    sim.put("bot autopilot status\r");
+    cout << sim.getln() << endl;
+    sim.put("drive brake 0\rbot autopilot on\rbot autopilot status\r");
+    cout << sim.getln() << endl;
+    bool done {false};
+    while (!done)
+    {
+      this_thread::sleep_for(at);
+      sim.put("bot lvar\r");
+      response.str(sim.getln());
+      response >> sys >> verb
+        >> location >> velocity >> attitude >> rotation;
+      velocity.z = 0;
+      float heading = attitude.z;
+      float vt = fabs(velocity.magnatude() - 50.0);
+      float ht = fabs(heading - 3.14);
+      done = (vt < 0.5) and (ht < 0.1);
+      cout << vt << " : " << ht << " (" << heading << ")" << endl;
+    }
+    cout << "\nOn Course 1\n" << endl;
+    sim.put("bot autopilot heading 6.0\rbot autopilot status\r");
+    cout << sim.getln() << endl;
+    done = false;
+    while (!done)
+    {
+      this_thread::sleep_for(at);
+      sim.put("bot lvar\r");
+      response.str(sim.getln());
+      response >> sys >> verb
+        >> location >> velocity >> attitude >> rotation;
+      velocity.z = 0;
+      float heading = attitude.z;
+      float vt = fabs(velocity.magnatude() - 50.0);
+      float ht = fabs(heading - 6.0);
+      done = (vt < 0.5) and (ht < 0.1);
+      cout << vt << " : " << ht << " (" << heading << ")" << endl;
+    }
+    cout << "\nOn course 2\n" << endl;
+    sim.put("bot autopilot heading 1.30\rbot autopilot speed 30\rbot autopilot status\r");
+    cout << sim.getln() << endl;
+    done = false;
+    while (!done)
+    {
+      this_thread::sleep_for(at);
+      sim.put("bot lvar\r");
+      response.str(sim.getln());
+      response >> sys >> verb
+        >> location >> velocity >> attitude >> rotation;
+      velocity.z = 0;
+      float heading = attitude.z;
+      float vt = fabs(velocity.magnatude() - 30.0);
+      float ht = fabs(heading - 1.3);
+      done = (vt < 0.5) and (ht < 0.1);
+      cout << vt << " : " << ht << " (" << heading << ")" << endl;
+    }
+    cout << "\nOn course 3\n" << endl;
       
+    cout << "\nRun complete" << endl;
     
   }
   catch (...)
