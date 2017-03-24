@@ -274,7 +274,7 @@ void bot_mk1::gonculate()
     t << "drive turn ";
     float current_heading = attitude.angles().z;
     delta = (current_heading - set_heading);
-    if (delta < 0.0) { t << turn_limit; }
+    if ((delta < 0.0) or (delta > 3.14159)) { t << turn_limit; }
     else { t << -turn_limit; };
     from_BCP.push(t.str());
   };
