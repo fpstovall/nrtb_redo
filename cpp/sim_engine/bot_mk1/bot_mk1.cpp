@@ -40,17 +40,16 @@ bot_mk1::bot_mk1(tcp_socket_p link, triplet where)
 {
   // add effectors
 	add_pre(std::make_shared<radar_mk1>());
-  //add_pre(effector_p(new norm_gravity));
   add_pre(std::make_shared<norm_gravity>());
-  //add_pre(effector_p(new hover(location.z,0.10,2.0)));
   add_pre(std::make_shared<hover>(location.z,0.10,2.0));
-  drive.reset(new diff_steer(*this,1e5,2e5,4*pi,10,8));
+  diff_steer(*this,1e5,2e5,4*pi,10,8);
   // bot control and com setup.
   BCP = std::move(link);
   ImAlive = true;
   // Start the receiver and transmitter
   r_thread = std::thread(&bot_mk1::receiver,this);
   t_thread = std::thread(&bot_mk1::transmitter,this);
+  cp_thread = std::thread(&bot_mk1::msg_router,this);
   // Send ready to the BCP
   to_BCP.push("READY");
 };
@@ -74,10 +73,12 @@ bot_mk1::~bot_mk1()
   ImAlive = false;
   // unconditionally shutdown the queue and close the socket.
   try { to_BCP.shutdown(); } catch (...) {};
+  try { from_BCP.shutdown(); } catch (...) {};
   if (BCP) try { BCP->close(); } catch (...) {};
   // Wait on the threads.
   if (r_thread.joinable()) r_thread.join();
   if (t_thread.joinable()) t_thread.join();
+  if (cp_thread.joinable()) cp_thread.join();
 };
 
 bool bot_mk1::tick(float duration)
@@ -141,7 +142,7 @@ void bot_mk1::receiver()
       if (s.length() > 0)
       {  
         log.trace("<< "+s);
-        msg_router(s);
+        from_BCP.push(s);
       };
     };
   }
@@ -169,57 +170,66 @@ void bot_mk1::transmitter()
   };
 };
 
-void bot_mk1::msg_router(std::string s)
+void bot_mk1::msg_router()
 {
-  // don't go in here if we are in a quanta refresh.
-  std::unique_lock<std::mutex>(cooking_lock);
-  try
+  std::string s = "";
+  while (true) 
   {
-    std::string returnme = "";
-    // check local commands first.
-    std::stringstream tokens(s);
-    std::string sys;
-    std::string verb;
-    tokens >> sys >> verb;
-    // check for effector commands
-    if (sys == "bot")
+    try {s = from_BCP.pop(); } catch (...) { return; };
+    try
     {
-      if (verb == "lvar")
+      // tick notification.
+      if (s == "tick")
       {
-        std::stringstream s;
-        s << sys << " " << verb 
-        << " " << location 
-        << " " << velocity
-        << " " << attitude.angles() 
-        << " " << rotation.angles();
-        to_BCP.push(s.str());
-      }
-      else if (verb == "health")
-      {
-        to_BCP.push("bot health 100");
-      }
-      else if (verb == "ping")
-      {
-        to_BCP.push("READY");
+        gonculate();
       }
       else
       {
-        to_BCP.push("bad_cmd \""+s+"\"");
+        std::string returnme = "";
+        // check local commands first.
+        std::stringstream tokens(s);
+        std::string sys;
+        std::string verb;
+        tokens >> sys >> verb;
+        if (sys == "bot")
+        {
+          if (verb == "lvar")
+          {
+            lvar();
+          }
+          else if (verb == "health")
+          {
+            health();
+          }
+          else if (verb == "ping")
+          {
+            to_BCP.push("READY");
+          }
+          else if (verb == "autopilot")
+          {
+            autopilot(tokens);
+          }
+          else
+          {
+            to_BCP.push("bad_cmd \""+s+"\"");
+          };
+        }
+        // check for effector commands.
+        else if (command(s,returnme))
+        {
+          if (returnme != "") to_BCP.push(returnme);
+        }
+        else
+        {
+          to_BCP.push("bad_sys \""+s+"\"");
+        };
       };
     }
-    else if (command(s,returnme))
+    catch (...)
     {
-      if (returnme != "") to_BCP.push(returnme);
-    }
-    else
-    {
-      to_BCP.push("bad_sys \""+s+"\"");
+      to_BCP.push("WTF? \""+s+"\"");
     };
-  }
-  catch (...)
-  {
-    to_BCP.push("WTF? \""+s+"\"");
-  };
+  }; // while true
 };
 
 void bot_mk1::send_to_bcp(std::string msg)
@@ -231,15 +241,110 @@ void bot_mk1::bot_cmd(std::string cmd)
 {
   auto log(common_log::get_reference()(name));
   log.trace("++ "+cmd);
-  msg_router(cmd);
+  from_BCP.push(cmd);
 };
 
 void bot_mk1::lock()
 {
-  cooking_lock.lock();
+  from_BCP.hold();
 };
 
 void bot_mk1::unlock()
 {
-  cooking_lock.unlock();
+  from_BCP.release();
+  from_BCP.push("tick");
+};
+
+void bot_mk1::gonculate()
+{
+  if (auto_on)
+  {
+    // check speed and adjust
+    triplet v = velocity;
+    v.z = 0;
+    float delta = v.magnatude() - set_speed;
+    std::stringstream s;
+    s << "drive power ";
+    if (delta > 0.1) { s << -power_limit; } 
+    else if (delta >= 0) { s << 0; }
+    else { s << power_limit; };
+    from_BCP.push(s.str());
+    // check heading and adjust
+    std::stringstream t;
+    t << "drive turn ";
+    float current_heading = attitude.angles().z;
+    delta = (current_heading - set_heading);
+    if ((delta < 0.0) or (delta > 3.14159)) { t << turn_limit; }
+    else { t << -turn_limit; };
+    from_BCP.push(t.str());
+  };
+};
+
+void bot_mk1::lvar()
+{
+  std::stringstream s;
+  s << "bot" << " " << "lvar" 
+  << " " << location 
+  << " " << velocity
+  << " " << attitude.angles() 
+  << " " << rotation.angles();
+  to_BCP.push(s.str());
+};
+
+void bot_mk1::health()
+{
+  to_BCP.push("bot health 100");
+};
+
+void bot_mk1::autopilot(std::stringstream & s)
+{
+  try
+  {
+    std::string verb;
+    s >> verb;
+    if (verb == "on") 
+    { 
+      auto_on = true;
+    }
+    else if (verb == "off")
+    {
+      auto_on = false;
+    }
+    else if (verb == "power")
+    {
+      s >> power_limit;
+    }
+    else if (verb == "speed")
+    {
+      s >> set_speed;
+    }
+    else if (verb == "turn_rate")
+    {
+      s >> turn_limit;
+    }
+    else if (verb == "heading")
+    {
+      s >> set_heading;
+      set_heading = fmod(set_heading,3.14159*2);
+    }
+    else if (verb == "status")
+    {
+      std::stringstream response;
+      response << "bot autopilot "
+        << auto_on << " "
+        << set_heading << " "
+        << set_speed << " "
+        << turn_limit << " "
+        << power_limit;
+      to_BCP.push(response.str());
+    }
+    else 
+    {
+      to_BCP.push("bot autopilot bad_cmd");
+    };
+  }
+  catch (...) 
+  {
+    to_BCP.push("bot autopilot WTF?");
+  };
 };

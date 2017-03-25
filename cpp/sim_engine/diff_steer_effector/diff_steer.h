@@ -135,8 +135,8 @@ public:
   typedef std::shared_ptr<pre> pre_p;
   typedef std::shared_ptr<post> post_p;
 protected:
-  pre_p pre_effector;
-  post_p post_effector;  
+//  pre_p pre_effector;
+//  post_p post_effector;  
 };
 
 } // namepace nrtb

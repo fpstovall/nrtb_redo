@@ -158,6 +158,8 @@ int main(int argc, char * argv[])
   
   // start the comm handler.
   async_com_handler sim(server_addr);
+
+  string state = "new";
   
   try
   {
@@ -168,6 +170,12 @@ int main(int argc, char * argv[])
 
     // get bot ack.
     cout << "\n" << sim.get() << endl;
+
+    // autopilot setup.
+    sim.put("bot autopilot power 100");
+    sim.put("bot autopilot turn_rate 5");
+    sim.put("bot autopilot speed 300");
+    sim.put("drive brake 100");
     
     // get our current conditions
     while (true)
@@ -189,28 +197,33 @@ int main(int argc, char * argv[])
       
       if (target.location.x == -1.0)
       {
-        // no current target to chase
-        sim.put("drive power 0");
-        sim.put("drive brake 100");
+        if (state != "searching")
+        {
+          // no current target to chase
+          sim.put("bot autopilot off");
+          sim.put("drive brake 100");
+          sim.put("drive turn 0");
+          state = "searching";
+        };
       }
       else
       {
-        // go get'm!
-        sim.put("drive brake 0");
-        sim.put("drive power 100");
-        // figure out our course changes. 
-        float delta = (target.location.y -current.attitude.z);
-        if (delta < -0.3) 
-          { sim.put("drive turn -10"); }
-        else if (delta > -0.3) 
-          { sim.put("drive turn 10"); }
-        else { sim.put("drive turn 0"); };
+        if (state != "tracking")
+        {
+          // go get'm!
+          sim.put("drive brake 0");
+          sim.put("bot autopilot on");
+          state = "tracking";
+        };
+        stringstream s;
+        s << "bot autopilot heading " << target.location.y;
+        sim.put(s.str());
+
       };
-      const int t(1e6/40);
+      const int t(1e6/20);
       std::chrono::microseconds st(t);
       this_thread::sleep_for(st);
     };
-    
   }
   catch (...)
   {};

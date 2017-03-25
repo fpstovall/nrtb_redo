@@ -85,6 +85,23 @@ int main()
     << q1->in_count << ":"
     << q1->out_count << endl;
   /************************************************
+   * hold the queue and verify that processing stops
+  ************************************************/
+  q1->hold();
+  for (int i=225; i<250; i++)
+  {
+    q1->push(i);
+  };
+  usleep(100);
+  cout << "cp 3 "
+    << q1->in_count << ":"
+    << q1->out_count << endl;
+  q1->release();
+  while (q1->size()) usleep(100);
+  cout << "cp 4 "
+    << q1->in_count << ":"
+    << q1->out_count << endl;
+  /************************************************
    * Last check; attach a second thread to the queue
    * and make sure both are servicing it.
    ***********************************************/
@@ -104,7 +121,7 @@ int main()
   // release the queues.
   q1.reset();
   // do some reporting.
-  cout << "cp 3 " 
+  cout << "cp 5 " 
     << q1_in << ":" << q1_out
     << " t1=" << t1_count
     << " t2=" << t2_count

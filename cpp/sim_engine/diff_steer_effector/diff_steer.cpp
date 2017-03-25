@@ -28,12 +28,12 @@ diff_steer::diff_steer(base_object& o, float thrust, float _brake,
                        float turn_rate, 
                        float skid_threshold, float slide_friction)
 {
-  pre_effector.reset(new pre(thrust,_brake,turn_rate));
-  post_effector.reset(new post(skid_threshold,slide_friction));
-  effector_p t(pre_effector);
-  o.add_pre(t);
-  t = post_effector;
-  o.add_post(t);
+//  pre_effector.reset(new pre(thrust,_brake,turn_rate));
+//  post_effector.reset(new post(skid_threshold,slide_friction));
+//  effector_p t(pre_effector);
+  o.add_pre(std::make_shared<pre>(thrust,_brake,turn_rate));
+//  t = post_effector;
+  o.add_post(std::make_shared<post>(skid_threshold,slide_friction));
 };
 
 /******** pre-effector **********/

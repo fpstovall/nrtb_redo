@@ -185,8 +185,12 @@ int main(int argc, char * argv[])
       << "  turn slop : " << turnslop
       << endl;
       
-    sim.put("drive power 25");
     sim.put("drive brake 0");
+    sim.put("bot autopilot power 50");
+    sim.put("bot autopilot heading 0");
+    sim.put("bot autopilot speed 100");
+    sim.put("bot autopilot turn_rate 10");
+    sim.put("bot autopilot on");
 
     int state(run); 
     float wayhome(0.0);
@@ -199,8 +203,7 @@ int main(int argc, char * argv[])
       // get current conditions
       sim.put("bot lvar");
       current.load(sim.get());
-            
-      if ((++counter % 50) == 0)
+      if ((++counter % 10) == 0)
       {
         cout << runtime.interval_as_HMS()
           << "\n\t           State: " << state_map(state) 
@@ -224,26 +227,23 @@ int main(int argc, char * argv[])
       {
         case run : 
         {
-          float v = current.velocity.magnatude();
           if (current.location.range(center) > zone) state = tofar;
-          else if (v > speedlimit)
-            sim.put("drive power 0");
-          else if (v < (speedlimit*0.95))
-            sim.put("drive power 25");
           break;
         }
         case tofar :
         {
-          sim.put("drive power 0");
+          sim.put("bot autopilot speed 10");
           state = orient;
           break;
         }
         case orient : 
         {
-          wayhome = (center - current.location).to_polar().y;
+          wayhome = (center - current.location).to_polar().y + 1.0;
           if (wayhome<0.0) wayhome += 6.283185;
-          // start turn
-          sim.put("drive turn 10");
+          // change course
+          stringstream s;
+          s << "bot autopilot heading " << wayhome;
+          sim.put(s.str());
           // set state
           state = turning;
           break;
@@ -254,10 +254,8 @@ int main(int argc, char * argv[])
           // check to see if we have the heading yet.
           if (diff < turnslop)
           {
-            // -- stop turn
-            sim.put("drive turn 0");
-            // -- start drive
-            sim.put("drive power 25");
+            // -- pick up speed.
+            sim.put("bot autopilot speed 100");
             // -- set status to run
             state = returning;
             tohome = current.location.range(center);
@@ -281,7 +279,7 @@ int main(int argc, char * argv[])
           break;
         }
       };
-      const int t(1e6/20);
+      const int t(1e6/10);
       std::chrono::microseconds st(t);
       this_thread::sleep_for(st);
     };
