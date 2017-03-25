@@ -141,6 +141,9 @@ std::string state_map(int state)
 
 int main(int argc, char * argv[])
 {
+  // constants
+  float pi = 3.14159;
+  float pi2 = pi * 2.0;
   hirez_timer returntime();
   // load the global configuration
   conf_reader config;
@@ -209,9 +212,9 @@ int main(int argc, char * argv[])
           << "\n\t           State: " << state_map(state) 
           << "\n\t vct from center: " << (current.location-center).to_polar()
           << "\n\t    ground speed: " << current.velocity.magnatude()
-          << "\n\t vehicle heading: " << current.attitude.z 
+          << "\n\t vehicle heading: " << [&]{ return fmod((current.attitude.z + pi2),pi2);}()
           << "\n\t   actual motion: " << 
-            [&]{triplet t=current.velocity; t.z=0.0; return t.to_polar().y;}()
+            [&]{triplet t=current.velocity; t.z=0.0; return fmod(t.to_polar().y+pi2,pi2);}()
           << "\n\t calc'd way home: " << wayhome
           << endl;
       };
