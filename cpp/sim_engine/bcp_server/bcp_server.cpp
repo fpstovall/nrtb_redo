@@ -83,7 +83,8 @@ void bcp_listener::processor()
       {
         log.trace("new connection");
         triplet l(u(rng)-1e4,u(rng)-1e4,0.0);
-        engine.add_object(object_p(new bot_mk1(std::move(bcp), l)));     
+//        engine.add_object(object_p(new bot_mk1(std::move(bcp), l)));     
+        engine.add_object(std::make_shared<bot_mk1>(std::move(bcp), l));     
         log.trace("bot added to sim");
       }
       else 
