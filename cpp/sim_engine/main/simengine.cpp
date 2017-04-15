@@ -27,6 +27,7 @@
 #include <mongo/client/dbclient.h>
 #include <mongo/bson/bson.h>
 #include <boost/lexical_cast.hpp>
+#include <future>
 
 using namespace nrtb;
 using namespace std;
@@ -103,6 +104,14 @@ string mk_run_id()
   return s.str();
 };
 
+bool check_for_end()
+{
+  // run until stop is requested.
+  cout << "\nPress enter to end.\n" << endl;
+  cin.get();
+  return true;  
+};
+
 int main(int argc, char * argv[])
 {
   // load the global configuration
@@ -159,23 +168,46 @@ int main(int argc, char * argv[])
     config.get<std::string>("port","*:64500"),
     config.get<int>("pop_limit",100));
   bcps.start();
-  
+
   int run_time = config.get("run_time",1);
-  if (run_time > 0)
+
+  // start the exit listener
+  std::future<bool> dflag = std::async(check_for_end); 
+  // Run health check loop unitl failure or requested shutdown.
+  bool done{false};
+  long long int tock_limit = run_time * 10;
+  long long int tocks = 0;
+  std::chrono::milliseconds span (100);
+  while (!done)
   {
-    // programmed run time.
-    chrono::seconds rt(run_time);
-    this_thread::sleep_for(rt);
-  }
-  else
-  {
-    // run until stop is requested.
-    cout << "\nPress enter to end.\n" << endl;
-    char t = ' ';
-    cin.get();
-    cout << "shutting down" << endl;
+    std::cout << '.' << std::flush;
+    if (dflag.wait_for(span)==std::future_status::timeout)
+    {
+      if ((run_time > 0) and (tocks++ >= tock_limit)) 
+      {
+        done = true;
+        cout << "\nRun time limit reached" << endl;
+      };
+    }
+    else if (dflag.valid()) 
+    {
+      done = dflag.get();
+      cout << "\nUser requested shutdown." << endl;
+    };
+    // health checks
+    bool hflag = world.running() and bcps.listening() and writer.joinable();
+    if (!hflag) 
+    { 
+      done = true;
+      cout << "Thread health check failed: " << endl;
+      if (!world.running()) cout << "\tSim_core down" << endl;
+      if (!bcps.listening()) cout << "TCP listener down" << endl;
+      if (!writer.joinable()) cout << "Log writer down" << endl;
+    };
   };
+
   // shut it all down.
+  cout << "shutting down" << endl;
   bcps.stop();
   world.stop_sim();
   // wait for output queue to drain.
@@ -184,9 +216,10 @@ int main(int argc, char * argv[])
   while (soq.size()) this_thread::sleep_for(pause);
   // close out the writer.
   soq.shutdown();
-  writer.join();
+  if (writer.joinable()) writer.join();
   // say goodbye
   g_log.info("Shut down");
+  exit(0);
 };
 
 
