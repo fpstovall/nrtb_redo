@@ -27,7 +27,8 @@
 #include <mongo/client/dbclient.h>
 #include <mongo/bson/bson.h>
 #include <boost/lexical_cast.hpp>
-#include <future>
+//#include <future>
+#include <signal.h>
 
 using namespace nrtb;
 using namespace std;
@@ -104,13 +105,12 @@ string mk_run_id()
   return s.str();
 };
 
-bool check_for_end()
+sig_atomic_t user_exit_request {0};
+
+void sig_int_handler(int sig)
 {
-  // run until stop is requested.
-  cout << "\nPress enter to end.\n" << endl;
-  cin.get();
-  return true;  
-};
+  user_exit_request = 1;
+}
 
 int main(int argc, char * argv[])
 {
@@ -171,8 +171,10 @@ int main(int argc, char * argv[])
 
   int run_time = config.get("run_time",1);
 
-  // start the exit listener
-  std::future<bool> dflag = std::async(check_for_end); 
+  // set sig_int handler;
+  cout << "\nUse Control-C to manually exit" << endl;
+  signal (SIGINT, sig_int_handler);
+
   // Run health check loop unitl failure or requested shutdown.
   bool done{false};
   long long int tock_limit = run_time * 10;
@@ -180,19 +182,19 @@ int main(int argc, char * argv[])
   std::chrono::milliseconds span (100);
   while (!done)
   {
+    this_thread::sleep_for(span);
     std::cout << '.' << std::flush;
-    if (dflag.wait_for(span)==std::future_status::timeout)
+    // user requested exit check
+    if (user_exit_request)
     {
-      if ((run_time > 0) and (tocks++ >= tock_limit)) 
-      {
-        done = true;
-        cout << "\nRun time limit reached" << endl;
-      };
-    }
-    else if (dflag.valid()) 
+      done = true;
+      cout << "\nUser requested exit" << endl;
+    };
+    // timeout check
+    if ((run_time > 0) and (tocks++ >= tock_limit)) 
     {
-      done = dflag.get();
-      cout << "\nUser requested shutdown." << endl;
+      done = true;
+      cout << "\nRun time limit reached" << endl;
     };
     // health checks
     bool hflag = world.running() and bcps.listening() and writer.joinable();
