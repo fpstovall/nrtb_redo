@@ -171,6 +171,8 @@ int main(int argc, char * argv[])
 
   int run_time = config.get("run_time",1);
 
+  auto & soq = global_ipc_channel_manager::get_reference().get("sim_output");  
+
   // set sig_int handler;
   cout << "\nUse Control-C to manually exit" << endl;
   signal (SIGINT, sig_int_handler);
@@ -183,7 +185,10 @@ int main(int argc, char * argv[])
   while (!done)
   {
     this_thread::sleep_for(span);
-    std::cout << '.' << std::flush;
+    tocks++;
+    std::cout << "\rPopulation: " << world.size() 
+      << " Out_Queue: " << soq.size()
+      << " Time " << tocks/10.0 << "         " << std::flush;
     // user requested exit check
     if (user_exit_request)
     {
@@ -191,7 +196,7 @@ int main(int argc, char * argv[])
       cout << "\nUser requested exit" << endl;
     };
     // timeout check
-    if ((run_time > 0) and (tocks++ >= tock_limit)) 
+    if ((run_time > 0) and (tocks >= tock_limit)) 
     {
       done = true;
       cout << "\nRun time limit reached" << endl;
@@ -201,10 +206,10 @@ int main(int argc, char * argv[])
     if (!hflag) 
     { 
       done = true;
-      cout << "Thread health check failed: " << endl;
+      cout << "\nThread health check failed: " << endl;
       if (!world.running()) cout << "\tSim_core down" << endl;
-      if (!bcps.listening()) cout << "TCP listener down" << endl;
-      if (!writer.joinable()) cout << "Log writer down" << endl;
+      if (!bcps.listening()) cout << "\tTCP listener down" << endl;
+      if (!writer.joinable()) cout << "\tLog writer down" << endl;
     };
   };
 
@@ -214,7 +219,6 @@ int main(int argc, char * argv[])
   world.stop_sim();
   // wait for output queue to drain.
   chrono::milliseconds pause(100);
-  auto & soq = global_ipc_channel_manager::get_reference().get("sim_output");  
   while (soq.size()) this_thread::sleep_for(pause);
   // close out the writer.
   soq.shutdown();
