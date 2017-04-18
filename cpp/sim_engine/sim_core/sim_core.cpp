@@ -370,7 +370,7 @@ void sim_core::start_sim()
 
 bool sim_core::running()
 {
-  return is_running;
+  return engine.joinable();
 };
 
 
