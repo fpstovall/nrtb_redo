@@ -27,6 +27,8 @@
 #include <mongo/client/dbclient.h>
 #include <mongo/bson/bson.h>
 #include <boost/lexical_cast.hpp>
+//#include <future>
+#include <signal.h>
 
 using namespace nrtb;
 using namespace std;
@@ -69,7 +71,7 @@ void output_writer(string id, string host, bool write_zeros=true)
         mongo::BSONArrayBuilder obj_array;
         for (auto o : rep.objects)
         {
-          obj_array << o.second->as_str();
+          obj_array << o;
           //o.second->as_str());
         };
         b.appendArray("objects",obj_array.arr());
@@ -102,6 +104,13 @@ string mk_run_id()
   s << year+day+secs;
   return s.str();
 };
+
+sig_atomic_t user_exit_request {0};
+
+void sig_int_handler(int sig)
+{
+  user_exit_request = 1;
+}
 
 int main(int argc, char * argv[])
 {
@@ -159,34 +168,64 @@ int main(int argc, char * argv[])
     config.get<std::string>("port","*:64500"),
     config.get<int>("pop_limit",100));
   bcps.start();
-  
+
   int run_time = config.get("run_time",1);
-  if (run_time > 0)
+
+  auto & soq = global_ipc_channel_manager::get_reference().get("sim_output");  
+
+  // set sig_int handler;
+  cout << "\nUse Control-C to manually exit" << endl;
+  signal (SIGINT, sig_int_handler);
+
+  // Run health check loop unitl failure or requested shutdown.
+  bool done{false};
+  long long int tock_limit = run_time * 10;
+  long long int tocks = 0;
+  std::chrono::milliseconds span (100);
+  while (!done)
   {
-    // programmed run time.
-    chrono::seconds rt(run_time);
-    this_thread::sleep_for(rt);
-  }
-  else
-  {
-    // run until stop is requested.
-    cout << "\nPress enter to end.\n" << endl;
-    char t = ' ';
-    cin.get();
-    cout << "shutting down" << endl;
+    this_thread::sleep_for(span);
+    tocks++;
+    std::cout << "\rPopulation: " << world.size() 
+      << " Out_Queue: " << soq.size()
+      << " Time " << tocks/10.0 << "         " << std::flush;
+    // user requested exit check
+    if (user_exit_request)
+    {
+      done = true;
+      cout << "\nUser requested exit" << endl;
+    };
+    // timeout check
+    if ((run_time > 0) and (tocks >= tock_limit)) 
+    {
+      done = true;
+      cout << "\nRun time limit reached" << endl;
+    };
+    // health checks
+    bool hflag = world.running() and bcps.listening() and writer.joinable();
+    if (!hflag) 
+    { 
+      done = true;
+      cout << "\nThread health check failed: " << endl;
+      if (!world.running()) cout << "\tSim_core down" << endl;
+      if (!bcps.listening()) cout << "\tTCP listener down" << endl;
+      if (!writer.joinable()) cout << "\tLog writer down" << endl;
+    };
   };
+
   // shut it all down.
+  cout << "shutting down" << endl;
   bcps.stop();
   world.stop_sim();
   // wait for output queue to drain.
   chrono::milliseconds pause(100);
-  auto & soq = global_ipc_channel_manager::get_reference().get("sim_output");  
   while (soq.size()) this_thread::sleep_for(pause);
   // close out the writer.
   soq.shutdown();
-  writer.join();
+  if (writer.joinable()) writer.join();
   // say goodbye
   g_log.info("Shut down");
+  exit(0);
 };
 
 

@@ -69,7 +69,7 @@ int main()
     sim_core::report rep = msg->data<sim_core::report>();
     cout << rep.quanta << "\t" << rep.objects.size() << "\t";
     for (auto p : rep.objects)
-      cout << p.first << " ";
+      cout << split(p,':')[0] << " ";
     cout << endl;
     count = rep.objects.size();
   };

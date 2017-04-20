@@ -44,12 +44,12 @@ void bcp_listener::start()
 void bcp_listener::stop()
 {
   try { listener.stop_listen(); } catch (...) {};
-  p_thread.join();
+  if (p_thread.joinable()) p_thread.join();
 };
 
 bool bcp_listener::listening()
 {
-  return listener.listening();
+  return listener.listening() and p_thread.joinable();
 };
 
 int bcp_listener::connections()
@@ -83,7 +83,7 @@ void bcp_listener::processor()
       {
         log.trace("new connection");
         triplet l(u(rng)-1e4,u(rng)-1e4,0.0);
-        engine.add_object(object_p(new bot_mk1(std::move(bcp), l)));     
+        engine.add_object(std::make_shared<bot_mk1>(std::move(bcp), l));     
         log.trace("bot added to sim");
       }
       else 

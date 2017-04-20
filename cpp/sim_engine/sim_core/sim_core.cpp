@@ -89,7 +89,7 @@ sim_core::report sim_core::get_report(unsigned long long ticks, double wt)
   returnme.quanta = quanta;
   returnme.duration = ticks;
   returnme.wallclock = wt;
-  returnme.objects = get_obj_copies();
+  returnme.objects = obj_status();
   return returnme;
 };
 
@@ -370,7 +370,7 @@ void sim_core::start_sim()
 
 bool sim_core::running()
 {
-  return is_running;
+  return engine.joinable();
 };
 
 
