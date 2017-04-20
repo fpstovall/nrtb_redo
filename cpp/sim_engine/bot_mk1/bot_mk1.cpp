@@ -141,7 +141,7 @@ void bot_mk1::receiver()
       s = gsub(gsub(s,"\n",""),"\r","");
       if (s.length() > 0)
       {  
-        log.trace("<< "+s);
+//        log.trace("<< "+s);
         from_BCP.push(s);
       };
     };
@@ -161,7 +161,7 @@ void bot_mk1::transmitter()
     {
       std::string s = to_BCP.pop();
       BCP->put(s+"\r");
-      log.trace(">> "+s);
+//      log.trace(">> "+s);
     };
   }
   catch (...)
@@ -240,7 +240,7 @@ void bot_mk1::send_to_bcp(std::string msg)
 void bot_mk1::bot_cmd(std::string cmd)
 {
   auto log(common_log::get_reference()(name));
-  log.trace("++ "+cmd);
+//  log.trace("++ "+cmd);
   from_BCP.push(cmd);
 };
 

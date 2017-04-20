@@ -121,7 +121,7 @@ public:
     unsigned long long quanta;
     unsigned long long duration;
     double wallclock;
-    object_list objects;
+    strlist objects;
   };
   /****************************************
    * The following methods are exposed for 
@@ -134,7 +134,7 @@ public:
   object_list get_obj_copies();
 private:
   /****************************************
-  * clsn_rec is used to track interseting
+  * clsn_rec is used to track intersecting
   * objects.
   ***************************************/
   struct clsn_rec

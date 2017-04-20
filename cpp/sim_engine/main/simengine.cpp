@@ -71,7 +71,7 @@ void output_writer(string id, string host, bool write_zeros=true)
         mongo::BSONArrayBuilder obj_array;
         for (auto o : rep.objects)
         {
-          obj_array << o.second->as_str();
+          obj_array << o;
           //o.second->as_str());
         };
         b.appendArray("objects",obj_array.arr());
