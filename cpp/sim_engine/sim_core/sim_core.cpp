@@ -350,8 +350,10 @@ void sim_core::remove_obj(long long unsigned int oid)
 void sim_core::stop_sim()
 {
   end_run = true;
-  if (engine.joinable())
+  if (engine.joinable()) 
+  {
     engine.join();
+  };
 };
 
 void sim_core::start_sim()

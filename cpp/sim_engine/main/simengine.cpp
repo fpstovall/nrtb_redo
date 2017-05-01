@@ -90,7 +90,7 @@ void output_writer(string id, string host, bool write_zeros=true)
     };
   }
   catch (...) {}; 
-  cout << "output writer closed." << endl;
+  cout << "  Output writer closed." << endl;
 };
 
 string mk_run_id()
@@ -216,15 +216,19 @@ int main(int argc, char * argv[])
   // shut it all down.
   cout << "shutting down" << endl;
   bcps.stop();
+  cout << "  BCP Listener stopped." << endl;
   world.stop_sim();
+  cout << "  simulation stopped." << endl;
   // wait for output queue to drain.
   chrono::milliseconds pause(100);
   while (soq.size()) this_thread::sleep_for(pause);
-  // close out the writer.
+  cout << "  Output queue empty." << endl;
+    // close out the writer.
   soq.shutdown();
   if (writer.joinable()) writer.join();
+  cout << "  Output writer stopped." << endl;
   // say goodbye
-  g_log.info("Shut down");
+  g_log.info("Shutdown complete.");
   exit(0);
 };
 
