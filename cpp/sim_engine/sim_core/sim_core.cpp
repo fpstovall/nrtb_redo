@@ -139,6 +139,18 @@ void sim_core::tick()
   // collision resolution. They may be several states at once.
 };
 
+
+/*****************
+* check_one() returns a valid clsn_rec if a collision
+* was detected, or one with null pointers if not. it's 
+* designed to be called by sim_core::collision_check as
+* a future function.
+*****************/
+sim_core::clsn_rec check_one()
+{
+  //TODO: Complete this function.
+};
+
 void sim_core::collision_check()
 {
   // this version is using a very naive algorithm.
