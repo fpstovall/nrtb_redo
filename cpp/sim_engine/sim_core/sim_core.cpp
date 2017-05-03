@@ -146,9 +146,15 @@ void sim_core::tick()
 * designed to be called by sim_core::collision_check as
 * a future function.
 *****************/
-sim_core::clsn_rec check_one()
+sim_core::clsn_rec sim_core::check_one(object_p a, object_p b, float duration)
 {
-  //TODO: Complete this function.
+  clsn_rec returnme;
+  returnme.a = NULL;
+  if (a->check_collision(b, duration))
+  {
+    returnme.a = a;
+    returnme.b = b;
+  };
 };
 
 void sim_core::collision_check()

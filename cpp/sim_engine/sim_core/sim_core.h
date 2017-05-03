@@ -163,6 +163,7 @@ private:
   // these methods implement simulation steps.
   void turn_init();
   void tick();
+  clsn_rec check_one(object_p a, object_p b, float duration);
   void collision_check();
   void resolve_collisions();
   // Stores the current state to the "sim_output" ipc_queue
