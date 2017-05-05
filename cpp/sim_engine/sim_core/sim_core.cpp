@@ -139,9 +139,29 @@ void sim_core::tick()
   // collision resolution. They may be several states at once.
 };
 
+
+/*****************
+* check_one() returns a valid clsn_rec if a collision
+* was detected, or one with null pointers if not. it's 
+* designed to be called by sim_core::collision_check as
+* a future function.
+*****************/
+sim_core::clsn_rec sim_core::check_one(object_p a, object_p b, float duration)
+{
+  clsn_rec returnme;
+  returnme.a = NULL;
+  if (a->check_collision(b, duration))
+  {
+    returnme.a = a;
+    returnme.b = b;
+  };
+  return returnme;
+};
+
 void sim_core::collision_check()
 {
   // this version is using a very naive algorithm.
+  float cr = 15000 * quanta_duration;
   auto b = all_objects.begin();
   auto c = b;
   auto e = all_objects.end();
@@ -151,19 +171,23 @@ void sim_core::collision_check()
     b++;
     while (b != e)
     {
-      if (c->second->check_collision(b->second, quanta_duration))
+      auto &o1 = c->second;
+      auto &o2 = b->second;
+      float d = o1->location.range(o1->location)
+                - o1->bounding_sphere.radius - o2->bounding_sphere.radius;
+      if ((d<cr) and  o1->check_collision(o2,quanta_duration))
       {
         // a collision has been found.
         clsn_rec crec;
-        crec.a = c->second;
-        crec.b = b->second;
+        crec.a = o1;
+        crec.b = o2;
         collisions.push_back(crec);
       };
       b++;
     };
     c++;
   };
-  // at exit, all colliions have been recorded.
+  // at exit, all collisions have been recorded.
 };
 
 void sim_core::turn_init()
@@ -350,8 +374,10 @@ void sim_core::remove_obj(long long unsigned int oid)
 void sim_core::stop_sim()
 {
   end_run = true;
-  if (engine.joinable())
+  if (engine.joinable()) 
+  {
     engine.join();
+  };
 };
 
 void sim_core::start_sim()

@@ -345,7 +345,7 @@ int main()
   w2.start_sim();
   sleep(3);
   w2.stop_sim();
-  // verify ending count (all should have been distroyed.
+  // verify ending count (all should have been destroyed.
   t = log_test(log,"50/50 end count", (w2.obj_status().size()));
   failed = failed or t;
   
@@ -381,7 +381,7 @@ int main()
   while (w3.running()) usleep(50);
   for (auto o : w3.get_obj_copies())
     cout << o.second->as_str() << endl;
-  // verify ending count (all should have been distroyed.
+  // verify ending count (all should have been destroyed.
   t = log_test(log,"Collision test", (w3.obj_status().size()));
   failed = failed or t;
     
