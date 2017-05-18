@@ -227,7 +227,7 @@ void sim_core::turn_init()
           }
           case verb_rm:
           {
-            // maark object for deletion.
+            // mark object for deletion.
             auto did=msg->data<unsigned long long>();
             deletions.push_back(did);
             break;
@@ -308,16 +308,17 @@ void sim_core::resolve_collisions()
     {
       base_object & a = *(crec.a);
       base_object & b = *(crec.b);
+      // are we still intersecting?
       double min_dist = a.bounding_sphere.radius 
         + b.bounding_sphere.radius; 
       double adj = min_dist - a.location.range(b.location);
-      // is a move still needed?
+      // is a move still needed? 
       if (adj > 0.0)
       {  
          // TODO: this too naive to be allowed to live
          // overlong. Needs to be replaced by a version
          // which produces more realistic offsets..
-         adj /= 2;
+         adj /= 2.0;
          triplet vec = (a.location-b.location).normalize();
          a.location += vec * adj;
          b.location -= vec * adj;
