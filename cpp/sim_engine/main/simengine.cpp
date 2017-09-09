@@ -43,7 +43,8 @@ using namespace std;
  * out of the main file and into it's own more complete
  * module.
  ****************************************************/
-void output_writer(string id, string host, bool write_zeros=true)
+void output_writer(string id, string host, bool write_zeros=true,
+                   bool write_bots=true)
 {
   try
   {
@@ -67,14 +68,17 @@ void output_writer(string id, string host, bool write_zeros=true)
           << "obj_count" << unsigned(rep.objects.size())
           << "ticks" << unsigned(rep.duration)
           << "run_sec" << float(rep.wallclock);
-        // buld objects array.
-        mongo::BSONArrayBuilder obj_array;
-        for (auto o : rep.objects)
+        // buld objects array if enabled.
+        if (write_bots)
         {
-          obj_array << o;
-          //o.second->as_str());
+          mongo::BSONArrayBuilder obj_array;
+          for (auto o : rep.objects)
+          {
+            obj_array << o;
+            //o.second->as_str());
+          };
+          b.appendArray("objects",obj_array.arr());
         };
-        b.appendArray("objects",obj_array.arr());
         // save the quanta to the database.
         db.insert("nrtb.quanta",b.obj());
       };
@@ -155,7 +159,8 @@ int main(int argc, char * argv[])
   // start the sim output writer.
   std::thread writer(output_writer, run_id,
                      config.get<string>("mongo","localhost"),
-                     config.get<bool>("write_zeros",true));
+                     config.get<bool>("write_zeros",true),
+                     config.get<bool>("write_bots",false));
   
   // start the sim_core.
   float quanta = config.get<float>("quanta",1.0/50.0); 
