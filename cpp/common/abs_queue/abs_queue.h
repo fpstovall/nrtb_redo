@@ -131,8 +131,8 @@ public:
 protected:
 
     queue_t buffer;
-    std::mutex mylock;
-    std::condition_variable signal;
+    std::mutex mylock, joinlock;
+    std::condition_variable signal, sigdone;
     std::atomic<bool> ready {true};
     std::atomic<bool> blocked {false};
 };
@@ -222,13 +222,20 @@ void abs_queue<T,queue_t>::shutdown()
 template <class T, class queue_t>
 void abs_queue<T,queue_t>::join()
 {
-  while (completed != in_count) usleep(100);
+  std::unique_lock<std::mutex> lock(joinlock);
+  while (completed != in_count)
+    sigdone.wait(lock);
 }
 
 template <class T, class queue_t>
 void abs_queue<T,queue_t>::task_done()
 {
   completed++;
+  if (completed == in_count)
+  {
+    std::unique_lock<std::mutex> lock(joinlock);
+    sigdone.notify_all();
+  }
 }
 
 template <class T, class queue_t>
