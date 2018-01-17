@@ -91,6 +91,7 @@ void output_writer(string id, string host, bool write_zeros=true,
           BSON("$set" << BSON("last_checkpoint" << unsigned(rep.quanta)))
         );
       };
+      soq.task_done();
     };
   }
   catch (...) {}; 
@@ -225,10 +226,8 @@ int main(int argc, char * argv[])
   world.stop_sim();
   cout << "  simulation stopped." << endl;
   // wait for output queue to drain.
-  chrono::milliseconds pause(100);
-  while (soq.size()) this_thread::sleep_for(pause);
-  cout << "  Output queue empty." << endl;
-    // close out the writer.
+  soq.join();
+  // close out the writer.
   soq.shutdown();
   if (writer.joinable()) writer.join();
   cout << "  Output writer stopped." << endl;
