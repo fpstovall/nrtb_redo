@@ -36,3 +36,7 @@ Session.vim
 .project
 RemoteSystemsTempFiles
 nrtb_beta.kdev4
+
+### VS Code ###
+.vscode
+

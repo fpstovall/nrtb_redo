@@ -23,6 +23,7 @@
 #include <atomic>
 #include <mutex>
 #include <condition_variable>
+#include <unistd.h>
 
 namespace nrtb
 {
@@ -55,6 +56,8 @@ public:
     std::atomic<int> in_count {0};
     /// Total number of items read from queue.
     std::atomic<int> out_count {0};
+    /// Total number reported done by workers
+    std::atomic<int> completed {0};
 
     /*********************************************
       * creates the queue with the specified
@@ -98,6 +101,25 @@ public:
      * puts the queue in shutdown mode.
     *********************************************/
     void shutdown();
+
+    /*********************************************
+     * Blocks until the queue is empty. This is 
+     * only safe to use if the workers all call 
+     * task_done() at the end of processing for 
+     * each packet. Using join() with workers 
+     * which do not properly call task_done() 
+     * is an error which will hang your code.
+    *********************************************/
+    void join();
+
+    /********************************************
+     * Called by workers when they complete work
+     * on each packat. This is required if join()
+     * is to be used to wait for the queue to
+     * drain. If not used, a call to join() will
+     * block forever. 
+    ********************************************/
+    void task_done();
 
     // returns the number of items in the queue
     int size();
@@ -195,6 +217,18 @@ void abs_queue<T,queue_t>::shutdown()
     signal.notify_all();
   }
   catch (...) {}  
+}
+
+template <class T, class queue_t>
+void abs_queue<T,queue_t>::join()
+{
+  while (completed != in_count) usleep(100);
+}
+
+template <class T, class queue_t>
+void abs_queue<T,queue_t>::task_done()
+{
+  completed++;
 }
 
 template <class T, class queue_t>

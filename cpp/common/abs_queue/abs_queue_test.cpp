@@ -41,7 +41,8 @@ int consumer_task(string name, queue_p input)
     {
       int num = input->pop();
       count++;
-      usleep(1);	  
+      usleep(1);
+      input->task_done();	  
     }
   }
   catch (...) 
@@ -110,7 +111,10 @@ int main()
   {
     q1->push(i);
   };
-  while (q1->size()) usleep(100);
+  //while (q1->size()) usleep(100);
+  cout << "join() test : " << flush;
+  q1->join();
+  cout << "PASSED" << endl;
   // shut it all down
   q1->shutdown();
   // important numbers
