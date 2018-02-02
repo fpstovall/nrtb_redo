@@ -122,23 +122,16 @@ contacts sim_core::contact_list()
 void sim_core::tick()
 {
   // call the local tick and apply for each object in the simulation.
-  for(auto & a: all_objects)
-  {
-    if (a.second->tick(quanta_duration))
-      deletions.push_back(a.first);
-  };
+  for(auto & a: all_objects) ticklist.push(a.second);
+  ticklist.join();
   // check for bumps in the night.
   collision_check();
-  for (auto & a: all_objects)
-  {
-    if (a.second->apply(quanta_duration))
-      deletions.push_back(a.first);
-  };
+  for (auto & a: all_objects) applylist.push(a.second);
+  applylist.join();
   // at the end of this method, all objects are either
   // at their final state, listed as deleted, or pending
   // collision resolution. They may be several states at once.
 };
-
 
 /*****************
 * check_one() returns a valid clsn_rec if a collision
@@ -229,7 +222,8 @@ void sim_core::turn_init()
           {
             // mark object for deletion.
             auto did=msg->data<unsigned long long>();
-            deletions.push_back(did);
+            //deletions.push_back(did);
+            all_objects[did]->alive = false;
             break;
           }
           default:
@@ -287,10 +281,15 @@ void sim_core::turn_init()
   // Clear out the collision list
   collisions.clear();
   // delete any objects marked in the last turn.
-  for (auto a : deletions)
+  for (auto a : all_objects)
   {
     // ignore errors here.
-    try { all_objects.erase(a); } catch (...) {};
+    try 
+    { 
+      if (!a.second->alive) 
+        all_objects.erase(a.first); 
+    }
+    catch (...) {};
   };
   // clear the deletions list
   deletions.clear();
@@ -375,13 +374,16 @@ void sim_core::remove_obj(long long unsigned int oid)
 void sim_core::stop_sim()
 {
   end_run = true;
+  // shutdown the workers
+  applylist.shutdown();
+  ticklist.shutdown();
   if (engine.joinable()) 
   {
     engine.join();
   };
 };
 
-void sim_core::start_sim()
+void sim_core::start_sim(int threads)
 {
   // are we already running?
   if (is_running)
@@ -391,6 +393,14 @@ void sim_core::start_sim()
     e.store("Already running in sim_core::start_sim().");
     throw e; 
   };
+  // Start the worker threads
+  for (int i=0; i<threads; i++)
+  {
+    std::thread(sim_core::do_tick,std::ref(*this)).detach();
+    std::thread(sim_core::do_apply,std::ref(*this)).detach();
+    //t.detach();
+    //t1.detach();
+  };
   // launch the run_sim() method.
   engine =  std::thread(sim_core::run_sim,std::ref(*this));
 };
@@ -399,7 +409,6 @@ bool sim_core::running()
 {
   return engine.joinable();
 };
-
 
 void sim_core::run_sim(sim_core & w)
 {
@@ -490,4 +499,29 @@ void sim_core::run_sim(sim_core & w)
   w.is_running = false;
 };
 
+void sim_core::do_tick(sim_core & w)
+{
+  try {
+    while (true)
+    {
+      auto o = w.ticklist.pop();
+      o->alive = !o->tick(w.quanta_duration);
+      w.ticklist.task_done();
+    }
+  }
+  catch (...) {};
+};
+
+void sim_core::do_apply(sim_core & w)
+{
+  try {
+    while (true)
+    {
+      auto o = w.applylist.pop();
+      o->alive = !o->apply(w.quanta_duration);
+      w.applylist.task_done();
+    }
+  }
+  catch (...) {};
+};
 

@@ -103,7 +103,7 @@ public:
   // returns the current population count
   int size();
   // Starts the simulation. Throws if already running.
-  void start_sim();
+  void start_sim(int threads);
   // Stops the the simulation. 
   void stop_sim();
   // Inserts the object into the simulation.
@@ -171,6 +171,14 @@ private:
   report get_report(unsigned long long ticks, double wt);
   // The actual simulation engine.. runs as a seperate thread.
   static void run_sim(sim_core & w);
+  /***************************
+   * Changes for parallel update processing.
+   ****************************/
+  typedef linear_queue<object_p> object_q;
+  object_q ticklist;
+  object_q applylist;
+  static void do_tick(sim_core & w);
+  static void do_apply(sim_core & w);  
 };
 
 typedef singleton<sim_core> global_sim_core;

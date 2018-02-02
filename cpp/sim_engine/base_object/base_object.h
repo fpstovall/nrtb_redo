@@ -168,7 +168,7 @@ public:
  **********************************************/
 struct base_object
 {
-  bool alive {false};
+  bool alive {true};
   // provides a unique sequence of id numbers for objects.
   static serializer object_num;
   // NOP destructor to ensure clean deallocation.

@@ -235,6 +235,7 @@ val_map get_sim_metrics()
 int main()
 {
   bool failed = false;
+  int tcount = std::thread::hardware_concurrency();
     
   log_recorder log(common_log::get_reference()("sim_core_test"));
   log.trace("Starting");
@@ -256,7 +257,7 @@ int main()
   failed = failed or t; 
   
   cout << "Single object run (3 secs)" << endl;
-  world.start_sim();
+  world.start_sim(tcount);
   t = log_test(log,"sim_core::start_sim() returned",false);
   failed = failed or t;
   // run 3 and running test.
@@ -294,7 +295,7 @@ int main()
 
   cout << "Dynamic add test (0.3 secs)" << endl;
   sim_core w1(1/50.0);
-  w1.start_sim();
+  w1.start_sim(tcount);
   while (!(w1.running())) usleep(10);
   usleep(1e5);
   contacts l1 = w1.contact_list();
@@ -342,7 +343,7 @@ int main()
   // verify starting count
   t = log_test(log,"50/50 start count", (w2.obj_status().size()!=50));
   failed = failed or t;
-  w2.start_sim();
+  w2.start_sim(tcount);
   sleep(3);
   w2.stop_sim();
   // verify ending count (all should have been destroyed.
@@ -375,7 +376,7 @@ int main()
   object_p target(new my_object);
   target->location.y = 0.75;
   w3.add_object(target);
-  w3.start_sim();
+  w3.start_sim(tcount);
   sleep(1);
   w3.stop_sim();
   while (w3.running()) usleep(50);
