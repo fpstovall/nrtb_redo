@@ -40,7 +40,7 @@ int main()
 
   // use the listener to make some bots.
   sim_core sc1(1.0/50.0);
-  sc1.start_sim();
+  sc1.start_sim(2);
   bcp_listener listener(sc1,"*:64500",100);
   listener.start();
   std::vector<tcp_socket_p> bcps;
