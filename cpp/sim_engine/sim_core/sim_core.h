@@ -170,15 +170,16 @@ private:
   //  in a gp_sim_message with report struct as the data.
   report get_report(unsigned long long ticks, double wt);
   // The actual simulation engine.. runs as a seperate thread.
-  static void run_sim(sim_core & w);
+  void run_sim();
   /***************************
    * Changes for parallel update processing.
    ****************************/
+  int worker_count {2};
   typedef linear_queue<object_p> object_q;
   object_q ticklist;
   object_q applylist;
-  static void do_tick(sim_core & w);
-  static void do_apply(sim_core & w);  
+  void do_tick();
+  void do_apply();  
 };
 
 typedef singleton<sim_core> global_sim_core;

@@ -374,9 +374,6 @@ void sim_core::remove_obj(long long unsigned int oid)
 void sim_core::stop_sim()
 {
   end_run = true;
-  // shutdown the workers
-  applylist.shutdown();
-  ticklist.shutdown();
   if (engine.joinable()) 
   {
     engine.join();
@@ -393,16 +390,9 @@ void sim_core::start_sim(int threads)
     e.store("Already running in sim_core::start_sim().");
     throw e; 
   };
-  // Start the worker threads
-  for (int i=0; i<threads; i++)
-  {
-    std::thread(sim_core::do_tick,std::ref(*this)).detach();
-    std::thread(sim_core::do_apply,std::ref(*this)).detach();
-    //t.detach();
-    //t1.detach();
-  };
   // launch the run_sim() method.
-  engine =  std::thread(sim_core::run_sim,std::ref(*this));
+  worker_count = threads;
+  engine =  std::thread(&sim_core::run_sim,this);
 };
 
 bool sim_core::running()
@@ -410,9 +400,9 @@ bool sim_core::running()
   return engine.joinable();
 };
 
-void sim_core::run_sim(sim_core & w)
+void sim_core::run_sim()
 {
-  w.is_running = true;
+  is_running = true;
   // link to sim engine general log
   log_recorder glog(common_log::get_reference()("sim_core::run"));
   glog.trace("Starting");
@@ -424,38 +414,44 @@ void sim_core::run_sim(sim_core & w)
       = global_ipc_channel_manager::get_reference();
     ipc_queue & oq = ipc.get("sim_output");
     gp_sim_message_adapter output(oq);
+    // Start the worker threads
+    for (int i=0; i<worker_count; i++)
+    {
+      std::thread(&sim_core::do_tick,this).detach();
+      std::thread(&sim_core::do_apply,this).detach();
+    };
     // output initial state
     glog.trace("Storing inital model state");
-    void_p r(new report(w.get_report(0,0.0)));
+    void_p r(new report(get_report(0,0.0)));
     // -- for init, type 1, noun 0, verb 0 carries a report struct.
     output.push(gp_sim_message_p(new gp_sim_message(oq, 1, 0, 0, r)));
     glog.trace("Entering game cycle");
     // start wall-clock timer.
     hirez_timer wallclock; // governs the overall turn time
     hirez_timer turnclock; // measures the actual gonculation time.
-    w.quanta=0;
-    unsigned long long ticks = round(w.quanta_duration * 1e6);
+    quanta=0;
+    unsigned long long ticks = round(quanta_duration * 1e6);
     unsigned long long nexttime = ticks;
-    while (!w.end_run)
+    while (!end_run)
     {
       turnclock.reset();
       turnclock.start();
-      for (auto &i: w.all_objects) { i.second->lock(); };
-      w.quanta++;
-      w.turn_init();
-      w.tick();
-      w.resolve_collisions();
+      for (auto &i: all_objects) { i.second->lock(); };
+      quanta++;
+      turn_init();
+      tick();
+      resolve_collisions();
       // populate public sensor list;
-      w.public_list.start_new();
-      for(auto i: w.all_objects)
+      public_list.start_new();
+      for(auto i: all_objects)
       {
-        w.public_list.add(*i.second);
+        public_list.add(*i.second);
       };
-      w.public_list.done_adding();
-      for (auto &i: w.all_objects) { i.second->unlock(); };
+      public_list.done_adding();
+      for (auto &i: all_objects) { i.second->unlock(); };
       // output turn status
       unsigned long long elapsed = turnclock.interval_as_usec();
-      void_p r(new report(w.get_report(elapsed,wallclock.interval())));
+      void_p r(new report(get_report(elapsed,wallclock.interval())));
       // -- for output, type 1, noun 1, verb 0 carries a report struct.
       output.push(gp_sim_message_p(new gp_sim_message(oq, 1, 1, 0, r)));
       // check for overrun and report as needed.
@@ -463,7 +459,7 @@ void sim_core::run_sim(sim_core & w)
       {
         base_exception e;
         stringstream s;
-        s << "Quanta " << w.quanta << " Overrun: " 
+        s << "Quanta " << quanta << " Overrun: " 
           << elapsed << " usec expected "
           << ticks;
         e.store(s.str());
@@ -495,31 +491,34 @@ void sim_core::run_sim(sim_core & w)
     glog.critical("Run terminated abnormally.");
   };
   // close out nicely.
+  // shutdown the workers, igoring issues 
+  try {applylist.shutdown();} catch (...) {};
+  try {ticklist.shutdown();} catch (...) {};
   glog.trace("complete");
-  w.is_running = false;
+  is_running = false;
 };
 
-void sim_core::do_tick(sim_core & w)
+void sim_core::do_tick()
 {
   try {
     while (true)
     {
-      auto o = w.ticklist.pop();
-      o->alive = !o->tick(w.quanta_duration);
-      w.ticklist.task_done();
+      auto o = ticklist.pop();
+      o->alive = !o->tick(quanta_duration);
+      ticklist.task_done();
     }
   }
   catch (...) {};
 };
 
-void sim_core::do_apply(sim_core & w)
+void sim_core::do_apply()
 {
   try {
     while (true)
     {
-      auto o = w.applylist.pop();
-      o->alive = !o->apply(w.quanta_duration);
-      w.applylist.task_done();
+      auto o = applylist.pop();
+      o->alive = !o->apply(quanta_duration);
+      applylist.task_done();
     }
   }
   catch (...) {};
