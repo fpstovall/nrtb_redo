@@ -167,7 +167,7 @@ int main(int argc, char * argv[])
   float quanta = config.get<float>("quanta",1.0/50.0); 
   sim_core & world = global_sim_core::get_reference();
   world.set_quanta(quanta);
-  world.start_sim();
+  world.start_sim(std::thread::hardware_concurrency());
   
   // start the bcp_server
   bcp_listener bcps(world,
@@ -183,7 +183,7 @@ int main(int argc, char * argv[])
   cout << "\nUse Control-C to manually exit" << endl;
   signal (SIGINT, sig_int_handler);
 
-  // Run health check loop unitl failure or requested shutdown.
+  // Run health check loop until failure or requested shutdown.
   bool done{false};
   long long int tock_limit = run_time * 10;
   long long int tocks = 0;

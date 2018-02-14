@@ -99,7 +99,7 @@ int main()
   
   // start a sim_core;
   sim_core & w = global_sim_core::get_reference();
-  w.start_sim();
+  w.start_sim(2);
   chrono::milliseconds nap(10);
   //while (!w.running()) this_thread::sleep_for(nap); 
   

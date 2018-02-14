@@ -198,6 +198,7 @@ bool base_object::tick(float quanta)
                         torque.angles(),quanta);
     rotation_mod.set((rotation.angles() + rbase.angles()) / 2.0);
   }
+  alive != killme;
   return killme;
 };
 
@@ -213,6 +214,7 @@ bool base_object::apply(float quanta)
   for (auto e : post_attribs)
     if (e.second->tick(*this, quanta))
       killme = true;
+  alive != killme;
   return killme;
 };
 

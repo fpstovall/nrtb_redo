@@ -122,23 +122,16 @@ contacts sim_core::contact_list()
 void sim_core::tick()
 {
   // call the local tick and apply for each object in the simulation.
-  for(auto & a: all_objects)
-  {
-    if (a.second->tick(quanta_duration))
-      deletions.push_back(a.first);
-  };
+  for(auto & a: all_objects) ticklist.push(a.second);
+  ticklist.join();
   // check for bumps in the night.
   collision_check();
-  for (auto & a: all_objects)
-  {
-    if (a.second->apply(quanta_duration))
-      deletions.push_back(a.first);
-  };
+  for (auto & a: all_objects) applylist.push(a.second);
+  applylist.join();
   // at the end of this method, all objects are either
   // at their final state, listed as deleted, or pending
   // collision resolution. They may be several states at once.
 };
-
 
 /*****************
 * check_one() returns a valid clsn_rec if a collision
@@ -229,7 +222,8 @@ void sim_core::turn_init()
           {
             // mark object for deletion.
             auto did=msg->data<unsigned long long>();
-            deletions.push_back(did);
+            //deletions.push_back(did);
+            all_objects[did]->alive = false;
             break;
           }
           default:
@@ -287,10 +281,15 @@ void sim_core::turn_init()
   // Clear out the collision list
   collisions.clear();
   // delete any objects marked in the last turn.
-  for (auto a : deletions)
+  for (auto a : all_objects)
   {
     // ignore errors here.
-    try { all_objects.erase(a); } catch (...) {};
+    try 
+    { 
+      if (!a.second->alive) 
+        all_objects.erase(a.first); 
+    }
+    catch (...) {};
   };
   // clear the deletions list
   deletions.clear();
@@ -381,7 +380,7 @@ void sim_core::stop_sim()
   };
 };
 
-void sim_core::start_sim()
+void sim_core::start_sim(int threads)
 {
   // are we already running?
   if (is_running)
@@ -392,7 +391,8 @@ void sim_core::start_sim()
     throw e; 
   };
   // launch the run_sim() method.
-  engine =  std::thread(sim_core::run_sim,std::ref(*this));
+  worker_count = threads;
+  engine =  std::thread(&sim_core::run_sim,this);
 };
 
 bool sim_core::running()
@@ -400,10 +400,9 @@ bool sim_core::running()
   return engine.joinable();
 };
 
-
-void sim_core::run_sim(sim_core & w)
+void sim_core::run_sim()
 {
-  w.is_running = true;
+  is_running = true;
   // link to sim engine general log
   log_recorder glog(common_log::get_reference()("sim_core::run"));
   glog.trace("Starting");
@@ -415,38 +414,44 @@ void sim_core::run_sim(sim_core & w)
       = global_ipc_channel_manager::get_reference();
     ipc_queue & oq = ipc.get("sim_output");
     gp_sim_message_adapter output(oq);
+    // Start the worker threads
+    for (int i=0; i<worker_count; i++)
+    {
+      std::thread(&sim_core::do_tick,this).detach();
+      std::thread(&sim_core::do_apply,this).detach();
+    };
     // output initial state
     glog.trace("Storing inital model state");
-    void_p r(new report(w.get_report(0,0.0)));
+    void_p r(new report(get_report(0,0.0)));
     // -- for init, type 1, noun 0, verb 0 carries a report struct.
     output.push(gp_sim_message_p(new gp_sim_message(oq, 1, 0, 0, r)));
     glog.trace("Entering game cycle");
     // start wall-clock timer.
     hirez_timer wallclock; // governs the overall turn time
     hirez_timer turnclock; // measures the actual gonculation time.
-    w.quanta=0;
-    unsigned long long ticks = round(w.quanta_duration * 1e6);
+    quanta=0;
+    unsigned long long ticks = round(quanta_duration * 1e6);
     unsigned long long nexttime = ticks;
-    while (!w.end_run)
+    while (!end_run)
     {
       turnclock.reset();
       turnclock.start();
-      for (auto &i: w.all_objects) { i.second->lock(); };
-      w.quanta++;
-      w.turn_init();
-      w.tick();
-      w.resolve_collisions();
+      for (auto &i: all_objects) { i.second->lock(); };
+      quanta++;
+      turn_init();
+      tick();
+      resolve_collisions();
       // populate public sensor list;
-      w.public_list.start_new();
-      for(auto i: w.all_objects)
+      public_list.start_new();
+      for(auto i: all_objects)
       {
-        w.public_list.add(*i.second);
+        public_list.add(*i.second);
       };
-      w.public_list.done_adding();
-      for (auto &i: w.all_objects) { i.second->unlock(); };
+      public_list.done_adding();
+      for (auto &i: all_objects) { i.second->unlock(); };
       // output turn status
       unsigned long long elapsed = turnclock.interval_as_usec();
-      void_p r(new report(w.get_report(elapsed,wallclock.interval())));
+      void_p r(new report(get_report(elapsed,wallclock.interval())));
       // -- for output, type 1, noun 1, verb 0 carries a report struct.
       output.push(gp_sim_message_p(new gp_sim_message(oq, 1, 1, 0, r)));
       // check for overrun and report as needed.
@@ -454,7 +459,7 @@ void sim_core::run_sim(sim_core & w)
       {
         base_exception e;
         stringstream s;
-        s << "Quanta " << w.quanta << " Overrun: " 
+        s << "Quanta " << quanta << " Overrun: " 
           << elapsed << " usec expected "
           << ticks;
         e.store(s.str());
@@ -486,8 +491,36 @@ void sim_core::run_sim(sim_core & w)
     glog.critical("Run terminated abnormally.");
   };
   // close out nicely.
+  // shutdown the workers, igoring issues 
+  try {applylist.shutdown();} catch (...) {};
+  try {ticklist.shutdown();} catch (...) {};
   glog.trace("complete");
-  w.is_running = false;
+  is_running = false;
 };
 
+void sim_core::do_tick()
+{
+  try {
+    while (true)
+    {
+      auto o = ticklist.pop();
+      o->alive = !o->tick(quanta_duration);
+      ticklist.task_done();
+    }
+  }
+  catch (...) {};
+};
+
+void sim_core::do_apply()
+{
+  try {
+    while (true)
+    {
+      auto o = applylist.pop();
+      o->alive = !o->apply(quanta_duration);
+      applylist.task_done();
+    }
+  }
+  catch (...) {};
+};
 
