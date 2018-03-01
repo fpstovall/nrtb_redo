@@ -121,34 +121,18 @@ contacts sim_core::contact_list()
 
 void sim_core::tick()
 {
-  // call the local tick and apply for each object in the simulation.
+  // call the local tick for each object in the simulation.
   for(auto & a: all_objects) ticklist.push(a.second);
   ticklist.join();
   // check for bumps in the night.
   collision_check();
+  clsn_work_list.join();
+  // call apply for all objects in the simulation;
   for (auto & a: all_objects) applylist.push(a.second);
   applylist.join();
   // at the end of this method, all objects are either
   // at their final state, listed as deleted, or pending
   // collision resolution. They may be several states at once.
-};
-
-/*****************
-* check_one() returns a valid clsn_rec if a collision
-* was detected, or one with null pointers if not. it's 
-* designed to be called by sim_core::collision_check as
-* a future function.
-*****************/
-sim_core::clsn_rec sim_core::check_one(object_p a, object_p b, float duration)
-{
-  clsn_rec returnme;
-  returnme.a = NULL;
-  if (a->check_collision(b, duration))
-  {
-    returnme.a = a;
-    returnme.b = b;
-  };
-  return returnme;
 };
 
 void sim_core::collision_check()
@@ -164,18 +148,10 @@ void sim_core::collision_check()
     b++;
     while (b != e)
     {
-      auto &o1 = c->second;
-      auto &o2 = b->second;
-      float d = o1->location.range(o1->location)
-                - o1->bounding_sphere.radius - o2->bounding_sphere.radius;
-      if ((d<cr) and  o1->check_collision(o2,quanta_duration))
-      {
-        // a collision has been found.
-        clsn_rec crec;
-        crec.a = o1;
-        crec.b = o2;
-        collisions.push_back(crec);
-      };
+      clsn_rec workme;
+      workme.a = c->second;
+      workme.b = b->second;
+      clsn_work_list.push(workme);
       b++;
     };
     c++;
@@ -297,8 +273,9 @@ void sim_core::turn_init()
 
 void sim_core::resolve_collisions()
 {
-  for (auto crec : collisions)
+  while (collisions.size())
   {
+    clsn_rec crec = collisions.pop();
     // call each object's collision routine
     bool killa = crec.a->apply_collision(crec.b, quanta_duration);
     bool killb = crec.b->apply_collision(crec.a, quanta_duration);
@@ -419,6 +396,7 @@ void sim_core::run_sim()
     {
       std::thread(&sim_core::do_tick,this).detach();
       std::thread(&sim_core::do_apply,this).detach();
+      std::thread(&sim_core::do_collision_check,this).detach();
     };
     // output initial state
     glog.trace("Storing inital model state");
@@ -494,6 +472,8 @@ void sim_core::run_sim()
   // shutdown the workers, igoring issues 
   try {applylist.shutdown();} catch (...) {};
   try {ticklist.shutdown();} catch (...) {};
+  try {clsn_work_list.shutdown();} catch (...) {};
+  try {collisions.shutdown();} catch (...) {};
   glog.trace("complete");
   is_running = false;
 };
@@ -521,6 +501,23 @@ void sim_core::do_apply()
       applylist.task_done();
     }
   }
+  catch (...) {};
+};
+
+void sim_core::do_collision_check()
+{
+  try
+  {
+    while (true)
+    {
+      auto r = clsn_work_list.pop();
+      if (r.a->check_collision(r.b, quanta_duration))
+      {
+        collisions.push(r);
+      };
+      clsn_work_list.task_done();
+    };
+  }  
   catch (...) {};
 };
 
