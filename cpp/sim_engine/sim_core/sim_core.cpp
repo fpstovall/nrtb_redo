@@ -121,14 +121,20 @@ contacts sim_core::contact_list()
 
 void sim_core::tick()
 {
+  std::vector<object_p> packets[worker_count];
+  int current = 0;
+  // create the work packets
+  for(auto & a: all_objects) 
+  {
+    packets[current++ % worker_count].push_back(a.second);
+  }
   // call the local tick for each object in the simulation.
-  for(auto & a: all_objects) ticklist.push(a.second);
+  for (int i=0;i++;i<worker_count) ticklist.push(packets[i]);
   ticklist.join();
   // check for bumps in the night.
   collision_check();
-  clsn_work_list.join();
   // call apply for all objects in the simulation;
-  for (auto & a: all_objects) applylist.push(a.second);
+  for (int i=0;i++;i<worker_count) applylist.push(packets[i]);
   applylist.join();
   // at the end of this method, all objects are either
   // at their final state, listed as deleted, or pending
@@ -137,8 +143,9 @@ void sim_core::tick()
 
 void sim_core::collision_check()
 {
-  // this version is using a very naive algorithm.
-  float cr = 15000 * quanta_duration;
+  std::vector<clsn_rec> packets[worker_count];
+  int cpack {0};
+  // Assemble work packets for each thread.
   auto b = all_objects.begin();
   auto c = b;
   auto e = all_objects.end();
@@ -151,11 +158,14 @@ void sim_core::collision_check()
       clsn_rec workme;
       workme.a = c->second;
       workme.b = b->second;
-      clsn_work_list.push(workme);
+      packets[cpack++ % worker_count].push_back(workme);
       b++;
     };
     c++;
   };
+  // submit the work to the worker threads
+  for (int i=0;i++;i<worker_count) clsn_work_list.push(packets[i]);
+  clsn_work_list.join();  
   // at exit, all collisions have been recorded.
 };
 
@@ -483,8 +493,9 @@ void sim_core::do_tick()
   try {
     while (true)
     {
-      auto o = ticklist.pop();
-      o->alive = !o->tick(quanta_duration);
+      auto v = ticklist.pop();
+      for (auto o : v)
+        o->alive = !o->tick(quanta_duration);
       ticklist.task_done();
     }
   }
@@ -496,8 +507,9 @@ void sim_core::do_apply()
   try {
     while (true)
     {
-      auto o = applylist.pop();
-      o->alive = !o->apply(quanta_duration);
+      auto v = applylist.pop();
+      for (auto o : v)
+        o->alive = !o->apply(quanta_duration);
       applylist.task_done();
     }
   }
@@ -510,11 +522,12 @@ void sim_core::do_collision_check()
   {
     while (true)
     {
-      auto r = clsn_work_list.pop();
-      if (r.a->check_collision(r.b, quanta_duration))
-      {
-        collisions.push(r);
-      };
+      auto v = clsn_work_list.pop();
+      for (auto r : v)
+        if (r.a->check_collision(r.b, quanta_duration))
+        {
+          collisions.push(r);
+        };
       clsn_work_list.task_done();
     };
   }  

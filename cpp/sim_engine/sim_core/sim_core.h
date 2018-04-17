@@ -174,14 +174,14 @@ private:
    * Changes for parallel update processing.
    ****************************/
   int worker_count {2};
-  typedef linear_queue<object_p> object_q;
+  typedef linear_queue<std::vector<object_p>> object_q;
   object_q ticklist;
   object_q applylist;
   void do_tick();
-  void do_apply();  
-  typedef linear_queue<clsn_rec> clsn_q;
+  void do_apply();
+  typedef linear_queue<std::vector<clsn_rec>> clsn_q;
   clsn_q clsn_work_list;
-  clsn_q collisions;
+  linear_queue<clsn_rec> collisions;
   void do_collision_check();
 };
 
