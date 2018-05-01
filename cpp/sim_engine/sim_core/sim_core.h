@@ -157,7 +157,6 @@ private:
   std::thread engine;
   // Lists (self descriptive.
   object_list all_objects;
-  std::vector<clsn_rec> collisions;
   std::vector<unsigned long long> deletions;
   panopticon public_list;
   // these methods implement simulation steps.
@@ -175,11 +174,15 @@ private:
    * Changes for parallel update processing.
    ****************************/
   int worker_count {2};
-  typedef linear_queue<object_p> object_q;
+  typedef linear_queue<std::vector<object_p>> object_q;
   object_q ticklist;
   object_q applylist;
   void do_tick();
-  void do_apply();  
+  void do_apply();
+  typedef linear_queue<std::vector<clsn_rec>> clsn_q;
+  clsn_q clsn_work_list;
+  linear_queue<clsn_rec> collisions;
+  void do_collision_check();
 };
 
 typedef singleton<sim_core> global_sim_core;
