@@ -48,6 +48,7 @@ struct recorder : abs_effector
   {
     locations.push_back(o.location);
     velocities.push_back(o.velocity);
+    return false;
   };
 };
 

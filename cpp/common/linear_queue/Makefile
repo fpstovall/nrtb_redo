@@ -16,7 +16,7 @@
 #
 #***********************************************
 
-switches=-std=gnu++11 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP
+switches=-std=gnu++17 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP
 
 lib:	linear_queue_test
 	@./linear_queue_test

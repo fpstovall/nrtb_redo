@@ -28,8 +28,8 @@ serializer.o:	serializer.h serializer.cpp Makefile
 
 serializer_test:	serializer.o serializer_test.cpp
 	@rm -f serializer_test
-	g++ -c serializer_test.cpp -I../include -std=gnu++11
-	g++ -o serializer_test serializer_test.o serializer.o -lpthread -std=gnu++11
+	g++ -c serializer_test.cpp -I../include -std=gnu++17
+	g++ -o serializer_test serializer_test.o serializer.o -lpthread -std=gnu++17
 
 clean:
 	@rm -rvf *.o serializer_test ../include/serializer.h ../obj/serializer.o

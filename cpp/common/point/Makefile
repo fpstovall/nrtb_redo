@@ -16,7 +16,7 @@
 #
 #***********************************************
 
-switches=-std=gnu++11 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP
+switches=-std=gnu++17 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP
 
 lib:	common_test Makefile
 	@echo "(2,3.5,7)" | ./common_test 

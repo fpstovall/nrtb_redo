@@ -16,7 +16,7 @@
 #
 #***********************************************
 
-switches=-std=gnu++11 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP
+switches=-std=gnu++17 -D _GLIBCXX_USE_SCHED_YIELD -D _GLIBCXX_USE_NANOSLEEP
 
 lib:	abs_queue_test
 	@./abs_queue_test

@@ -74,6 +74,7 @@ float diff_steer::pre::drive(float power)
   {
     lockdown();
   };
+  return power;
 };
 
 float diff_steer::pre::brake(float braking)
@@ -87,6 +88,7 @@ float diff_steer::pre::brake(float braking)
   {
     lockdown();
   };
+  return braking;
 };
 
 float diff_steer::pre::turn(float rate)
@@ -99,6 +101,7 @@ float diff_steer::pre::turn(float rate)
   {
     lockdown();
   };
+  return rate;
 };
 
 void diff_steer::pre::lockdown()
